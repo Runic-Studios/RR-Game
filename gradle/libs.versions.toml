@@ -1,0 +1,28 @@
+[versions]
+kotlin = "2.1.20"
+paper = "1.21.5-R0.1-SNAPSHOT"
+jackson = "2.18.3"
+mccoroutine = "2.22.0"
+grpc = "1.71.0"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ktfmt = "com.ncorti.ktfmt.gradle:0.21.0"
+shadow = "com.gradleup.shadow:8.3.6"
+
+[libraries]
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
+guice = "com.google.inject:guice:7.0.0"
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+trove-client = "com.runicrealms.trove:trove-client:0.0.7-SNAPSHOT"
+mccoroutine-api = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-api", version.ref = "mccoroutine" }
+mccoroutine-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core", version.ref = "mccoroutine" }
+grpc-kotlinstub = "io.grpc:grpc-kotlin-stub:1.4.1"
+grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
+grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+protobuf-java = "com.google.protobuf:protobuf-java:4.30.1"

@@ -1,0 +1,3 @@
+main: com.runicrealms.game.plugin.GamePlugin
+name: Game
+version: 3.0
