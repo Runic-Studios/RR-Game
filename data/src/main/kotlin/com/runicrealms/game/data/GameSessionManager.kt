@@ -68,8 +68,9 @@ constructor(
 
         val playerLoginEvent = GamePlayerJoinEvent(session)
 
-        // Note: we have a joinAll
-        Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
+        withContext(plugin.asyncDispatcher) {
+            Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
+        }
     }
 
     @EventHandler
@@ -146,27 +147,31 @@ constructor(
 
     // NOTE: assumes you DON'T have a lock on the character data in the calling context!
     suspend fun setCharacterSession(session: GameSession, slot: Int?): Boolean {
-        return session.characterMutex.withLock {
-            val oldCharacterData = session.characterData ?: return@withLock true
-            if (slot == oldCharacterData.slot) return@withLock true
-            if (slot != null) {
-                val creationResult = session.claim.loadCharacter(slot)
-                if (!creationResult.isSuccess) {
-                    logger.error(
-                        "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
-                        creationResult.exceptionOrNull()!!,
-                    )
-                    return@withLock false
-                }
-                val characterData = creationResult.getOrNull()!!
-                session.characterData = characterData
+        return withContext(plugin.asyncDispatcher) {
+            session.characterMutex.withLock {
+                val oldCharacterData = session.characterData ?: return@withLock true
+                if (slot == oldCharacterData.slot) return@withLock true
+                if (slot != null) {
+                    val creationResult = session.claim.loadCharacter(slot)
+                    if (!creationResult.isSuccess) {
+                        logger.error(
+                            "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
+                            creationResult.exceptionOrNull()!!,
+                        )
+                        return@withLock false
+                    }
+                    val characterData = creationResult.getOrNull()!!
+                    session.characterData = characterData
 
-                val characterJoinEvent = GameCharacterJoinEvent(session, characterData)
-                Bukkit.getPluginManager().callSuspendingEvent(characterJoinEvent, plugin).joinAll()
-            } else {
-                endCharacterSession(session)
+                    val characterJoinEvent = GameCharacterJoinEvent(session, characterData)
+                    Bukkit.getPluginManager()
+                        .callSuspendingEvent(characterJoinEvent, plugin)
+                        .joinAll()
+                } else {
+                    endCharacterSession(session)
+                }
+                return@withLock true
             }
-            return@withLock true
         }
     }
 

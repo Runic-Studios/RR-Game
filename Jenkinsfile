@@ -8,8 +8,8 @@ pipeline {
     }
 
     environment {
-        ARTIFACT_NAME = 'game'
-        PROJECT_NAME = 'Game'
+        ARTIFACT_NAME = 'rr-game'
+        PROJECT_NAME = 'RR Game'
         REGISTRY = 'registry.runicrealms.com'
         REGISTRY_PROJECT = 'library'
     }
