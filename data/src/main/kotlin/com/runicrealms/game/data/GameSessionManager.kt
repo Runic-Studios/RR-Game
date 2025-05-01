@@ -58,7 +58,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
                 )
                 logger.error(
                     "Failed to load player ${event.player.name}",
-                    createResult.exceptionOrNull()!!,
+                    IllegalStateException(createResult.exceptionOrNull()!!),
                 )
                 return
             }
@@ -97,7 +97,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
                         }
                         logger.error(
                             "Failed to save session periodically",
-                            saveResult.exceptionOrNull()!!,
+                            IllegalStateException(saveResult.exceptionOrNull()!!),
                         )
                         // Note: kicking will trigger a save
                         break
@@ -159,7 +159,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
                     if (!creationResult.isSuccess) {
                         logger.error(
                             "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
-                            creationResult.exceptionOrNull()!!,
+                            IllegalStateException(creationResult.exceptionOrNull()!!),
                         )
                         return@withLock false
                     }
@@ -202,7 +202,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
             if (!saveResult.isSuccess) {
                 logger.error(
                     "FATAL: failed to save user $user on session end",
-                    saveResult.exceptionOrNull()!!,
+                    IllegalStateException(saveResult.exceptionOrNull()!!),
                 )
             }
         }
@@ -211,7 +211,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
         if (!releaseResult.isSuccess) {
             logger.error(
                 "FATAL: failed to release lock on user $user on session end",
-                releaseResult.exceptionOrNull()!!,
+                IllegalStateException(releaseResult.exceptionOrNull()!!),
             )
         }
     }
