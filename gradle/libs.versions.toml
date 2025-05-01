@@ -19,7 +19,7 @@ guice = "com.google.inject:guice:7.0.0"
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
-trove-client = "com.runicrealms.trove:trove-client:0.0.7-SNAPSHOT"
+trove-client = "com.runicrealms.trove:trove-client:0.0.8-SNAPSHOT"
 mccoroutine-api = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-api", version.ref = "mccoroutine" }
 mccoroutine-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core", version.ref = "mccoroutine" }
 grpc-kotlinstub = "io.grpc:grpc-kotlin-stub:1.4.1"
