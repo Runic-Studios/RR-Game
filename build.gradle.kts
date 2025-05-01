@@ -53,7 +53,7 @@ subprojects {
         implementation(rootProject.libs.kotlinx.coroutine)
 
         // Velagones
-        implementation(rootProject.libs.velagones.paper)
+        compileOnly(rootProject.libs.velagones.paper)
     }
 }
 
