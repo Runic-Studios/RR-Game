@@ -6,8 +6,8 @@ import com.runicrealms.game.data.DataModule
 import com.runicrealms.game.gameplay.GameplayModule
 import com.runicrealms.trove.client.TroveClientConfig
 import com.runicrealms.trove.client.TroveClientModule
-import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
+import org.bukkit.plugin.java.JavaPlugin
 
 class GamePlugin : JavaPlugin() {
 

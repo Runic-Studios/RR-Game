@@ -29,15 +29,11 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class GameSessionManager
 @Inject
-constructor(
-    private val troveClient: TroveClient,
-    private val plugin: Plugin,
-) : Listener {
+constructor(private val troveClient: TroveClient, private val plugin: Plugin) : Listener {
 
     private val logger = LoggerFactory.getLogger("data")
 
@@ -54,24 +50,29 @@ constructor(
 
     @EventHandler
     suspend fun onPlayerJoin(event: PlayerJoinEvent) {
-        val createResult = withContext(plugin.asyncDispatcher) { createSession(event.player) }
-        if (!createResult.isSuccess) {
-            event.player.kick(
-                Component.text("Failed to load: ${createResult.exceptionOrNull()?.message}")
-            )
-            logger.error(
-                "Failed to load player ${event.player.name}",
-                createResult.exceptionOrNull()!!,
-            )
-            return
-        }
-        val session = createResult.getOrNull()!!
-        sessions[event.player.uniqueId] = session
+        try {
+            val createResult = withContext(plugin.asyncDispatcher) { createSession(event.player) }
+            if (!createResult.isSuccess) {
+                event.player.kick(
+                    Component.text("Failed to load: ${createResult.exceptionOrNull()?.message}")
+                )
+                logger.error(
+                    "Failed to load player ${event.player.name}",
+                    createResult.exceptionOrNull()!!,
+                )
+                return
+            }
+            val session = createResult.getOrNull()!!
+            sessions[event.player.uniqueId] = session
 
-        val playerLoginEvent = GamePlayerJoinEvent(session)
+            val playerLoginEvent = GamePlayerJoinEvent(session)
 
-        withContext(plugin.asyncDispatcher) {
-            Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
+            withContext(plugin.asyncDispatcher) {
+                Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
+            }
+        } catch (exception: Exception) {
+            logger.error("Failed to load player ${event.player.name}", exception)
+            event.player.kick(Component.text("Failed to load: ${exception.message}"))
         }
     }
 
