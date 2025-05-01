@@ -30,14 +30,16 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class GameSessionManager
 @Inject
 constructor(
     private val troveClient: TroveClient,
     private val plugin: Plugin,
-    private val logger: Logger,
 ) : Listener {
+
+    private val logger = LoggerFactory.getLogger("data")
 
     companion object {
         const val LEASE_EXPIRY_MILLIS: Long = 60 * 1000
