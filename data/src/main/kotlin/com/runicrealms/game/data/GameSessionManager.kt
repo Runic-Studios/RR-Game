@@ -85,7 +85,8 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
         return plugin.launch {
             withContext(plugin.asyncDispatcher) {
                 while (true) {
-                    val saveResult = withContext(NonCancellable) { saveSession(userID) }
+                    val session = sessions[userID] ?: break
+                    val saveResult = withContext(NonCancellable) { saveSession(session) }
                     if (!saveResult.isSuccess) {
                         withContext(plugin.minecraftDispatcher) {
                             Bukkit.getPlayer(userID)
@@ -108,10 +109,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
         }
     }
 
-    private suspend fun saveSession(user: UUID): Result<Unit> {
-        val session =
-            sessions[user] ?: return Result.failure(IllegalStateException("Player session missing"))
-
+    private suspend fun saveSession(session: GameSession): Result<Unit> {
         val refreshResult = session.claim.refreshLease()
         if (!refreshResult.isSuccess) return refreshResult
 
@@ -198,7 +196,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
         Bukkit.getPluginManager().callSuspendingEvent(playerQuitEvent, plugin).joinAll()
 
         if (save) {
-            val saveResult = saveSession(user)
+            val saveResult = saveSession(session)
             if (!saveResult.isSuccess) {
                 logger.error(
                     "FATAL: failed to save user $user on session end",
