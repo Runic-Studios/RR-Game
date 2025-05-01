@@ -17,7 +17,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://nexus.runicrealms.com/repository/maven-snapshots/")
+        maven("https://nexus.runicrealms.com/repository/maven-public/")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -51,6 +51,9 @@ subprojects {
         implementation(rootProject.libs.mccoroutine.api)
         implementation(rootProject.libs.mccoroutine.core)
         implementation(rootProject.libs.kotlinx.coroutine)
+
+        // Velagones
+        implementation(rootProject.libs.velagones.paper)
     }
 }
 

@@ -7,11 +7,13 @@ import com.runicrealms.game.gameplay.GameplayModule
 import com.runicrealms.trove.client.TroveClientConfig
 import com.runicrealms.trove.client.TroveClientModule
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.*
 
 class GamePlugin : JavaPlugin() {
 
     override fun onEnable() {
-        val troveModule = TroveClientModule(TroveClientConfig("localhost", 9091, "TODO")) // TODO
+        val troveServerID = "paper-" + UUID.randomUUID().toString().substring(0, 7)
+        val troveModule = TroveClientModule(TroveClientConfig(clientName = troveServerID)) // TODO
 
         val pluginModule = PluginModule(this)
         val commonModule = CommonModule()
