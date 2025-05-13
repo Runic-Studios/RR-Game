@@ -1,4 +1,4 @@
-package com.runicrealms.game.data
+package com.runicrealms.game.data.game
 
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
@@ -6,6 +6,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
+import com.runicrealms.game.data.DataAPI
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerDataLoadEvent
@@ -31,9 +32,29 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
+/**
+ * This is the main worker behind loading and saving a player's data.
+ * ALL loading/saving occurs within the class, no exceptions.
+ * Player/character data can be read and modified elsewhere, but changes to it are only
+ * staged, and the actual saving happens here.
+ *
+ * This operates on a few principles:
+ * - Actual loading/saving DB calls (using Trove) are executed with async dispatcher
+ * - Everything else happens on the Minecraft thread. Mostly importantly, this includes
+ *   adding new player sessions, adding session characters, ending sessions, etc.
+ *
+ * This class is responsible for emitting 5 different data-related events:
+ * - GamePlayerJoinEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
+ * - GamePlayerQuitEvent: Fires SYNCHRONOUSLY after a player has quit, but just before we destroy
+ *   their player object and save their data
+ * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and
+ *   we have loaded their data
+ * - GameCharacterQuitEvent: Fires SYNCHRONOUSLY after a player has quit or changed characters,
+ *   but just before we destroy their player object and save their data
+ */
 class GameSessionManager
 @Inject
-constructor(private val troveClient: TroveClient, private val plugin: Plugin) : Listener {
+constructor(private val troveClient: TroveClient, private val plugin: Plugin) : Listener, DataAPI {
 
     private val logger = LoggerFactory.getLogger("data")
 
@@ -43,6 +64,8 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
     }
 
     private val sessions = ConcurrentHashMap<UUID, GameSession>()
+
+    private val players = ConcurrentHashMap<UUID, GamePlayer>()
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
@@ -64,12 +87,12 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
             }
             val session = createResult.getOrNull()!!
             sessions[event.player.uniqueId] = session
+            val player = GamePlayer(plugin, session)
+            players[event.player.uniqueId] = player
 
-            val playerLoginEvent = GamePlayerJoinEvent(session)
+            val playerLoginEvent = GamePlayerJoinEvent(player)
 
-            withContext(plugin.asyncDispatcher) {
-                Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
-            }
+            Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
         } catch (exception: Exception) {
             logger.error("Failed to load player ${event.player.name}", exception)
             event.player.kick(Component.text("Failed to load: ${exception.message}"))
@@ -78,10 +101,11 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
 
     @EventHandler
     suspend fun onPlayerQuit(event: PlayerQuitEvent) {
-        withContext(plugin.asyncDispatcher) { endSession(event.player.uniqueId, true) }
+        endSession(event.player.uniqueId, true)
     }
 
     private fun launchSessionSaveTask(userID: UUID): Job {
+        // Any context
         return plugin.launch {
             withContext(plugin.asyncDispatcher) {
                 while (true) {
@@ -110,6 +134,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
     }
 
     private suspend fun saveSession(session: GameSession): Result<Unit> {
+        // Async context
         val refreshResult = session.claim.refreshLease()
         if (!refreshResult.isSuccess) return refreshResult
 
@@ -126,6 +151,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
     }
 
     private suspend fun createSession(bukkitPlayer: Player): Result<GameSession> {
+        // Async context
         val claimResult = troveClient.createClaim(bukkitPlayer.uniqueId, LEASE_EXPIRY_MILLIS)
         if (!claimResult.isSuccess) {
             return Result.failure(claimResult.exceptionOrNull()!!)
@@ -137,8 +163,11 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
         }
         val player = playerResult.getOrNull()!!
 
-        val createEvent = GamePlayerDataLoadEvent(player)
-        Bukkit.getPluginManager().callSuspendingEvent(createEvent, plugin).joinAll()
+        withContext(plugin.minecraftDispatcher) {
+            val createEvent = GamePlayerDataLoadEvent(player)
+            Bukkit.getPluginManager().callSuspendingEvent(createEvent, plugin).joinAll()
+            player.empty = false
+        }
 
         // This will initiate a different-context save when we run it
         val saveTask = launchSessionSaveTask(bukkitPlayer.uniqueId)
@@ -147,70 +176,104 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
     }
 
     // NOTE: assumes you DON'T have a lock on the character data in the calling context!
-    suspend fun setCharacterSession(session: GameSession, slot: Int?): Boolean {
+    override suspend fun setCharacter(user: UUID, slot: Int?): Boolean {
+        // Any context
+        val session = sessions[user] ?: return false
         return withContext(plugin.asyncDispatcher) {
-            session.characterMutex.withLock {
-                val oldCharacterData = session.characterData ?: return@withLock true
-                if (slot == oldCharacterData.slot) return@withLock true
-                if (slot != null) {
-                    val creationResult = session.claim.loadCharacter(slot)
-                    if (!creationResult.isSuccess) {
-                        logger.error(
-                            "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
-                            IllegalStateException(creationResult.exceptionOrNull()!!),
-                        )
-                        return@withLock false
-                    }
-                    val characterData = creationResult.getOrNull()!!
-                    session.characterData = characterData
+            session.characterMutex.withLock { // Acquire lock async
+                withContext(plugin.minecraftDispatcher) resultContext@{
+                    val oldCharacterData = session.characterData ?: return@resultContext true
+                    if (slot == oldCharacterData.slot) return@resultContext true
+                    if (slot != null) {
+                        val creationResult = withContext(plugin.asyncDispatcher) {
+                            session.claim.loadCharacter(slot)
+                        }
+                        if (!creationResult.isSuccess) {
+                            logger.error(
+                                "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
+                                IllegalStateException(creationResult.exceptionOrNull()!!),
+                            )
+                            return@resultContext false
+                        }
+                        val characterData = creationResult.getOrNull()!!
+                        session.characterData = characterData
 
-                    val characterJoinEvent = GameCharacterJoinEvent(session, characterData)
-                    Bukkit.getPluginManager()
-                        .callSuspendingEvent(characterJoinEvent, plugin)
-                        .joinAll()
-                } else {
-                    endCharacterSession(session)
+                        val character = GameCharacter(plugin, session)
+                        players[session.bukkitPlayer.uniqueId] = character
+
+                        val characterJoinEvent = GameCharacterJoinEvent(character)
+                        Bukkit.getPluginManager()
+                            .callSuspendingEvent(characterJoinEvent, plugin)
+                            .joinAll()
+                    } else {
+                        endCharacterSession(session)
+                    }
+                    return@resultContext true
                 }
-                return@withLock true
             }
         }
     }
 
     // NOTe: assumes you have a lock on the character data in the calling context!
     private suspend fun endCharacterSession(session: GameSession) {
-        val characterData = session.characterData ?: return
-        val characterQuitEvent = GameCharacterQuitEvent(session, characterData)
+        // Minecraft game thread context
+        val character = players[session.bukkitPlayer.uniqueId] as? GameCharacter ?: return
+        val characterQuitEvent = GameCharacterQuitEvent(character)
         Bukkit.getPluginManager().callSuspendingEvent(characterQuitEvent, plugin).joinAll()
         session.characterData = null
+        players[session.bukkitPlayer.uniqueId] = GamePlayer(plugin, session)
     }
 
     private suspend fun endSession(user: UUID, save: Boolean) {
+        // Minecraft game thread context
         val session = sessions.remove(user) ?: return
 
-        session.saveJob.cancelAndJoin()
+        withContext(plugin.asyncDispatcher) {
+            session.saveJob.cancelAndJoin()
 
-        session.characterMutex.withLock { endCharacterSession(session) }
-
-        val playerQuitEvent = GamePlayerQuitEvent(session)
-
-        Bukkit.getPluginManager().callSuspendingEvent(playerQuitEvent, plugin).joinAll()
-
-        if (save) {
-            val saveResult = saveSession(session)
-            if (!saveResult.isSuccess) {
-                logger.error(
-                    "FATAL: failed to save user $user on session end",
-                    IllegalStateException(saveResult.exceptionOrNull()!!),
-                )
+            session.characterMutex.withLock {
+                withContext(plugin.minecraftDispatcher) {
+                    endCharacterSession(session)
+                }
             }
         }
 
-        val releaseResult = session.claim.releaseAndClose()
-        if (!releaseResult.isSuccess) {
-            logger.error(
-                "FATAL: failed to release lock on user $user on session end",
-                IllegalStateException(releaseResult.exceptionOrNull()!!),
-            )
+        val player = players[session.bukkitPlayer.uniqueId]!!
+        val playerQuitEvent = GamePlayerQuitEvent(player)
+
+        Bukkit.getPluginManager().callSuspendingEvent(playerQuitEvent, plugin).joinAll()
+
+        withContext(plugin.asyncDispatcher) {
+            if (save) {
+                val saveResult = saveSession(session)
+                if (!saveResult.isSuccess) {
+                    logger.error(
+                        "FATAL: failed to save user $user on session end",
+                        IllegalStateException(saveResult.exceptionOrNull()!!),
+                    )
+                }
+            }
+
+            val releaseResult = session.claim.releaseAndClose()
+            if (!releaseResult.isSuccess) {
+                logger.error(
+                    "FATAL: failed to release lock on user $user on session end",
+                    IllegalStateException(releaseResult.exceptionOrNull()!!),
+                )
+            }
         }
     }
+
+    override fun getPlayer(user: UUID): GamePlayer? = players[user]
+
+    override fun getCharacter(user: UUID): GameCharacter? = players[user] as? GameCharacter
+
+    override fun getAllPlayers(): Collection<GamePlayer> = players.values
+
+    override fun getAllCharacters(): Collection<GameCharacter> = players.values.filter {
+        it !is GameCharacter
+    }.map {
+        it as GameCharacter
+    }
+
 }

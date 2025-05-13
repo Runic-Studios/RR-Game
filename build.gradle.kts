@@ -18,6 +18,8 @@ subprojects {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://nexus.runicrealms.com/repository/maven-public/")
+        maven("https://repo.codemc.io/repository/maven-public/")
+        maven("https://repo.dmulloy2.net/repository/public/")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -37,8 +39,10 @@ subprojects {
 
         // Configuration and Injection
         implementation(rootProject.libs.guice)
+        implementation(rootProject.libs.guice.assistedinject)
         implementation(rootProject.libs.jackson.kotlin)
         implementation(rootProject.libs.jackson.databind)
+        implementation(rootProject.libs.jackson.dataformat.yaml)
 
         // Trove
         implementation(rootProject.libs.trove.client)
@@ -52,8 +56,17 @@ subprojects {
         implementation(rootProject.libs.mccoroutine.core)
         implementation(rootProject.libs.kotlinx.coroutine)
 
+        // Shaded dependencies
+        implementation(rootProject.libs.adventure.legacy)
+
         // Velagones
         compileOnly(rootProject.libs.velagones.paper)
+
+        // Item NBT API
+        compileOnly(rootProject.libs.nbtapi)
+
+        // ProtocolLib
+        compileOnly(rootProject.libs.protocollib)
     }
 }
 

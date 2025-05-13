@@ -1,0 +1,18 @@
+main: com.runicrealms.game.plugin.GamePlugin
+name: Game
+version: '3.0'
+api-version: 1.21.4
+dependencies:
+  server:
+    Velagones:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    NBTAPI:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    ProtocolLib:
+      load: BEFORE
+      required: true
+      join-classpath: true

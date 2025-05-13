@@ -8,10 +8,10 @@ import org.bukkit.event.HandlerList
  * Fired after a player has logged-in and we have loaded their data, but before we have registered
  * them as a player and fired GamePlayerJoinEvent
  */
-class GamePlayerDataLoadEvent(val playerData: UserPlayerData) : Event(true) {
+class GamePlayerDataLoadEvent(val playerData: UserPlayerData) : Event(false) {
 
     companion object {
-        private val HANDLERS: HandlerList = HandlerList()
+        private val HANDLERS = HandlerList()
 
         @JvmStatic fun getHandlerList() = HANDLERS
     }

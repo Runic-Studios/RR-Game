@@ -15,6 +15,7 @@ class TipsDataListener @Inject constructor(plugin: Plugin) : Listener {
 
     @EventHandler
     fun onGamePlayerCreate(event: GamePlayerDataLoadEvent) {
+        if (!event.playerData.empty) return
         with(event.playerData) {
             settings.data.setTips(true)
             stageChanges(settings)
