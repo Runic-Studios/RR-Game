@@ -4,7 +4,7 @@ import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.data.game.GamePlayer
 import java.util.UUID
 
-interface DataAPI {
+interface UserDataRegistry {
 
     /**
      * Sets a user's active character.
@@ -17,33 +17,32 @@ interface DataAPI {
     /**
      * Gets a GamePlayer from their UUID.
      *
-     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread.
-     * Calling from async threads can result in undetermined behaviour.
+     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread. Calling from
+     * async threads can result in undetermined behaviour.
      */
     fun getPlayer(user: UUID): GamePlayer?
 
     /**
      * Gets a GameCharacter from their UUID.
      *
-     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread.
-     * Calling from async threads can result in undetermined behaviour.
+     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread. Calling from
+     * async threads can result in undetermined behaviour.
      */
     fun getCharacter(user: UUID): GameCharacter?
 
     /**
      * Gets all logged-in GamePlayers.
      *
-     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread.
-     * Calling from async threads can result in undetermined behaviour.
+     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread. Calling from
+     * async threads can result in undetermined behaviour.
      */
     fun getAllPlayers(): Collection<GamePlayer>
 
     /**
      * Gets all logged-in GameCharacters.
      *
-     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread.
-     * Calling from async threads can result in undetermined behaviour.
+     * It is STRONGLY ADVISED that this only be called on the Minecraft game thread. Calling from
+     * async threads can result in undetermined behaviour.
      */
     fun getAllCharacters(): Collection<GameCharacter>
-
 }

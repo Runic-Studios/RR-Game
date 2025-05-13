@@ -3,9 +3,7 @@ package com.runicrealms.game.common.config.converter
 import com.fasterxml.jackson.databind.util.StdConverter
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 
-/**
- * Jackson databind compatible converter for turning Strings into ClassTypes
- */
+/** Jackson databind compatible converter for turning Strings into ClassTypes */
 class ClassTypeConverter : StdConverter<String, ClassType?>() {
 
     override fun convert(value: String): ClassType? {
@@ -16,5 +14,4 @@ class ClassTypeConverter : StdConverter<String, ClassType?>() {
         }
         return null
     }
-
 }

@@ -4,11 +4,11 @@ import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.items.character.AddedStats
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.config.template.GameItemOffhandTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.util.ItemLoreBuilder
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
@@ -18,7 +18,9 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 
-class GameItemOffhand @AssistedInject constructor(
+class GameItemOffhand
+@AssistedInject
+constructor(
     @Assisted inputData: ItemData,
     addedStatsFactory: AddedStats.Factory,
     templateRegistry: GameItemTemplateRegistry,
@@ -62,7 +64,7 @@ class GameItemOffhand @AssistedInject constructor(
             data = data.toBuilder().setOffhand(offhandData).build()
         }
 
-         addedStatsFactory.create(correctedStats.calculatedRolls, offhandData.perksList, 0)
+        addedStatsFactory.create(correctedStats.calculatedRolls, offhandData.perksList, 0)
     }
 
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
@@ -81,7 +83,7 @@ class GameItemOffhand @AssistedInject constructor(
                 statLore.add(
                     Component.text(
                         "+" + statRoll.second.min + "-" + statRoll.second.max + statInfo.icon,
-                        Style.style(statInfo.color)
+                        Style.style(statInfo.color),
                     )
                 )
             } else if (statRoll != null) {
@@ -89,7 +91,7 @@ class GameItemOffhand @AssistedInject constructor(
                 statLore.add(
                     Component.text(
                         ((if (value < 0) "-" else "+") + value + statInfo.icon),
-                        Style.style(statInfo.color)
+                        Style.style(statInfo.color),
                     )
                 )
             }
@@ -100,11 +102,18 @@ class GameItemOffhand @AssistedInject constructor(
         for (perk in offhandData.perksList) {
             val perkTemplate = perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
-            val perkText = Component.text()
-                .append(Component.text("<" + handler.getDynamicItemPerksStacksTextPlaceholder() + ">"))
-                .append(Component.text("+" + perk.stacks + " ", Style.style(NamedTextColor.WHITE)))
-                .append(handler.getName())
-                .build()
+            val perkText =
+                Component.text()
+                    .append(
+                        Component.text(
+                            "<" + handler.getDynamicItemPerksStacksTextPlaceholder() + ">"
+                        )
+                    )
+                    .append(
+                        Component.text("+" + perk.stacks + " ", Style.style(NamedTextColor.WHITE))
+                    )
+                    .append(handler.getName())
+                    .build()
             perkLore.add(perkText)
             val handlerLore = handler.getLoreSection()
             if (handlerLore != null) perkLore.addAll(handlerLore)
@@ -126,13 +135,13 @@ class GameItemOffhand @AssistedInject constructor(
                     .append(Component.text("Lv. Min ", Style.style(NamedTextColor.GRAY)))
                     .append(
                         Component.text(
-                            if (offhandTemplate.level > 0) offhandTemplate.level.toString() else "None",
-                            Style.style(NamedTextColor.WHITE)
+                            if (offhandTemplate.level > 0) offhandTemplate.level.toString()
+                            else "None",
+                            Style.style(NamedTextColor.WHITE),
                         )
                     )
                     .build()
             )
             .build()
     }
-
 }

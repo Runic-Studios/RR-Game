@@ -5,11 +5,11 @@ import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.TextIcons
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.items.character.AddedStats
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.config.template.GameItemArmorTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.util.GemStatUtil
 import com.runicrealms.game.items.util.ItemLoreBuilder
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
@@ -21,7 +21,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 
-class GameItemArmor @AssistedInject constructor(
+class GameItemArmor
+@AssistedInject
+constructor(
     @Assisted inputData: ItemData,
     addedStatsFactory: AddedStats.Factory,
     templateRegistry: GameItemTemplateRegistry,
@@ -56,7 +58,8 @@ class GameItemArmor @AssistedInject constructor(
         var bonusHealth = armorTemplate.health
         for (gemBonus in armorData.gemBonusesList) {
             for (stat in gemBonus.statsList) {
-                calculatedStats[stat.type] = calculatedStats.getOrDefault(stat.type, 0) + stat.amount
+                calculatedStats[stat.type] =
+                    calculatedStats.getOrDefault(stat.type, 0) + stat.amount
             }
             bonusHealth += gemBonus.health
         }
@@ -92,7 +95,8 @@ class GameItemArmor @AssistedInject constructor(
         for (gemBonus in armorData.gemBonusesList) {
             for (gemStat in gemBonus.statsList) {
                 if (stats.containsKey(gemStat.type)) continue // This is added later
-                gemOnlyStats[gemStat.type] = gemOnlyStats.getOrDefault(gemStat.type, 0) + gemStat.amount
+                gemOnlyStats[gemStat.type] =
+                    gemOnlyStats.getOrDefault(gemStat.type, 0) + gemStat.amount
             }
         }
 
@@ -104,44 +108,62 @@ class GameItemArmor @AssistedInject constructor(
                 statLore.add(
                     Component.text(
                         "+" + statRoll.second.min + "-" + statRoll.second.max + statInfo.icon,
-                        Style.style(statInfo.color)
+                        Style.style(statInfo.color),
                     )
                 )
             } else if (statRoll != null) {
                 val value = statRoll.first.getRolledValue(statRoll.second)
                 var finalValue = value
                 for (gemBonus in armorData.gemBonusesList) {
-                    val gemMatch = gemBonus.statsList.firstOrNull { it.type == statType } ?: continue
+                    val gemMatch =
+                        gemBonus.statsList.firstOrNull { it.type == statType } ?: continue
                     finalValue += gemMatch.amount
                 }
                 if (finalValue == value) {
                     statLore.add(
                         Component.text(
                             ((if (value < 0) "-" else "+") + value + statInfo.icon),
-                            Style.style(statInfo.color)
+                            Style.style(statInfo.color),
                         )
                     )
                 } else {
-                    val originalText = Component.text(
-                        (if (value < 0) "-" else "+") + value + statInfo.icon, Style.style(
-                            NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH
+                    val originalText =
+                        Component.text(
+                            (if (value < 0) "-" else "+") + value + statInfo.icon,
+                            Style.style(NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH),
                         )
-                    )
-                    val newText = Component.text(
-                        (if (finalValue < 0) "-" else "+") + finalValue + statInfo.icon,
-                        Style.style(statInfo.color)
-                    )
+                    val newText =
+                        Component.text(
+                            (if (finalValue < 0) "-" else "+") + finalValue + statInfo.icon,
+                            Style.style(statInfo.color),
+                        )
                     statLore.add(
-                        Component.text().append(originalText).append(Component.text(" ")).append(newText).build()
+                        Component.text()
+                            .append(originalText)
+                            .append(Component.text(" "))
+                            .append(newText)
+                            .build()
                     )
                 }
             } else if (gemOnlyStats.containsKey(statType)) {
                 val value = gemOnlyStats[statType]!!
                 val originalText =
-                    Component.text("+0" + statInfo.icon, Style.style(NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH))
+                    Component.text(
+                        "+0" + statInfo.icon,
+                        Style.style(NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH),
+                    )
                 val newText =
-                    Component.text((if (value < 0) "-" else "+") + value + statInfo.icon, Style.style(statInfo.color))
-                statLore.add(Component.text().append(originalText).append(Component.text(" ")).append(newText).build())
+                    Component.text(
+                        (if (value < 0) "-" else "+") + value + statInfo.icon,
+                        Style.style(statInfo.color),
+                    )
+                statLore.add(
+                    Component.text()
+                        .append(originalText)
+                        .append(Component.text(" "))
+                        .append(newText)
+                        .build()
+                )
             }
         }
 
@@ -150,35 +172,53 @@ class GameItemArmor @AssistedInject constructor(
         for (gemBonus in armorData.gemBonusesList) {
             finalHealth += gemBonus.health
         }
-        val healthText = if (finalHealth == health) {
-            Component.text(health.toString() + TextIcons.HEALTH_ICON, Style.style(NamedTextColor.RED))
-        } else {
-            val originalText = Component.text(
-                health.toString() + TextIcons.HEALTH_ICON,
-                Style.style(NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH)
-            )
-            val newText =
-                Component.text(originalText.toString() + TextIcons.HEALTH_ICON, Style.style(NamedTextColor.RED))
-            Component.text().append(originalText).append(Component.text(" ")).append(newText).build()
-        }
+        val healthText =
+            if (finalHealth == health) {
+                Component.text(
+                    health.toString() + TextIcons.HEALTH_ICON,
+                    Style.style(NamedTextColor.RED),
+                )
+            } else {
+                val originalText =
+                    Component.text(
+                        health.toString() + TextIcons.HEALTH_ICON,
+                        Style.style(NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH),
+                    )
+                val newText =
+                    Component.text(
+                        originalText.toString() + TextIcons.HEALTH_ICON,
+                        Style.style(NamedTextColor.RED),
+                    )
+                Component.text()
+                    .append(originalText)
+                    .append(Component.text(" "))
+                    .append(newText)
+                    .build()
+            }
 
-        val gemTextBuilder = Component.text()
-            .append(Component.text("Gem Slots: ", Style.style(NamedTextColor.GRAY)))
-            .append(Component.text("[ ", Style.style(NamedTextColor.WHITE)))
+        val gemTextBuilder =
+            Component.text()
+                .append(Component.text("Gem Slots: ", Style.style(NamedTextColor.GRAY)))
+                .append(Component.text("[ ", Style.style(NamedTextColor.WHITE)))
         var counter = 0
         for (gemBonus in armorData.gemBonusesList) {
             for (i in 0..<GemStatUtil.getGemSlots(gemBonus.tier)) {
                 val gemInfo = gemBonus.mainStat.getInfo()
-                gemTextBuilder.append(Component.text(gemInfo.icon + " ", Style.style(gemInfo.color)))
+                gemTextBuilder.append(
+                    Component.text(gemInfo.icon + " ", Style.style(gemInfo.color))
+                )
                 counter++
             }
         }
         for (i in counter..<armorTemplate.maxGemSlots) {
-            gemTextBuilder.append(Component.text(TextIcons.EMPTY_GEM_ICON + " ", Style.style(NamedTextColor.GRAY)))
+            gemTextBuilder.append(
+                Component.text(TextIcons.EMPTY_GEM_ICON + " ", Style.style(NamedTextColor.GRAY))
+            )
         }
         gemTextBuilder.append(Component.text("]", Style.style(NamedTextColor.WHITE)))
 
-        builder.appendLinesIf(armorTemplate.maxGemSlots > 0, gemTextBuilder.build())
+        builder
+            .appendLinesIf(armorTemplate.maxGemSlots > 0, gemTextBuilder.build())
             .newLine()
             .appendLines(healthText)
             .newLine()
@@ -190,11 +230,18 @@ class GameItemArmor @AssistedInject constructor(
         for (perk in armorData.perksList) {
             val perkTemplate = perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
-            val perkText = Component.text()
-                .append(Component.text("<" + handler.getDynamicItemPerksStacksTextPlaceholder() + ">"))
-                .append(Component.text("+" + perk.stacks + " ", Style.style(NamedTextColor.WHITE)))
-                .append(handler.getName())
-                .build()
+            val perkText =
+                Component.text()
+                    .append(
+                        Component.text(
+                            "<" + handler.getDynamicItemPerksStacksTextPlaceholder() + ">"
+                        )
+                    )
+                    .append(
+                        Component.text("+" + perk.stacks + " ", Style.style(NamedTextColor.WHITE))
+                    )
+                    .append(handler.getName())
+                    .build()
             perkLore.add(perkText)
             val handlerLore = handler.getLoreSection()
             if (handlerLore != null) perkLore.addAll(handlerLore)
@@ -203,18 +250,29 @@ class GameItemArmor @AssistedInject constructor(
         }
         if (atLeastOnePerk) perkLore.removeLast()
 
-        builder.appendLinesIf(atLeastOnePerk, perkLore)
+        builder
+            .appendLinesIf(atLeastOnePerk, perkLore)
             .newLineIf(atLeastOnePerk)
             .appendLines(
                 Component.text()
                     .append(armorTemplate.rarity.display)
-                    .append(Component.text(" " + getArmorName(), Style.style(armorTemplate.rarity.color)))
+                    .append(
+                        Component.text(
+                            " " + getArmorName(),
+                            Style.style(armorTemplate.rarity.color),
+                        )
+                    )
                     .build()
             )
             .appendLines(
                 Component.text()
                     .append(Component.text("<class> "))
-                    .append(Component.text(armorTemplate.classType.getInfo().name, Style.style(NamedTextColor.GRAY)))
+                    .append(
+                        Component.text(
+                            armorTemplate.classType.getInfo().name,
+                            Style.style(NamedTextColor.GRAY),
+                        )
+                    )
                     .build()
             )
             .appendLines(
@@ -224,7 +282,7 @@ class GameItemArmor @AssistedInject constructor(
                     .append(
                         Component.text(
                             if (armorTemplate.level > 0) armorTemplate.level.toString() else "None",
-                            Style.style(NamedTextColor.WHITE)
+                            Style.style(NamedTextColor.WHITE),
                         )
                     )
                     .build()

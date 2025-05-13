@@ -7,5 +7,4 @@ interface GameItemTemplateRegistry {
     fun getTemplate(identifier: String): GameItemTemplate?
 
     fun GameItemTemplate.generateGameItem(count: Int): GameItem
-
 }

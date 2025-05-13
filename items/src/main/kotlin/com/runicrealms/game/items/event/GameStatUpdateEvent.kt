@@ -7,8 +7,8 @@ import org.bukkit.event.HandlerList
 
 class GameStatUpdateEvent(
     val character: GameCharacter,
-    val equipmentCache: CharacterEquipmentCache
-): Event(false) {
+    val equipmentCache: CharacterEquipmentCache,
+) : Event(false) {
 
     companion object {
         private val HANDLERS = HandlerList()
@@ -17,5 +17,4 @@ class GameStatUpdateEvent(
     }
 
     override fun getHandlers() = HANDLERS
-
 }

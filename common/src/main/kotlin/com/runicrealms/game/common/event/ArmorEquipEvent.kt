@@ -8,15 +8,14 @@ import org.bukkit.event.player.PlayerEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
-
 class ArmorEquipEvent(
     player: Player,
     val equipType: EquipMethod,
     val type: ArmorType,
     val oldArmorPiece: ItemStack?,
     val newArmorPiece: ItemStack?,
-    private var isCancelled: Boolean = false
-): PlayerEvent(player, false), Cancellable {
+    private var isCancelled: Boolean = false,
+) : PlayerEvent(player, false), Cancellable {
 
     companion object {
         private val HANDLERS = HandlerList()
@@ -71,8 +70,8 @@ class ArmorEquipEvent(
         HOTBAR_SWAP,
 
         /**
-         * When in range of a dispenser that shoots an armor piece to equip.<br></br>
-         * Requires the spigot version to have [org.bukkit.event.block.BlockDispenseArmorEvent] implemented.
+         * When in range of a dispenser that shoots an armor piece to equip.<br></br> Requires the
+         * spigot version to have [org.bukkit.event.block.BlockDispenseArmorEvent] implemented.
          */
         DISPENSER,
 
@@ -104,10 +103,33 @@ class ArmorEquipEvent(
             fun matchType(itemStack: ItemStack?): ArmorType? {
                 if (itemStack == null) return null
                 return when (itemStack.type) {
-                    Material.CHAINMAIL_HELMET, Material.GOLDEN_HELMET, Material.DIAMOND_HELMET, Material.LEATHER_HELMET, Material.IRON_HELMET, Material.CARVED_PUMPKIN, Material.SKELETON_SKULL, Material.WITHER_SKELETON_SKULL, Material.CREEPER_HEAD, Material.DRAGON_HEAD, Material.PLAYER_HEAD, Material.ZOMBIE_HEAD -> HELMET
-                    Material.CHAINMAIL_CHESTPLATE, Material.GOLDEN_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.LEATHER_CHESTPLATE, Material.IRON_CHESTPLATE -> CHESTPLATE
-                    Material.CHAINMAIL_LEGGINGS, Material.GOLDEN_LEGGINGS, Material.DIAMOND_LEGGINGS, Material.LEATHER_LEGGINGS, Material.IRON_LEGGINGS -> LEGGINGS
-                    Material.CHAINMAIL_BOOTS, Material.GOLDEN_BOOTS, Material.DIAMOND_BOOTS, Material.LEATHER_BOOTS, Material.IRON_BOOTS -> BOOTS
+                    Material.CHAINMAIL_HELMET,
+                    Material.GOLDEN_HELMET,
+                    Material.DIAMOND_HELMET,
+                    Material.LEATHER_HELMET,
+                    Material.IRON_HELMET,
+                    Material.CARVED_PUMPKIN,
+                    Material.SKELETON_SKULL,
+                    Material.WITHER_SKELETON_SKULL,
+                    Material.CREEPER_HEAD,
+                    Material.DRAGON_HEAD,
+                    Material.PLAYER_HEAD,
+                    Material.ZOMBIE_HEAD -> HELMET
+                    Material.CHAINMAIL_CHESTPLATE,
+                    Material.GOLDEN_CHESTPLATE,
+                    Material.DIAMOND_CHESTPLATE,
+                    Material.LEATHER_CHESTPLATE,
+                    Material.IRON_CHESTPLATE -> CHESTPLATE
+                    Material.CHAINMAIL_LEGGINGS,
+                    Material.GOLDEN_LEGGINGS,
+                    Material.DIAMOND_LEGGINGS,
+                    Material.LEATHER_LEGGINGS,
+                    Material.IRON_LEGGINGS -> LEGGINGS
+                    Material.CHAINMAIL_BOOTS,
+                    Material.GOLDEN_BOOTS,
+                    Material.DIAMOND_BOOTS,
+                    Material.LEATHER_BOOTS,
+                    Material.IRON_BOOTS -> BOOTS
                     else -> null
                 }
             }

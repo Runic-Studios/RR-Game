@@ -14,10 +14,10 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 
-class GameItemGem @AssistedInject constructor(
-    @Assisted inputData: ItemData,
-    templateRegistry: GameItemTemplateRegistry,
-) : GameItem(inputData, templateRegistry.getTemplate(inputData.templateID)!!) {
+class GameItemGem
+@AssistedInject
+constructor(@Assisted inputData: ItemData, templateRegistry: GameItemTemplateRegistry) :
+    GameItem(inputData, templateRegistry.getTemplate(inputData.templateID)!!) {
 
     val gemTemplate = template as GameItemGemTemplate
 
@@ -31,21 +31,34 @@ class GameItemGem @AssistedInject constructor(
         for (stat in data.gem.bonus.statsList) {
             if (stat.amount == 0) continue
             val statInfo = stat.type.getInfo()
-            lore.add(Component.text((if (stat.amount < 0) "-" else "+") + stat.amount + statInfo.icon, Style.style(statInfo.color)))
+            lore.add(
+                Component.text(
+                    (if (stat.amount < 0) "-" else "+") + stat.amount + statInfo.icon,
+                    Style.style(statInfo.color),
+                )
+            )
         }
 
         return ItemLoreBuilder()
-            .appendLines(Component.text()
-                .append(Component.text("Req Slots ", Style.style(NamedTextColor.GRAY)))
-                .append(Component.text(GemStatUtil.getGemSlots(data.gem.bonus.tier)))
-                .build())
+            .appendLines(
+                Component.text()
+                    .append(Component.text("Req Slots ", Style.style(NamedTextColor.GRAY)))
+                    .append(Component.text(GemStatUtil.getGemSlots(data.gem.bonus.tier)))
+                    .build()
+            )
             .newLine()
             .appendLines(lore)
             .newLine()
             .appendLines(
-                Component.text("Drag and click on armor", Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC)),
-                Component.text("to apply this gem!", Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC)))
+                Component.text(
+                    "Drag and click on armor",
+                    Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC),
+                ),
+                Component.text(
+                    "to apply this gem!",
+                    Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC),
+                ),
+            )
             .build()
     }
-
 }

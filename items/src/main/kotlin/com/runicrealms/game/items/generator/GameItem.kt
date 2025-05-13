@@ -18,14 +18,14 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
 
 /**
- * This class (and its subclasses) are meant to be very lightweight wrappers around
- * the protobuf-generated class ItemData.
+ * This class (and its subclasses) are meant to be very lightweight wrappers around the
+ * protobuf-generated class ItemData.
  *
- * These classes should provide easy conversion from ItemData into ItemStacks
- * (through lore and item generation), as well as useful information like added stats.
+ * These classes should provide easy conversion from ItemData into ItemStacks (through lore and item
+ * generation), as well as useful information like added stats.
  *
- * Additional rule of thumb: Any fields that are only utilized in generation methods
- * or by external classes should always be lazy.
+ * Additional rule of thumb: Any fields that are only utilized in generation methods or by external
+ * classes should always be lazy.
  *
  * We NEED loading of this class to be as fast as possible since it occurs extremely frequently.
  */
@@ -34,10 +34,7 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     open fun generateItemStack(menuDisplay: Boolean = false): ItemStack {
         val itemStack = template.display.generateItem(data.count)
         val meta = itemStack.itemMeta ?: Bukkit.getItemFactory().getItemMeta(itemStack.type)
-        meta.addAttributeModifier(
-            Attribute.ATTACK_SPEED,
-            attributeModifier
-        )
+        meta.addAttributeModifier(Attribute.ATTACK_SPEED, attributeModifier)
         val lore = generateLore(menuDisplay)
 
         if (template.tags.isNotEmpty()) {
@@ -47,12 +44,13 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         }
 
         if (template.lore.isNotEmpty()) {
-            val extra = if (lore.size != 0) {
-                mutableListOf<TextComponent>().apply {
-                    addAll(template.lore)
-                    add(Component.text(""))
-                }
-            } else template.lore
+            val extra =
+                if (lore.size != 0) {
+                    mutableListOf<TextComponent>().apply {
+                        addAll(template.lore)
+                        add(Component.text(""))
+                    }
+                } else template.lore
             lore.addAll(0, extra)
         }
 
@@ -79,7 +77,10 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         return range.min + (rollPercentage * range.max - range.min + 1).toInt()
     }
 
-    protected fun correctStatRolls(rolls: List<ItemData.RolledStat>, ranges: Map<StatType, GameItemTemplate.StatRange>): CorrectedStatRolls {
+    protected fun correctStatRolls(
+        rolls: List<ItemData.RolledStat>,
+        ranges: Map<StatType, GameItemTemplate.StatRange>,
+    ): CorrectedStatRolls {
         val correctedRolls = mutableListOf<ItemData.RolledStat>()
         val calculatedRolls = LinkedHashMap<StatType, Int>()
         var modified = false
@@ -93,10 +94,11 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         }
         for ((statType, statRange) in ranges) {
             if (calculatedRolls.containsKey(statType)) continue
-            val roll = ItemData.RolledStat.newBuilder()
-                .setType(statType)
-                .setRollPercentage(ThreadLocalRandom.current().nextDouble())
-                .build()
+            val roll =
+                ItemData.RolledStat.newBuilder()
+                    .setType(statType)
+                    .setRollPercentage(ThreadLocalRandom.current().nextDouble())
+                    .build()
             correctedRolls.add(roll)
             modified = true
             calculatedRolls[statType] = roll.getRolledValue(statRange)
@@ -107,10 +109,13 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     protected data class CorrectedStatRolls(
         val correctedRolls: List<ItemData.RolledStat>,
         val calculatedRolls: LinkedHashMap<StatType, Int>,
-        val modified: Boolean
+        val modified: Boolean,
     )
 
-    protected fun correctPerks(existingPerks: List<ItemData.Perk>, defaultPerks: Map<String, Int>): CorrectedPerks {
+    protected fun correctPerks(
+        existingPerks: List<ItemData.Perk>,
+        defaultPerks: Map<String, Int>,
+    ): CorrectedPerks {
         val correctedPerks = mutableListOf<ItemData.Perk>()
         var modified = false
         for (existingPerk in existingPerks) {
@@ -124,10 +129,12 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         }
         for ((defaultPerkID, defaultPerkStacks) in defaultPerks) {
             if (existingPerks.any { it.perkID == defaultPerkID }) continue
-            correctedPerks.add(ItemData.Perk.newBuilder()
-                .setPerkID(defaultPerkID)
-                .setStacks(defaultPerkStacks)
-                .build())
+            correctedPerks.add(
+                ItemData.Perk.newBuilder()
+                    .setPerkID(defaultPerkID)
+                    .setStacks(defaultPerkStacks)
+                    .build()
+            )
             modified = true
         }
         return CorrectedPerks(correctedPerks, modified)
@@ -135,12 +142,16 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
 
     protected data class CorrectedPerks(
         val correctedPerks: List<ItemData.Perk>,
-        val modified: Boolean
+        val modified: Boolean,
     )
 
     companion object {
         private val attributeModifier =
-            AttributeModifier(NamespacedKey("game","generic.attackSpeed"), Int.MAX_VALUE.toDouble(), AttributeModifier.Operation.ADD_NUMBER)
+            AttributeModifier(
+                NamespacedKey("game", "generic.attackSpeed"),
+                Int.MAX_VALUE.toDouble(),
+                AttributeModifier.Operation.ADD_NUMBER,
+            )
 
         private fun getPotionColor(template: GameItemTemplate): Color {
             val property = template.extraProperties["color"] as? String
@@ -157,5 +168,4 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
             }
         }
     }
-
 }

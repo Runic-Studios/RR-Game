@@ -7,6 +7,6 @@ class DataModule : AbstractModule() {
 
     override fun configure() {
         bind(GameSessionManager::class.java).asEagerSingleton()
-        bind(DataAPI::class.java).to(GameSessionManager::class.java)
+        bind(UserDataRegistry::class.java).to(GameSessionManager::class.java)
     }
 }

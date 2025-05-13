@@ -9,8 +9,8 @@ class ActiveItemPerksChangeEvent(
     val character: GameCharacter,
     val oldItemPerks: Set<ItemData.Perk>,
     val newItemPerks: Set<ItemData.Perk>,
-    val playSounds: Boolean
-): Event(false) {
+    val playSounds: Boolean,
+) : Event(false) {
 
     companion object {
         private val HANDLERS = HandlerList()

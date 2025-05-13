@@ -1,7 +1,6 @@
 package com.runicrealms.game.items.perk
 
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
-import com.google.inject.Inject
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
@@ -17,42 +16,37 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
-abstract class GameItemPerkHandler protected constructor(
+abstract class GameItemPerkHandler
+protected constructor(
     val template: GameItemPerkTemplate,
     plugin: Plugin,
     dynamicItemRegistry: DynamicItemRegistry,
-    private val equipmentRegistry: CharacterEquipmentCacheRegistry
+    private val equipmentRegistry: CharacterEquipmentCacheRegistry,
 ) : Listener {
 
-
     private val active: MutableSet<UUID> = Collections.newSetFromMap(ConcurrentHashMap())
-    private val dynamicItemPerksStacksTextPlaceholder = DynamicItemPerkStacksTextPlaceholder(this, equipmentRegistry)
+    private val dynamicItemPerksStacksTextPlaceholder =
+        DynamicItemPerkStacksTextPlaceholder(this, equipmentRegistry)
 
     init {
-        dynamicItemRegistry.registerTextPlaceholder(this.dynamicItemPerksStacksTextPlaceholder) // used to handle lore
+        dynamicItemRegistry.registerTextPlaceholder(
+            this.dynamicItemPerksStacksTextPlaceholder
+        ) // used to handle lore
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
     }
 
-    /**
-     * Returns the display name for this perk to be used on item lore
-     */
+    /** Returns the display name for this perk to be used on item lore */
     open fun getName(): TextComponent {
         return template.name
     }
 
     /**
-     * Gets the lore for this item perk.
-     * This is the portion of the lore that appears on the item for the item perk, NOT INCLUDING the header
+     * Gets the lore for this item perk. This is the portion of the lore that appears on the item
+     * for the item perk, NOT INCLUDING the header
      *
+     * Header: [?/4] +X Perk Name
      *
-     * Header:
-     * [?/4] +X Perk Name
-     *
-     *
-     * Lore:
-     * explanation lorum ipsum 50% dolor
-     * sit amet etc etc etc
-     *
+     * Lore: explanation lorum ipsum 50% dolor sit amet etc etc etc
      *
      * Null indicates no lore
      */
@@ -61,18 +55,15 @@ abstract class GameItemPerkHandler protected constructor(
     }
 
     /**
-     * Called when the number of stacks of this item perk changes.
-     * Fires async.
-     * Override this method to track changes to a player's stacks.
+     * Called when the number of stacks of this item perk changes. Fires async. Override this method
+     * to track changes to a player's stacks.
      *
      * @param stacks Number of stacks, 0 indicates no stacks (item perk deactivated).
      */
-    open fun onChange(character: GameCharacter?, stacks: Int) {
-    }
+    open fun onChange(character: GameCharacter?, stacks: Int) {}
 
     /**
-     * Updates the status of a player's item perk stacks.
-     * Used internally, cannot override.
+     * Updates the status of a player's item perk stacks. Used internally, cannot override.
      *
      * @param character Character who has the item perk equipped/de-equipped
      * @param stacks How many item perk stacks the player has (0 if unequipped)
@@ -87,8 +78,8 @@ abstract class GameItemPerkHandler protected constructor(
     }
 
     /**
-     * Returns the current amount of stacks of this perk that a player has equipped.
-     * This is automatically capped by the maximum.
+     * Returns the current amount of stacks of this perk that a player has equipped. This is
+     * automatically capped by the maximum.
      */
     fun getCurrentStacks(character: GameCharacter): Int {
         val cache = equipmentRegistry.cachedPlayerStats[character.player.uniqueId] ?: return 0
@@ -104,8 +95,8 @@ abstract class GameItemPerkHandler protected constructor(
     }
 
     /**
-     * Returns the current amount of stacks of this perk that a player has equipped;
-     * This is not capped by the maximum number of stacks for this perk.
+     * Returns the current amount of stacks of this perk that a player has equipped; This is not
+     * capped by the maximum number of stacks for this perk.
      */
     fun getCurrentUncappedStacks(character: GameCharacter): Int {
         val cache = equipmentRegistry.cachedPlayerStats[character.player.uniqueId] ?: return 0
@@ -116,8 +107,8 @@ abstract class GameItemPerkHandler protected constructor(
     }
 
     /**
-     * Gets whether a given player has this item perk equipped.
-     * Use getCurrentStacks(Player) to get the number of stacks.
+     * Gets whether a given player has this item perk equipped. Use getCurrentStacks(Player) to get
+     * the number of stacks.
      *
      * @param player Player to check
      * @return If they have this perk equipped
@@ -127,8 +118,8 @@ abstract class GameItemPerkHandler protected constructor(
     }
 
     /**
-     * Gets the current set of active players who have this item perk equipped.
-     * Do not modify this set.
+     * Gets the current set of active players who have this item perk equipped. Do not modify this
+     * set.
      *
      * @return Active players' UUIDs
      */

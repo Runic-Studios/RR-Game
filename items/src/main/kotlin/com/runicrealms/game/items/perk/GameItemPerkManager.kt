@@ -12,9 +12,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
-class GameItemPerkManager @Inject constructor(
-    private val plugin: Plugin
-): Listener, GameItemPerkHandlerRegistry {
+class GameItemPerkManager @Inject constructor(private val plugin: Plugin) :
+    Listener, GameItemPerkHandlerRegistry {
 
     private val handlers = HashMap<GameItemPerkTemplate, GameItemPerkHandler>()
     private val types = HashMap<String, GameItemPerkTemplate>()
@@ -50,7 +49,7 @@ class GameItemPerkManager @Inject constructor(
         }
 
         if (event.playSounds) {
-            with (event.character.player) {
+            with(event.character.player) {
                 if (activated && !deactivated) {
                     playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 2.0f)
                 } else if (!activated && deactivated) {
@@ -69,5 +68,4 @@ class GameItemPerkManager @Inject constructor(
     override fun getGameItemPerkHandler(template: GameItemPerkTemplate): GameItemPerkHandler? {
         return handlers[template]
     }
-
 }

@@ -12,44 +12,28 @@ import com.runicrealms.trove.generated.api.schema.v1.StatType
 import net.kyori.adventure.text.TextComponent
 
 class GameItemOffhandTemplate(
-    @JsonProperty("id")
-    id: String,
-
-    @JsonProperty("display")
-    display: DisplayableItem,
-
+    @JsonProperty("id") id: String,
+    @JsonProperty("display") display: DisplayableItem,
     @JsonProperty("tags")
     @JsonDeserialize(contentConverter = GameItemTagConverter::class)
     tags: List<GameItemTag> = listOf(),
-
     @JsonProperty("lore")
     @JsonDeserialize(contentConverter = TextComponentConverter::class)
     lore: List<TextComponent> = listOf(),
-
     @JsonProperty("triggers")
     @JsonDeserialize(
         `as` = LinkedHashMap::class,
-        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class
+        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class,
     )
     triggers: LinkedHashMap<GameItemClickTrigger.Type, String> = LinkedHashMap(),
-
-    @JsonProperty("extra")
-    extraProperties: Map<String, Any> = mapOf(),
-
+    @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
     @JsonProperty("stats")
-    @JsonDeserialize(
-        keyUsing = StatTypeKeyDeserializer::class,
-        `as` = LinkedHashMap::class
-    )
+    @JsonDeserialize(keyUsing = StatTypeKeyDeserializer::class, `as` = LinkedHashMap::class)
     val stats: LinkedHashMap<StatType, StatRange> = LinkedHashMap(),
-
     @JsonProperty("item-perks")
     @JsonDeserialize(`as` = LinkedHashMap::class)
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
-
-    @JsonProperty("level")
-    val level: Int,
-
+    @JsonProperty("level") val level: Int,
     @JsonProperty("rarity")
     @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
     val rarity: GameItemRarityType,
@@ -57,11 +41,11 @@ class GameItemOffhandTemplate(
 
     override fun buildItemData(count: Int): ItemData.Builder {
         val builder = super.buildItemData(count)
-        val offhandBuilder = builder.offhandBuilder
-            .addAllStats(stats.toRolledStats())
-            .addAllPerks(defaultPerks.toPerks())
+        val offhandBuilder =
+            builder.offhandBuilder
+                .addAllStats(stats.toRolledStats())
+                .addAllPerks(defaultPerks.toPerks())
         builder.setOffhand(offhandBuilder.build())
         return builder
     }
-
 }

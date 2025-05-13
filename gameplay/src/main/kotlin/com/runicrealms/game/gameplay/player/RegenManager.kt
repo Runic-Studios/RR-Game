@@ -4,28 +4,27 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
-import com.runicrealms.game.data.DataAPI
+import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.min
 
 /**
- * Class to manage player health and mana. Stores max mana in the player data file,
- * and creates a HashMap to store all current player mana values.
+ * Class to manage player health and mana. Stores max mana in the player data file, and creates a
+ * HashMap to store all current player mana values.
  *
  * @author Skyfallin
  */
-class RegenManager @Inject constructor(
-    private val plugin: Plugin,
-    private val dataAPI: DataAPI
-) {
+class RegenManager
+@Inject
+constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRegistry) {
 
     private val currentManaList = ConcurrentHashMap<UUID, Int>()
 
@@ -33,7 +32,7 @@ class RegenManager @Inject constructor(
         // regen async to speed up
         plugin.launch {
             withContext(plugin.asyncDispatcher) {
-                for (character in dataAPI.getAllCharacters()) {
+                for (character in userDataRegistry.getAllCharacters()) {
                     regenHealth(character)
                     regenMana(character)
                 }
@@ -53,8 +52,9 @@ class RegenManager @Inject constructor(
         val player = character.player
         val mana = currentManaList[player.uniqueId]!!
         val maxMana: Int = calculateMaxMana(character)
-        if (mana < maxMana) currentManaList[player.uniqueId] =
-            min((mana + amount).toDouble(), maxMana.toDouble()).toInt()
+        if (mana < maxMana)
+            currentManaList[player.uniqueId] =
+                min((mana + amount).toDouble(), maxMana.toDouble()).toInt()
     }
 
     /**
@@ -77,14 +77,13 @@ class RegenManager @Inject constructor(
         }
     }
 
-    /**
-     * Task to regen health with appropriate modifiers
-     */
+    /** Task to regen health with appropriate modifiers */
     private suspend fun regenHealth(character: GameCharacter) {
         // Sync context
         val player = character.player
-        val regenAmount = (HEALTH_REGEN_BASE_VALUE + (HEALTH_REGEN_LEVEL_MULTIPLIER * player.level)).toInt()
-        if (!RunicCore.getCombatAPI().isInCombat(player.uniqueId)) {
+        val regenAmount =
+            (HEALTH_REGEN_BASE_VALUE + (HEALTH_REGEN_LEVEL_MULTIPLIER * player.level)).toInt()
+        if (true) { // TODO !RunicCore.getCombatAPI().isInCombat(player.uniqueId)) {
             val event = HealthRegenEvent(player, regenAmount * OOC_MULTIPLIER)
             Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
         } else {
@@ -93,14 +92,13 @@ class RegenManager @Inject constructor(
         }
     }
 
-    /**
-     * Periodic task to regenerate mana for all online players
-     */
+    /** Periodic task to regenerate mana for all online players */
     private suspend fun regenMana(character: GameCharacter) {
         // Sync context
         val player = character.player
-        val mana = if (currentManaList.containsKey(player.uniqueId)) currentManaList[player.uniqueId]!!
-        else (BASE_MANA + getManaPerLv(character)).toInt()
+        val mana =
+            if (currentManaList.containsKey(player.uniqueId)) currentManaList[player.uniqueId]!!
+            else (BASE_MANA + getManaPerLv(character)).toInt()
 
         val maxMana: Int = calculateMaxMana(character)
         if (mana >= maxMana) return
@@ -108,7 +106,8 @@ class RegenManager @Inject constructor(
         var regenAmt = calculateManaRegen(player.level)
 
         // Add multiplier for players out of combat
-        if (!RunicCore.getCombatAPI().isInCombat(player.uniqueId)) regenAmt *= OOC_MULTIPLIER
+        // TODO if (!RunicCore.getCombatAPI().isInCombat(player.uniqueId)) regenAmt *=
+        // OOC_MULTIPLIER
 
         val event = ManaRegenEvent(player, regenAmt)
         Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
@@ -127,11 +126,12 @@ class RegenManager @Inject constructor(
         val maxMana: Int
         // recalculate max mana based on player level
         val player = character.player
-        val newMaxMana =
-            (BASE_MANA + (getManaPerLv(character) * player.level)) as Int
+        val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)) as Int
         // grab extra mana from wisdom
         val wisdomBoost: Double =
-            newMaxMana * (STAT_MAX_MANA_MULT * RunicCore.getStatAPI().getPlayerWisdom(player.uniqueId))
+            newMaxMana *
+                (STAT_MAX_MANA_MULT *
+                    0) // TODO RunicCore.getStatAPI().getPlayerWisdom(player.uniqueId))
         maxMana = (newMaxMana + wisdomBoost).toInt()
 
         // fix current mana if it is now too high

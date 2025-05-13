@@ -2,25 +2,24 @@ package com.runicrealms.game.data.game
 
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.runicrealms.trove.client.user.UserPlayerData
-import org.bukkit.plugin.Plugin
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.coroutineContext
+import org.bukkit.plugin.Plugin
 
 /**
- * This class is a wrapper around the GameSession for interaction with
- * a user's player data, including reading and staging changes to it.
+ * This class is a wrapper around the GameSession for interaction with a user's player data,
+ * including reading and staging changes to it.
  */
-open class GamePlayer internal constructor(
-    protected val plugin: Plugin,
-    internal val gameSession: GameSession
-) {
+open class GamePlayer
+internal constructor(protected val plugin: Plugin, internal val gameSession: GameSession) {
 
     val player = gameSession.bukkitPlayer
 
     /**
      * ALL CALLS to withPlayerData MUST be on the Minecraft game thread!
      *
-     * Computation can be offloaded to worker threads, but final handling of data must occur on this thread.
+     * Computation can be offloaded to worker threads, but final handling of data must occur on this
+     * thread.
      */
     suspend fun <T> withPlayerData(action: UserPlayerData.() -> T): T {
         val ctx = coroutineContext
@@ -29,5 +28,4 @@ open class GamePlayer internal constructor(
         }
         return gameSession.playerData.action()
     }
-
 }

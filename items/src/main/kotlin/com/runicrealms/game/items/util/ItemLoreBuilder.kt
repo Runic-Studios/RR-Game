@@ -41,7 +41,10 @@ class ItemLoreBuilder {
         return this
     }
 
-    fun appendLinesIf(condition: Boolean, lineSupplier: () -> Array<TextComponent>): ItemLoreBuilder {
+    fun appendLinesIf(
+        condition: Boolean,
+        lineSupplier: () -> Array<TextComponent>,
+    ): ItemLoreBuilder {
         if (condition) lore.addAll(listOf(*lineSupplier()))
         return this
     }

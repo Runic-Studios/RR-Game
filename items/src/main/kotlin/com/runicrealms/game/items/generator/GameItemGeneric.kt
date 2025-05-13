@@ -7,10 +7,10 @@ import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import net.kyori.adventure.text.TextComponent
 
-class GameItemGeneric @AssistedInject constructor(
-    @Assisted data: ItemData,
-    templateRegistry: GameItemTemplateRegistry,
-) : GameItem(data, templateRegistry.getTemplate(data.templateID)!!) {
+class GameItemGeneric
+@AssistedInject
+constructor(@Assisted data: ItemData, templateRegistry: GameItemTemplateRegistry) :
+    GameItem(data, templateRegistry.getTemplate(data.templateID)!!) {
 
     val genericTemplate = template as GameItemGenericTemplate
 
@@ -19,5 +19,4 @@ class GameItemGeneric @AssistedInject constructor(
     }
 
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> = mutableListOf()
-
 }

@@ -8,27 +8,19 @@ import com.runicrealms.game.items.config.jackson.deserializer.GameItemClickTrigg
 import net.kyori.adventure.text.TextComponent
 
 class GameItemGenericTemplate(
-    @JsonProperty("id")
-    id: String,
-
-    @JsonProperty("display")
-    display: DisplayableItem,
-
+    @JsonProperty("id") id: String,
+    @JsonProperty("display") display: DisplayableItem,
     @JsonProperty("tags")
     @JsonDeserialize(contentConverter = GameItemTagConverter::class)
     tags: List<GameItemTag> = listOf(),
-
     @JsonProperty("lore")
     @JsonDeserialize(contentConverter = TextComponentConverter::class)
     lore: List<TextComponent> = listOf(),
-
     @JsonProperty("triggers")
     @JsonDeserialize(
         `as` = LinkedHashMap::class,
-        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class
+        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class,
     )
     triggers: LinkedHashMap<GameItemClickTrigger.Type, String> = LinkedHashMap(),
-
-    @JsonProperty("extra")
-    extraProperties: Map<String, Any> = mapOf(),
+    @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
 ) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties)

@@ -31,14 +31,16 @@ import org.bukkit.plugin.Plugin
  *
  * Also responsible for mapping between different item data types.
  */
-class GameItemManager @Inject constructor(
+class GameItemManager
+@Inject
+constructor(
     plugin: Plugin,
     private val gameItemArmorFactory: GameItemArmor.Factory,
     private val gameItemGemFactory: GameItemGem.Factory,
     private val gameItemGenericFactory: GameItemGeneric.Factory,
     private val gameItemOffhandFactory: GameItemOffhand.Factory,
     private val gameItemWeaponFactory: GameItemWeapon.Factory,
-): GameItemPerkTemplateRegistry, GameItemTemplateRegistry, ItemStackConverter {
+) : GameItemPerkTemplateRegistry, GameItemTemplateRegistry, ItemStackConverter {
 
     private val templates = HashMap<String, GameItemTemplate>()
     private val perks: Map<String, GameItemPerkTemplate>
@@ -47,24 +49,27 @@ class GameItemManager @Inject constructor(
         val yamlMapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
         val extensions = listOf("yml", "yaml")
 
-        val itemsTemplates = File(plugin.dataFolder, "items")
-            .walkTopDown()
-            .filter { it.extension in extensions }
-            .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
-            .associateBy { it.id }
+        val itemsTemplates =
+            File(plugin.dataFolder, "items")
+                .walkTopDown()
+                .filter { it.extension in extensions }
+                .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
+                .associateBy { it.id }
         templates.putAll(itemsTemplates)
-        val scriptTemplates = File(plugin.dataFolder, "scripts")
-            .walkTopDown()
-            .filter { it.extension in extensions }
-            .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
-            .associateBy { it.id }
+        val scriptTemplates =
+            File(plugin.dataFolder, "scripts")
+                .walkTopDown()
+                .filter { it.extension in extensions }
+                .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
+                .associateBy { it.id }
         templates.putAll(scriptTemplates)
 
-        perks = File(plugin.dataFolder, "itemperks")
-            .walkTopDown()
-            .filter { it.extension in extensions }
-            .map { file -> yamlMapper.readValue(file, GameItemPerkTemplate::class.java) }
-            .associateBy { it.identifier }
+        perks =
+            File(plugin.dataFolder, "itemperks")
+                .walkTopDown()
+                .filter { it.extension in extensions }
+                .map { file -> yamlMapper.readValue(file, GameItemPerkTemplate::class.java) }
+                .associateBy { it.identifier }
     }
 
     override fun getTemplate(identifier: String): GameItemTemplate? {
@@ -103,5 +108,4 @@ class GameItemManager @Inject constructor(
             return null
         }
     }
-
 }

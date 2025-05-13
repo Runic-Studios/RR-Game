@@ -5,17 +5,21 @@ import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
 
-class FlatStatsModifier @AssistedInject constructor(
+class FlatStatsModifier
+@AssistedInject
+constructor(
     @Assisted stats: MutableMap<StatType, Int>,
     @Assisted itemPerks: MutableCollection<ItemData.Perk>?,
     @Assisted health: Int,
-    addStatsFactory: AddedStats.Factory
+    addStatsFactory: AddedStats.Factory,
 ) : StatsModifier {
 
     interface Factory {
-        fun create(stats: MutableMap<StatType, Int>,
-                   itemPerks: MutableCollection<ItemData.Perk>?,
-                   health: Int,): FlatStatsModifier
+        fun create(
+            stats: MutableMap<StatType, Int>,
+            itemPerks: MutableCollection<ItemData.Perk>?,
+            health: Int,
+        ): FlatStatsModifier
     }
 
     private val stats = addStatsFactory.create(stats, itemPerks, health)

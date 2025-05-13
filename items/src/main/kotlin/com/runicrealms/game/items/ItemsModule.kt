@@ -1,7 +1,6 @@
 package com.runicrealms.game.items
 
 import com.google.inject.AbstractModule
-import com.google.inject.Scopes
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.character.CharacterEquipmentCache
@@ -18,7 +17,7 @@ import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
 import kotlin.reflect.KClass
 
-class ItemsModule: AbstractModule() {
+class ItemsModule : AbstractModule() {
 
     override fun configure() {
         addFactory(AddedStats::class, AddedStats.Factory::class)
@@ -43,7 +42,10 @@ class ItemsModule: AbstractModule() {
     }
 
     private fun <T : Any, U : Any> addFactory(objectType: KClass<T>, factoryType: KClass<U>) {
-        install(FactoryModuleBuilder().implement(objectType.java, objectType.java).build(factoryType.java))
+        install(
+            FactoryModuleBuilder()
+                .implement(objectType.java, objectType.java)
+                .build(factoryType.java)
+        )
     }
-
 }

@@ -9,17 +9,11 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 
-/**
- * Jackson dataformat yaml pojo: Used as the "display" section in an item template
- */
+/** Jackson dataformat yaml pojo: Used as the "display" section in an item template */
 data class DisplayableItem(
-    @JsonDeserialize(converter = TextComponentConverter::class)
-    val name: TextComponent,
-
-    @JsonDeserialize(converter = MaterialConverter::class)
-    val material: Material,
-
-    val damage: Short? = null
+    @JsonDeserialize(converter = TextComponentConverter::class) val name: TextComponent,
+    @JsonDeserialize(converter = MaterialConverter::class) val material: Material,
+    val damage: Short? = null,
 ) {
 
     fun generateItem(count: Int): ItemStack {
@@ -36,5 +30,4 @@ data class DisplayableItem(
         item.amount = count
         return item
     }
-
 }

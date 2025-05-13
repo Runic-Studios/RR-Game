@@ -7,5 +7,4 @@ interface GameItemPerkHandlerRegistry {
     fun getGameItemPerkHandler(template: GameItemPerkTemplate): GameItemPerkHandler?
 
     fun registerItemPerk(handler: GameItemPerkHandler)
-
 }

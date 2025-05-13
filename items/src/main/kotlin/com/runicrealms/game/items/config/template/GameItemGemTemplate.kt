@@ -12,51 +12,40 @@ import com.runicrealms.trove.generated.api.schema.v1.StatType
 import net.kyori.adventure.text.TextComponent
 
 class GameItemGemTemplate(
-    @JsonProperty("id")
-    id: String,
-
-    @JsonProperty("display")
-    display: DisplayableItem,
-
+    @JsonProperty("id") id: String,
+    @JsonProperty("display") display: DisplayableItem,
     @JsonProperty("tags")
     @JsonDeserialize(contentConverter = GameItemTagConverter::class)
     tags: List<GameItemTag> = listOf(),
-
     @JsonProperty("lore")
     @JsonDeserialize(contentConverter = TextComponentConverter::class)
     lore: List<TextComponent> = listOf(),
-
     @JsonProperty("triggers")
     @JsonDeserialize(
         `as` = LinkedHashMap::class,
-        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class
+        keyUsing = GameItemClickTriggerTypeKeyDeserializer::class,
     )
     triggers: LinkedHashMap<GameItemClickTrigger.Type, String> = LinkedHashMap(),
-
-    @JsonProperty("extra")
-    extraProperties: Map<String, Any> = mapOf(),
-
-    @JsonProperty("tier")
-    val tier: Int,
-
+    @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
+    @JsonProperty("tier") val tier: Int,
     @JsonProperty("main-stat")
     @JsonDeserialize(contentConverter = StatTypeConverter::class)
-    val mainStat: StatType
+    val mainStat: StatType,
 ) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
 
     override fun buildItemData(count: Int): ItemData.Builder {
         val builder = super.buildItemData(count)
         val gemBuilder = builder.gemBuilder
 
-        val bonus = ItemData.GemBonus.newBuilder()
-            .setHealth(0)
-            .setTier(tier)
-            .setMainStat(mainStat)
-            .addAllStats(GemStatUtil.generateGemBonuses(tier, mainStat))
-            .build()
+        val bonus =
+            ItemData.GemBonus.newBuilder()
+                .setHealth(0)
+                .setTier(tier)
+                .setMainStat(mainStat)
+                .addAllStats(GemStatUtil.generateGemBonuses(tier, mainStat))
+                .build()
         gemBuilder.setBonus(bonus)
         builder.setGem(gemBuilder.build())
         return builder
     }
-
 }

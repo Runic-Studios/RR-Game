@@ -6,7 +6,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
-import com.runicrealms.game.data.DataAPI
+import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerDataLoadEvent
@@ -33,28 +33,28 @@ import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
 /**
- * This is the main worker behind loading and saving a player's data.
- * ALL loading/saving occurs within the class, no exceptions.
- * Player/character data can be read and modified elsewhere, but changes to it are only
- * staged, and the actual saving happens here.
+ * This is the main worker behind loading and saving a player's data. ALL loading/saving occurs
+ * within the class, no exceptions. Player/character data can be read and modified elsewhere, but
+ * changes to it are only staged, and the actual saving happens here.
  *
  * This operates on a few principles:
  * - Actual loading/saving DB calls (using Trove) are executed with async dispatcher
- * - Everything else happens on the Minecraft thread. Mostly importantly, this includes
- *   adding new player sessions, adding session characters, ending sessions, etc.
+ * - Everything else happens on the Minecraft thread. Mostly importantly, this includes adding new
+ *   player sessions, adding session characters, ending sessions, etc.
  *
  * This class is responsible for emitting 5 different data-related events:
  * - GamePlayerJoinEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
  * - GamePlayerQuitEvent: Fires SYNCHRONOUSLY after a player has quit, but just before we destroy
  *   their player object and save their data
- * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and
- *   we have loaded their data
- * - GameCharacterQuitEvent: Fires SYNCHRONOUSLY after a player has quit or changed characters,
- *   but just before we destroy their player object and save their data
+ * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and we
+ *   have loaded their data
+ * - GameCharacterQuitEvent: Fires SYNCHRONOUSLY after a player has quit or changed characters, but
+ *   just before we destroy their player object and save their data
  */
 class GameSessionManager
 @Inject
-constructor(private val troveClient: TroveClient, private val plugin: Plugin) : Listener, DataAPI {
+constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
+    Listener, UserDataRegistry {
 
     private val logger = LoggerFactory.getLogger("data")
 
@@ -185,9 +185,10 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
                     val oldCharacterData = session.characterData ?: return@resultContext true
                     if (slot == oldCharacterData.slot) return@resultContext true
                     if (slot != null) {
-                        val creationResult = withContext(plugin.asyncDispatcher) {
-                            session.claim.loadCharacter(slot)
-                        }
+                        val creationResult =
+                            withContext(plugin.asyncDispatcher) {
+                                session.claim.loadCharacter(slot)
+                            }
                         if (!creationResult.isSuccess) {
                             logger.error(
                                 "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
@@ -232,9 +233,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
             session.saveJob.cancelAndJoin()
 
             session.characterMutex.withLock {
-                withContext(plugin.minecraftDispatcher) {
-                    endCharacterSession(session)
-                }
+                withContext(plugin.minecraftDispatcher) { endCharacterSession(session) }
             }
         }
 
@@ -270,10 +269,6 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) : 
 
     override fun getAllPlayers(): Collection<GamePlayer> = players.values
 
-    override fun getAllCharacters(): Collection<GameCharacter> = players.values.filter {
-        it !is GameCharacter
-    }.map {
-        it as GameCharacter
-    }
-
+    override fun getAllCharacters(): Collection<GameCharacter> =
+        players.values.filter { it !is GameCharacter }.map { it as GameCharacter }
 }
