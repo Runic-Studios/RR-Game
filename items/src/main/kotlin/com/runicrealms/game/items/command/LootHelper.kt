@@ -72,7 +72,7 @@ constructor(
      * @return a future/promise for an item that meets the following conditions, or null if none
      *   meet the conditions
      */
-    suspend fun getItem(
+    fun getItem(
         range: Pair<Int, Int>?,
         rarities: Set<GameItemRarityType>?,
         playerClass: ClassType?,
