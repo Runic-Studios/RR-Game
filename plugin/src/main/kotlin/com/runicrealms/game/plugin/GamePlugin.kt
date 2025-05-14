@@ -29,7 +29,7 @@ class GamePlugin : JavaPlugin() {
                 pluginModule,
                 dataModule,
                 gameplayModule,
-                itemsModule
+                itemsModule,
             )
     }
 }

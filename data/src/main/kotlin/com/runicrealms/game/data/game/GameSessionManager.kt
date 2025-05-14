@@ -12,8 +12,8 @@ import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerJoinEvent
-import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
 import com.runicrealms.game.data.event.GamePlayerLoadEvent
+import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.trove.client.TroveClient
 import java.util.UUID
@@ -47,30 +47,23 @@ import org.slf4j.LoggerFactory
  *
  * This class is responsible for emitting several different data-related events:
  * - GamePlayerPreLoadEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
- *   This should be used for checking to see if it is a new player (first login), and
- *   adding default data values if necessary. This event can't be failed.
- *
- * - GamePlayerLoadEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
- *   This should be used for applying the data we have loaded on to the bukkit player
- *   This event can be "failed".
- *
+ *   This should be used for checking to see if it is a new player (first login), and adding default
+ *   data values if necessary. This event can't be failed.
+ * - GamePlayerLoadEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data This
+ *   should be used for applying the data we have loaded on to the bukkit player This event can be
+ *   "failed".
  * - GamePlayerJoinEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data, and
  *   after GamePlayerLoadEvent. This event cannot fail.
- *
  * - GamePlayerQuitEvent: Fires SYNCHRONOUSLY after a player has quit, but just before we destroy
  *   their player object and save their data
- *
  * - GameCharacterPreLoadEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and
  *   we have loaded their data. This should be used for checking to see if it is a new character
  *   (just created), and adding default data values if necessary. This event can't be failed.
- *
  * - GameCharacterLoadEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and we
  *   have loaded their data. This should be used for applying the data we have loaded on to the
  *   bukkit player (e.g. inventory, etc). This event can be "failed".
- *
  * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character and we
  *   have fired GameCharacterLoadEvent successfully. This event cannot fail.
- *
  * - GameCharacterQuitEvent: Fires SYNCHRONOUSLY after a player has quit or changed characters, but
  *   just before we destroy their player object and save their data
  */
@@ -233,7 +226,9 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                         val characterData = creationResult.getOrNull()!!
 
                         val preLoadEvent = GameCharacterPreLoadEvent(characterData)
-                        Bukkit.getPluginManager().callSuspendingEvent(preLoadEvent, plugin).joinAll()
+                        Bukkit.getPluginManager()
+                            .callSuspendingEvent(preLoadEvent, plugin)
+                            .joinAll()
                         characterData.empty = false
 
                         session.characterData = characterData
@@ -257,7 +252,9 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                         }
 
                         val characterJoinEvent = GameCharacterJoinEvent(character)
-                        Bukkit.getPluginManager().callSuspendingEvent(characterJoinEvent, plugin).joinAll()
+                        Bukkit.getPluginManager()
+                            .callSuspendingEvent(characterJoinEvent, plugin)
+                            .joinAll()
                     } else {
                         endCharacterSession(session)
                     }

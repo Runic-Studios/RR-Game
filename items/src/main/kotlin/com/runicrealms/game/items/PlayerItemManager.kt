@@ -23,8 +23,8 @@ class PlayerItemManager
 constructor(
     plugin: Plugin,
     private val userDataRegistry: UserDataRegistry,
-    private val equipmentFactory: CharacterEquipmentCache.Factory) :
-    Listener, CharacterEquipmentCacheRegistry {
+    private val equipmentFactory: CharacterEquipmentCache.Factory,
+) : Listener, CharacterEquipmentCacheRegistry {
 
     override val cachedPlayerStats = ConcurrentHashMap<UUID, CharacterEquipmentCache>()
 
@@ -34,7 +34,8 @@ constructor(
 
     @EventHandler
     fun onCharacterJoin(event: GameCharacterJoinEvent) {
-        cachedPlayerStats[event.character.player.uniqueId] = equipmentFactory.create(event.character)
+        cachedPlayerStats[event.character.player.uniqueId] =
+            equipmentFactory.create(event.character)
     }
 
     @EventHandler

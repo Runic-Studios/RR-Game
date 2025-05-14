@@ -5,8 +5,8 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Fired after a player has chosen a character and we have loaded their data, but before we have registered
- * them as a character and fired GameCharacterLoadEvent.
+ * Fired after a player has chosen a character and we have loaded their data, but before we have
+ * registered them as a character and fired GameCharacterLoadEvent.
  *
  * This event should be used for applying default values to NEW character data (when a player
  * creates a brand-new character).

@@ -3,7 +3,6 @@ package com.runicrealms.game.items.character
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
-import com.google.common.collect.Sets
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.game.GameCharacter
@@ -24,7 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
@@ -211,7 +209,7 @@ constructor(
         if (oldPerks == null) oldPerks = EMPTY_MUTABLE_SET
         var newPerks = totalStats.perks
         if (newPerks == null) newPerks = EMPTY_MUTABLE_SET
-        if (Sets.intersection(oldPerks, newPerks) != Sets.union(oldPerks, newPerks)) {
+        if (oldPerks.toSet() != newPerks.toSet()) {
             if (!weaponSwitched)
                 beaconNoise = null // We didn't switch weapons, disregard funky logic
 
@@ -430,7 +428,7 @@ constructor(
         OFFHAND,
     }
 
-    private class RecentWeapon(val templateID: String, val itemPerks: Set<ItemData.Perk>?) {
+    private class RecentWeapon(val templateID: String, val itemPerks: Collection<ItemData.Perk>?) {
         constructor(weapon: GameItemWeapon) : this(weapon.template.id, weapon.addedStats.perks)
 
         fun matchesItem(item: GameItem?): Boolean {

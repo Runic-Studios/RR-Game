@@ -7,8 +7,8 @@ import org.bukkit.event.HandlerList
 
 class ActiveItemPerksChangeEvent(
     val character: GameCharacter,
-    val oldItemPerks: Set<ItemData.Perk>,
-    val newItemPerks: Set<ItemData.Perk>,
+    val oldItemPerks: Collection<ItemData.Perk>,
+    val newItemPerks: Collection<ItemData.Perk>,
     val playSounds: Boolean,
 ) : Event(false) {
 

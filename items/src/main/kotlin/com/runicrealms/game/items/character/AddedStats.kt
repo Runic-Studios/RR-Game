@@ -12,7 +12,7 @@ class AddedStats
 @AssistedInject
 constructor(
     @Assisted val stats: MutableMap<StatType, Int>,
-    @Assisted perks: MutableSet<ItemData.Perk>?,
+    @Assisted perks: MutableCollection<ItemData.Perk>?,
     @Assisted health: Int,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
 ) {
@@ -20,8 +20,8 @@ constructor(
     interface Factory {
         fun create(
             stats: MutableMap<StatType, Int>,
-            itemPerks: MutableCollection<ItemData.Perk>?,
-            addedHealth: Int,
+            perks: MutableCollection<ItemData.Perk>?,
+            health: Int,
         ): AddedStats
     }
 
