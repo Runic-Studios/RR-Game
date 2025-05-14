@@ -21,7 +21,7 @@ class GamePlugin : JavaPlugin() {
         val dataModule = DataModule()
         val gameplayModule = GameplayModule()
         val itemsModule = ItemsModule()
-        
+
         val injector =
             Guice.createInjector(
                 troveModule,
