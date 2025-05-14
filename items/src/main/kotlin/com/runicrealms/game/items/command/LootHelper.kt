@@ -1,6 +1,5 @@
 package com.runicrealms.game.items.command
 
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.google.inject.Inject
 import com.runicrealms.game.items.config.template.ClassTypeHolder
 import com.runicrealms.game.items.config.template.GameItemArmorTemplate
@@ -15,7 +14,6 @@ import java.util.LinkedList
 import java.util.Locale
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Stream
-import kotlinx.coroutines.withContext
 import org.bukkit.plugin.Plugin
 
 class LootHelper
@@ -79,31 +77,27 @@ constructor(
         rarities: Set<GameItemRarityType>?,
         playerClass: ClassType?,
         itemTypes: Set<ItemType>?,
-        lqm: Float?,
+        lqm: Float?, // TODO use lqm
     ): GameItemTemplate? {
         val rarity: Set<GameItemRarityType?> =
             if (!rarities.isNullOrEmpty()) rarities else setOf(rollRarity())
-
-        return withContext(plugin.asyncDispatcher) {
-            val options = mutableListOf<GameItemTemplate>()
-            for (template in itemTemplateRegistry.getItemTemplates()) {
-                if (template !is RarityLevelHolder) continue
-                if (!template.id.startsWith("script")) continue
-                if (range != null && range.first <= range.second) {
-                    if (range.first > template.level && range.second < template.level) continue
-                }
-                if (!rarity.contains(template.rarity)) continue
-                if (playerClass != null && playerClass != ClassType.ANY) {
-                    if (template !is ClassTypeHolder) continue
-                    if (template.classType != playerClass) continue
-                }
-                if (itemTypes != null && !itemTypes.contains(ItemType.getItemType(template)))
-                    continue
-                options.add(template)
+        val options = mutableListOf<GameItemTemplate>()
+        for (template in itemTemplateRegistry.getItemTemplates()) {
+            if (template !is RarityLevelHolder) continue
+            if (!template.id.startsWith("script")) continue
+            if (range != null && range.first <= range.second) {
+                if (range.first > template.level && range.second < template.level) continue
             }
-            if (options.isEmpty()) return@withContext null
-            options[random.nextInt(0, options.size)]
+            if (!rarity.contains(template.rarity)) continue
+            if (playerClass != null && playerClass != ClassType.ANY) {
+                if (template !is ClassTypeHolder) continue
+                if (template.classType != playerClass) continue
+            }
+            if (itemTypes != null && !itemTypes.contains(ItemType.getItemType(template))) continue
+            options.add(template)
         }
+        if (options.isEmpty()) return null
+        return options[random.nextInt(0, options.size)]
     }
 
     fun getTemplatesInLevel(level: Int, rarity: GameItemRarityType): List<GameItemTemplate> {

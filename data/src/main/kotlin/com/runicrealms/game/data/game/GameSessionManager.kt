@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -213,64 +214,66 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
         // Any context
         val startTime = System.currentTimeMillis()
         val session = sessions[user] ?: return false
-        return withContext(plugin.asyncDispatcher) {
-            session.characterMutex.withLock { // Acquire lock async
-                withContext(plugin.minecraftDispatcher) resultContext@{
-                    val oldCharacterData = session.characterData ?: return@resultContext true
-                    if (slot == oldCharacterData.slot) return@resultContext true
-                    if (slot != null) {
-                        val creationResult =
-                            withContext(plugin.asyncDispatcher) {
-                                session.claim.loadCharacter(slot)
-                            }
-                        if (!creationResult.isSuccess) {
-                            logger.error(
-                                "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
-                                IllegalStateException(creationResult.exceptionOrNull()!!),
-                            )
-                            return@resultContext false
-                        }
-                        val characterData = creationResult.getOrNull()!!
-
-                        val preLoadEvent = GameCharacterPreLoadEvent(characterData)
-                        Bukkit.getPluginManager()
-                            .callSuspendingEvent(preLoadEvent, plugin)
-                            .joinAll()
-                        characterData.empty = false
-
-                        session.characterData = characterData
-
-                        val character = GameCharacter(plugin, session)
-                        players[session.bukkitPlayer.uniqueId] = character
-
-                        val characterLoadEvent = GameCharacterLoadEvent(character)
-                        Bukkit.getPluginManager()
-                            .callSuspendingEvent(characterLoadEvent, plugin)
-                            .joinAll()
-
-                        if (!characterLoadEvent.success) {
-                            for (error in characterLoadEvent.errors) {
+        return withTimeout(5000) {
+            withContext(plugin.asyncDispatcher) {
+                session.characterMutex.withLock { // Acquire lock async
+                    withContext(plugin.minecraftDispatcher) resultContext@{
+                        val oldCharacterData = session.characterData ?: return@resultContext true
+                        if (slot == oldCharacterData.slot) return@resultContext true
+                        if (slot != null) {
+                            val creationResult =
+                                withContext(plugin.asyncDispatcher) {
+                                    session.claim.loadCharacter(slot)
+                                }
+                            if (!creationResult.isSuccess) {
                                 logger.error(
                                     "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
-                                    error,
+                                    IllegalStateException(creationResult.exceptionOrNull()!!),
                                 )
+                                return@resultContext false
                             }
-                            return@resultContext false
+                            val characterData = creationResult.getOrNull()!!
+
+                            val preLoadEvent = GameCharacterPreLoadEvent(characterData)
+                            Bukkit.getPluginManager()
+                                .callSuspendingEvent(preLoadEvent, plugin)
+                                .joinAll()
+                            characterData.empty = false
+
+                            session.characterData = characterData
+
+                            val character = GameCharacter(plugin, session)
+                            players[session.bukkitPlayer.uniqueId] = character
+
+                            val characterLoadEvent = GameCharacterLoadEvent(character)
+                            Bukkit.getPluginManager()
+                                .callSuspendingEvent(characterLoadEvent, plugin)
+                                .joinAll()
+
+                            if (!characterLoadEvent.success) {
+                                for (error in characterLoadEvent.errors) {
+                                    logger.error(
+                                        "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
+                                        error,
+                                    )
+                                }
+                                return@resultContext false
+                            }
+
+                            val characterJoinEvent = GameCharacterJoinEvent(character)
+                            Bukkit.getPluginManager()
+                                .callSuspendingEvent(characterJoinEvent, plugin)
+                                .joinAll()
+
+                            val time = System.currentTimeMillis() - startTime
+                            logger.info(
+                                "Finished pre-load/load/join for character $slot of player ${session.bukkitPlayer.uniqueId} in $time millis"
+                            )
+                        } else {
+                            endCharacterSession(session)
                         }
-
-                        val characterJoinEvent = GameCharacterJoinEvent(character)
-                        Bukkit.getPluginManager()
-                            .callSuspendingEvent(characterJoinEvent, plugin)
-                            .joinAll()
-
-                        val time = System.currentTimeMillis() - startTime
-                        logger.info(
-                            "Finished pre-load/load/join for character $slot of player ${session.bukkitPlayer.uniqueId} in $time millis"
-                        )
-                    } else {
-                        endCharacterSession(session)
+                        return@resultContext true
                     }
-                    return@resultContext true
                 }
             }
         }

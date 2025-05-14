@@ -700,7 +700,7 @@ constructor(
 
         // iterating and picking item is async, slight delay and item is given on main thread after
         // async task is complete
-        val template = runBlocking { lootHelper.getItem(range, rarities, clazz, items, lqm) }
+        val template = lootHelper.getItem(range, rarities, clazz, items, lqm)
 
         if (template == null) {
             player.sendMessage(
