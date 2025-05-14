@@ -4,6 +4,9 @@ import com.runicrealms.game.data.game.GameCharacter
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
+/**
+ * Fires SYNCHRONOUSLY after a player quits their character, but just before we save and destroy their data.
+ */
 class GameCharacterQuitEvent(val character: GameCharacter) : Event(false) {
 
     companion object {

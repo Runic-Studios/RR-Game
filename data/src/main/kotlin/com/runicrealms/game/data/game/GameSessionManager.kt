@@ -8,9 +8,12 @@ import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
+import com.runicrealms.game.data.event.GameCharacterLoadEvent
+import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
-import com.runicrealms.game.data.event.GamePlayerDataLoadEvent
 import com.runicrealms.game.data.event.GamePlayerJoinEvent
+import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
+import com.runicrealms.game.data.event.GamePlayerLoadEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.trove.client.TroveClient
 import java.util.UUID
@@ -42,12 +45,32 @@ import org.slf4j.LoggerFactory
  * - Everything else happens on the Minecraft thread. Mostly importantly, this includes adding new
  *   player sessions, adding session characters, ending sessions, etc.
  *
- * This class is responsible for emitting 5 different data-related events:
- * - GamePlayerJoinEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
+ * This class is responsible for emitting several different data-related events:
+ * - GamePlayerPreLoadEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
+ *   This should be used for checking to see if it is a new player (first login), and
+ *   adding default data values if necessary. This event can't be failed.
+ *
+ * - GamePlayerLoadEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data
+ *   This should be used for applying the data we have loaded on to the bukkit player
+ *   This event can be "failed".
+ *
+ * - GamePlayerJoinEvent: Fires SYNCHRONOUSLY after a player joined, and we loaded their data, and
+ *   after GamePlayerLoadEvent. This event cannot fail.
+ *
  * - GamePlayerQuitEvent: Fires SYNCHRONOUSLY after a player has quit, but just before we destroy
  *   their player object and save their data
- * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and we
- *   have loaded their data
+ *
+ * - GameCharacterPreLoadEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and
+ *   we have loaded their data. This should be used for checking to see if it is a new character
+ *   (just created), and adding default data values if necessary. This event can't be failed.
+ *
+ * - GameCharacterLoadEvent: Fires SYNCHRONOUSLY after a player has chosen their character, and we
+ *   have loaded their data. This should be used for applying the data we have loaded on to the
+ *   bukkit player (e.g. inventory, etc). This event can be "failed".
+ *
+ * - GameCharacterJoinEvent: Fires SYNCHRONOUSLY after a player has chosen their character and we
+ *   have fired GameCharacterLoadEvent successfully. This event cannot fail.
+ *
  * - GameCharacterQuitEvent: Fires SYNCHRONOUSLY after a player has quit or changed characters, but
  *   just before we destroy their player object and save their data
  */
@@ -90,7 +113,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
             val player = GamePlayer(plugin, session)
             players[event.player.uniqueId] = player
 
-            val playerLoginEvent = GamePlayerJoinEvent(player)
+            val playerLoginEvent = GamePlayerLoadEvent(player)
 
             Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
 
@@ -101,6 +124,9 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                     logger.error("Failed to load player ${event.player.name}", error)
                 }
             }
+
+            val playerJoinEvent = GamePlayerJoinEvent(player)
+            Bukkit.getPluginManager().callSuspendingEvent(playerJoinEvent, plugin).joinAll()
         } catch (exception: Exception) {
             logger.error("Failed to load player ${event.player.name}", exception)
             event.player.kick(Component.text("Failed to load: ${exception.message}"))
@@ -172,8 +198,8 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
         val player = playerResult.getOrNull()!!
 
         withContext(plugin.minecraftDispatcher) {
-            val createEvent = GamePlayerDataLoadEvent(player)
-            Bukkit.getPluginManager().callSuspendingEvent(createEvent, plugin).joinAll()
+            val preLoadEvent = GamePlayerPreLoadEvent(player)
+            Bukkit.getPluginManager().callSuspendingEvent(preLoadEvent, plugin).joinAll()
             player.empty = false
         }
 
@@ -205,18 +231,23 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                             return@resultContext false
                         }
                         val characterData = creationResult.getOrNull()!!
+
+                        val preLoadEvent = GameCharacterPreLoadEvent(characterData)
+                        Bukkit.getPluginManager().callSuspendingEvent(preLoadEvent, plugin).joinAll()
+                        characterData.empty = false
+
                         session.characterData = characterData
 
                         val character = GameCharacter(plugin, session)
                         players[session.bukkitPlayer.uniqueId] = character
 
-                        val characterJoinEvent = GameCharacterJoinEvent(character)
+                        val characterLoadEvent = GameCharacterLoadEvent(character)
                         Bukkit.getPluginManager()
-                            .callSuspendingEvent(characterJoinEvent, plugin)
+                            .callSuspendingEvent(characterLoadEvent, plugin)
                             .joinAll()
 
-                        if (!characterJoinEvent.success) {
-                            for (error in characterJoinEvent.errors) {
+                        if (!characterLoadEvent.success) {
+                            for (error in characterLoadEvent.errors) {
                                 logger.error(
                                     "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
                                     error,
@@ -224,6 +255,9 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                             }
                             return@resultContext false
                         }
+
+                        val characterJoinEvent = GameCharacterJoinEvent(character)
+                        Bukkit.getPluginManager().callSuspendingEvent(characterJoinEvent, plugin).joinAll()
                     } else {
                         endCharacterSession(session)
                     }

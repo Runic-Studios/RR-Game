@@ -5,12 +5,21 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Fired SYNCHRONOUSLY after:
+ * Fires SYNCHRONOUSLY after:
  * - player selects a character
  * - we load character data (successfully)
- * - we fire GameCharacterLoadEvent (successfully), which applies the data to the bukkit player
+ *
+ * This event can be "failed", which will kick the player and not fire the GameCharacterJoinEvent
  */
-class GameCharacterJoinEvent(val character: GameCharacter) : Event(false) {
+class GameCharacterLoadEvent(val character: GameCharacter) : Event(false) {
+
+    internal var success = true
+    internal val errors by lazy { HashSet<Throwable>() }
+
+    fun fail(throwable: Throwable) {
+        success = false
+        errors.add(throwable)
+    }
 
     companion object {
         private val HANDLERS = HandlerList()

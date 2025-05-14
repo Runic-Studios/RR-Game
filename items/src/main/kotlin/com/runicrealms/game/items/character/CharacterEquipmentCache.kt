@@ -42,7 +42,7 @@ constructor(
     private val logger = LoggerFactory.getLogger("items")
 
     interface Factory {
-        fun create(player: Player): CharacterEquipmentCache
+        fun create(character: GameCharacter): CharacterEquipmentCache
     }
 
     /*

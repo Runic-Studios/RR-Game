@@ -2,7 +2,7 @@ package com.runicrealms.game.gameplay.player.inventory
 
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
-import com.runicrealms.game.data.event.GameCharacterJoinEvent
+import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.ItemStackConverter
@@ -28,7 +28,7 @@ constructor(
     }
 
     @EventHandler
-    fun onCharacterJoin(event: GameCharacterJoinEvent) {
+    fun onCharacterJoin(event: GameCharacterLoadEvent) {
         try {
             val items = event.character.withSyncCharacterData { inventory.data.itemsMap }
             for ((slot, itemDataStack) in items) {

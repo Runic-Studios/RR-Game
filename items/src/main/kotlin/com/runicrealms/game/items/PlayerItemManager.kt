@@ -4,6 +4,8 @@ import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.common.event.ArmorEquipEvent
 import com.runicrealms.game.data.UserDataRegistry
+import com.runicrealms.game.data.event.GameCharacterJoinEvent
+import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.character.CharacterEquipmentCache
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
 import com.runicrealms.game.items.event.GameStatUpdateEvent
@@ -18,13 +20,26 @@ import org.bukkit.plugin.Plugin
 
 class PlayerItemManager
 @Inject
-constructor(plugin: Plugin, private val userDataRegistry: UserDataRegistry) :
+constructor(
+    plugin: Plugin,
+    private val userDataRegistry: UserDataRegistry,
+    private val equipmentFactory: CharacterEquipmentCache.Factory) :
     Listener, CharacterEquipmentCacheRegistry {
 
     override val cachedPlayerStats = ConcurrentHashMap<UUID, CharacterEquipmentCache>()
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
+    }
+
+    @EventHandler
+    fun onCharacterJoin(event: GameCharacterJoinEvent) {
+        cachedPlayerStats[event.character.player.uniqueId] = equipmentFactory.create(event.character)
+    }
+
+    @EventHandler
+    fun onCharacterQuit(event: GameCharacterQuitEvent) {
+        cachedPlayerStats.remove(event.character.player.uniqueId)
     }
 
     @EventHandler(
