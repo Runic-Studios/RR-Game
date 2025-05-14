@@ -47,7 +47,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
      * @param player to receive mana
      * @param amount of mana to receive
      */
-    suspend fun addMana(character: GameCharacter, amount: Int) {
+    fun addMana(character: GameCharacter, amount: Int) {
         // Sync context
         val player = character.player
         val mana = currentManaList[player.uniqueId]!!
@@ -63,9 +63,9 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
      * @param player to calculate mana for
      * @return the mana per level
      */
-    private suspend fun getManaPerLv(character: GameCharacter): Double {
+    private fun getManaPerLv(character: GameCharacter): Double {
         // Sync context
-        return character.withCharacterData {
+        return character.withSyncCharacterData {
             when (traits.data.classType) {
                 ClassType.ARCHER -> ARCHER_MANA_LV
                 ClassType.CLERIC -> CLERIC_MANA_LV
@@ -121,7 +121,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
      *
      * @param player to calculate mana for
      */
-    suspend fun calculateMaxMana(character: GameCharacter): Int {
+    fun calculateMaxMana(character: GameCharacter): Int {
         // Sync context
         val maxMana: Int
         // recalculate max mana based on player level

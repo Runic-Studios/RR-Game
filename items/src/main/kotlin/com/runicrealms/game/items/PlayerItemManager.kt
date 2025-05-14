@@ -32,11 +32,11 @@ constructor(plugin: Plugin, private val userDataRegistry: UserDataRegistry) :
     ) // Fire after other armor equip events to allow them to cancel it
     fun onArmorEquipEvent(event: ArmorEquipEvent) {
         // Sync context
-        val player: Player = event.getPlayer()
+        val player: Player = event.player
         val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
         val uuid = player.uniqueId
         if (!cachedPlayerStats.containsKey(uuid)) return
-        if (event.isCancelled()) return
+        if (event.isCancelled) return
         val holder = cachedPlayerStats[uuid] ?: return
         when (event.type) {
             ArmorEquipEvent.ArmorType.HELMET ->

@@ -6,6 +6,16 @@ import org.bukkit.event.HandlerList
 
 class GameCharacterJoinEvent(val character: GameCharacter) : Event(false) {
 
+    internal var success = true
+    internal val errors by lazy {
+        HashSet<Throwable>()
+    }
+
+    fun fail(throwable: Throwable) {
+        success = false
+        errors.add(throwable)
+    }
+
     companion object {
         private val HANDLERS = HandlerList()
 

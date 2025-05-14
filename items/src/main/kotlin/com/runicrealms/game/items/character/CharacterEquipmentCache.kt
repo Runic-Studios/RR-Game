@@ -121,7 +121,7 @@ constructor(
         var beaconNoise: Boolean? =
             null // Null indicates default behavior, true indicates yes, false indicates no
 
-        if (weapon == null || canUseWeapon(character, weapon!!)) {
+        if (weapon == null || canUseWeapon(weapon!!)) {
             if (weapon != null && !weaponSwitched && !isOnCooldown()) {
                 totalStats.combine(weapon!!.addedStats) // Default behavior
             } else if (weapon != null && weaponSwitched) {
@@ -237,7 +237,7 @@ constructor(
     }
 
     fun updateAllItems(onLogin: Boolean, callEvent: Boolean) {
-        check(!(!onLogin && Bukkit.isPrimaryThread())) { "Cannot run update stats on main thread!" }
+        check(!Bukkit.isPrimaryThread()) { "Cannot run update stats on main thread!" }
         updateHelmet()
         updateChestplate()
         updateLeggings()
@@ -250,7 +250,7 @@ constructor(
     }
 
     fun updateItems(onLogin: Boolean, vararg types: StatHolderType) {
-        check(!(!onLogin && Bukkit.isPrimaryThread())) { "Cannot run update stats on main thread!" }
+        check(Bukkit.isPrimaryThread()) { "Cannot run update stats on main thread!" }
         var hasUpdatedTotal = false
         for (type in types) {
             when (type) {
@@ -363,7 +363,7 @@ constructor(
             if (recentWeapon?.matchesItem(weapon) == true)
                 return // avoid constructing a new object if we can
 
-            if (!canUseWeapon(character, weapon!!)) return
+            if (!canUseWeapon(weapon!!)) return
             recentWeapon = RecentWeapon(weapon!!)
         }
     }
@@ -400,7 +400,7 @@ constructor(
 
     fun getWeapon(): GameItemWeapon? {
         return if (weapon == null) null
-        else (if (canUseWeapon(character, weapon!!)) weapon else null)
+        else (if (canUseWeapon(weapon!!)) weapon else null)
     }
 
     fun getOffhand(): GameItemOffhand? {
@@ -415,6 +415,13 @@ constructor(
     fun removeModifier(modifier: StatsModifier) {
         statsModifiers.remove(modifier)
         updateTotalStats(false, false)
+    }
+
+    private fun canUseWeapon(weapon: GameItemWeapon): Boolean {
+        // ONLY CALL SYNC
+        val type = character.withSyncCharacterData { traits.data.classType }
+        return weapon.weaponTemplate.level <= character.player.level &&
+                type == weapon.weaponTemplate.classType
     }
 
     enum class StatHolderType {
@@ -446,13 +453,5 @@ constructor(
         // Save for memory/performance reasons
         private val EMPTY_MUTABLE_SET = mutableSetOf<ItemData.Perk>()
         private val EMPTY_MUTABLE_STAT_MAP = mutableMapOf<StatType, Int>()
-
-        private fun canUseWeapon(character: GameCharacter, weapon: GameItemWeapon): Boolean {
-            return runBlocking {
-                val type = character.withCharacterData { traits.data.classType }
-                return@runBlocking weapon.weaponTemplate.level <= character.player.level &&
-                    type == weapon.weaponTemplate.classType
-            }
-        }
     }
 }

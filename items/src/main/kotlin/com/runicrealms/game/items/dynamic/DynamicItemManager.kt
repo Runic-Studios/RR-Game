@@ -164,7 +164,6 @@ constructor(
         return null
     }
 
-    @JvmRecord
     private data class BracketedTextInfo(
         val beginIndex: Int,
         val endIndex: Int,
@@ -184,7 +183,7 @@ constructor(
             var startIndex = -1
             var endIndex: Int
 
-            for (i in 0..<input.length) {
+            for (i in input.indices) {
                 if (input[i] == '<' && startIndex == -1) {
                     startIndex = i
                 } else if (input[i] == '>' && startIndex != -1) {

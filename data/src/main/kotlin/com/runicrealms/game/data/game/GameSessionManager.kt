@@ -93,6 +93,17 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
             val playerLoginEvent = GamePlayerJoinEvent(player)
 
             Bukkit.getPluginManager().callSuspendingEvent(playerLoginEvent, plugin).joinAll()
+
+            if (!playerLoginEvent.success) {
+                val unified = playerLoginEvent.errors.map { it.message }.joinToString(", ")
+                event.player.kick(Component.text("Failed to load: $unified"))
+                for (error in playerLoginEvent.errors) {
+                    logger.error(
+                        "Failed to load player ${event.player.name}",
+                        error
+                    )
+                }
+            }
         } catch (exception: Exception) {
             logger.error("Failed to load player ${event.player.name}", exception)
             event.player.kick(Component.text("Failed to load: ${exception.message}"))
@@ -206,6 +217,16 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                         Bukkit.getPluginManager()
                             .callSuspendingEvent(characterJoinEvent, plugin)
                             .joinAll()
+
+                        if (!characterJoinEvent.success) {
+                            for (error in characterJoinEvent.errors) {
+                                logger.error(
+                                    "Failed to load character session for ${session.bukkitPlayer.uniqueId} slot $slot",
+                                    error,
+                                )
+                            }
+                            return@resultContext false
+                        }
                     } else {
                         endCharacterSession(session)
                     }

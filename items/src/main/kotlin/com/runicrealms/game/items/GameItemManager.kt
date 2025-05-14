@@ -6,13 +6,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.game.items.config.template.GameItemArmorTemplate
-import com.runicrealms.game.items.config.template.GameItemGemTemplate
-import com.runicrealms.game.items.config.template.GameItemGenericTemplate
-import com.runicrealms.game.items.config.template.GameItemOffhandTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplate
 import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
-import com.runicrealms.game.items.config.template.GameItemWeaponTemplate
 import com.runicrealms.game.items.generator.GameItem
 import com.runicrealms.game.items.generator.GameItemArmor
 import com.runicrealms.game.items.generator.GameItemGem
@@ -76,14 +71,14 @@ constructor(
         return templates[identifier]
     }
 
-    override fun GameItemTemplate.generateGameItem(count: Int): GameItem {
-        val data = generateItemData(1)
-        return when (this) {
-            is GameItemArmorTemplate -> gameItemArmorFactory.create(data)
-            is GameItemGemTemplate -> gameItemGemFactory.create(data)
-            is GameItemGenericTemplate -> gameItemGenericFactory.create(data)
-            is GameItemOffhandTemplate -> gameItemOffhandFactory.create(data)
-            is GameItemWeaponTemplate -> gameItemWeaponFactory.create(data)
+    override fun generateGameItem(itemData: ItemData): GameItem {
+        return when (itemData.typeDataCase) {
+            ItemData.TypeDataCase.ARMOR -> gameItemArmorFactory.create(itemData)
+            ItemData.TypeDataCase.GEM -> gameItemGemFactory.create(itemData)
+            ItemData.TypeDataCase.OFFHAND -> gameItemOffhandFactory.create(itemData)
+            ItemData.TypeDataCase.WEAPON -> gameItemWeaponFactory.create(itemData)
+            ItemData.TypeDataCase.TYPEDATA_NOT_SET -> gameItemGenericFactory.create(itemData)
+            null -> gameItemGenericFactory.create(itemData)
         }
     }
 
@@ -92,17 +87,14 @@ constructor(
     }
 
     override fun convertToGameItem(itemStack: ItemStack): GameItem? {
+        return generateGameItem(generateItemData(itemStack) ?: return null)
+    }
+
+    override fun generateItemData(itemStack: ItemStack): ItemData? {
         val byteData = NBT.readNbt(itemStack).getByteArray("data") ?: return null
         try {
             val itemData = ItemData.parseFrom(byteData)
-            return when (itemData.typeDataCase) {
-                ItemData.TypeDataCase.ARMOR -> gameItemArmorFactory.create(itemData)
-                ItemData.TypeDataCase.GEM -> gameItemGemFactory.create(itemData)
-                ItemData.TypeDataCase.OFFHAND -> gameItemOffhandFactory.create(itemData)
-                ItemData.TypeDataCase.WEAPON -> gameItemWeaponFactory.create(itemData)
-                ItemData.TypeDataCase.TYPEDATA_NOT_SET -> gameItemGenericFactory.create(itemData)
-                null -> gameItemGenericFactory.create(itemData)
-            }
+            return itemData
         } catch (exception: Exception) {
             exception.printStackTrace()
             return null
