@@ -20,6 +20,7 @@ subprojects {
         maven("https://nexus.runicrealms.com/repository/maven-public/")
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://repo.dmulloy2.net/repository/public/")
+        maven("https://repo.aikar.co/content/groups/aikar/")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -58,14 +59,11 @@ subprojects {
 
         // Shaded dependencies
         implementation(rootProject.libs.adventure.legacy)
+        implementation(rootProject.libs.aikar.commands)
 
-        // Velagones
+        // Plugin dependencies
         compileOnly(rootProject.libs.velagones.paper)
-
-        // Item NBT API
         compileOnly(rootProject.libs.nbtapi)
-
-        // ProtocolLib
         compileOnly(rootProject.libs.protocollib)
     }
 }

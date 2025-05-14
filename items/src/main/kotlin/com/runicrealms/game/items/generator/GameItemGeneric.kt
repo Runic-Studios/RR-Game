@@ -10,7 +10,7 @@ import net.kyori.adventure.text.TextComponent
 class GameItemGeneric
 @AssistedInject
 constructor(@Assisted data: ItemData, templateRegistry: GameItemTemplateRegistry) :
-    GameItem(data, templateRegistry.getTemplate(data.templateID)!!) {
+    GameItem(data, templateRegistry.getItemTemplate(data.templateID)!!) {
 
     val genericTemplate = template as GameItemGenericTemplate
 

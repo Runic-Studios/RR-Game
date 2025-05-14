@@ -17,7 +17,7 @@ import net.kyori.adventure.text.format.TextDecoration
 class GameItemGem
 @AssistedInject
 constructor(@Assisted inputData: ItemData, templateRegistry: GameItemTemplateRegistry) :
-    GameItem(inputData, templateRegistry.getTemplate(inputData.templateID)!!) {
+    GameItem(inputData, templateRegistry.getItemTemplate(inputData.templateID)!!) {
 
     val gemTemplate = template as GameItemGemTemplate
 

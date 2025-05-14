@@ -31,12 +31,12 @@ sealed class GameItemTemplate(
 
     val triggers = triggers.toTriggers()
 
-    protected open fun buildItemData(count: Int): ItemData.Builder {
-        val builder = ItemData.newBuilder().setTemplateID(id).setCount(count)
+    protected open fun buildItemData(): ItemData.Builder {
+        val builder = ItemData.newBuilder().setTemplateID(id)
         return builder
     }
 
-    fun generateItemData(count: Int) = buildItemData(count).build()
+    fun generateItemData() = buildItemData().build()
 
     data class StatRange(val min: Int, val max: Int)
 

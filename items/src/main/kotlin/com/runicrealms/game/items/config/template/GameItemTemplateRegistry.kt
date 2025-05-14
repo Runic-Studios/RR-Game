@@ -5,11 +5,11 @@ import com.runicrealms.trove.generated.api.schema.v1.ItemData
 
 interface GameItemTemplateRegistry {
 
-    fun getTemplate(identifier: String): GameItemTemplate?
+    fun getItemTemplate(identifier: String): GameItemTemplate?
 
-    fun GameItemTemplate.generateGameItem(count: Int): GameItem = generateGameItem(generateItemData(count))
-
-    fun generateGameItem(template: GameItemTemplate, count: Int) = template.generateGameItem(count)
+    fun generateGameItem(template: GameItemTemplate) = generateGameItem(template.generateItemData())
 
     fun generateGameItem(itemData: ItemData): GameItem
+
+    fun getItemTemplates(): Collection<GameItemTemplate>
 }

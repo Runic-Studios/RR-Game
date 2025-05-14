@@ -2,6 +2,7 @@ package com.runicrealms.game.items.config.template
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.runicrealms.game.common.config.converter.ClassTypeConverter
 import com.runicrealms.game.common.config.converter.TextComponentConverter
 import com.runicrealms.game.items.config.jackson.converter.GameItemRarityTypeConverter
 import com.runicrealms.game.items.config.jackson.converter.GameItemTagConverter
@@ -35,15 +36,20 @@ class GameItemWeaponTemplate(
     @JsonProperty("item-perks")
     @JsonDeserialize(`as` = LinkedHashMap::class)
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
-    @JsonProperty("level") val level: Int,
+    @JsonProperty("level") override val level: Int,
     @JsonProperty("rarity")
     @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
-    val rarity: GameItemRarityType,
-    @JsonProperty("class") val classType: ClassType,
-) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
+    override val rarity: GameItemRarityType,
+    @JsonProperty("class")
+    @JsonDeserialize(contentConverter = ClassTypeConverter::class)
+    override val classType: ClassType,
+) :
+    GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
+    ClassTypeHolder,
+    RarityLevelHolder {
 
-    override fun buildItemData(count: Int): ItemData.Builder {
-        val builder = super.buildItemData(count)
+    override fun buildItemData(): ItemData.Builder {
+        val builder = super.buildItemData()
         val weaponBuilder =
             builder.weaponBuilder
                 .setSkinID(null) // No skin ID (default)

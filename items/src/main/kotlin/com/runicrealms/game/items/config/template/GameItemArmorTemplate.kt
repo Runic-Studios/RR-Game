@@ -29,10 +29,10 @@ class GameItemArmorTemplate(
     )
     triggers: LinkedHashMap<GameItemClickTrigger.Type, String> = LinkedHashMap(),
     @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
-    @JsonProperty("level") val level: Int,
+    @JsonProperty("level") override val level: Int,
     @JsonProperty("rarity")
     @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
-    val rarity: GameItemRarityType,
+    override val rarity: GameItemRarityType,
     @JsonProperty("health") val health: Int,
     @JsonProperty("stats")
     @JsonDeserialize(keyUsing = StatTypeKeyDeserializer::class, `as` = LinkedHashMap::class)
@@ -43,11 +43,14 @@ class GameItemArmorTemplate(
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
     @JsonProperty("class")
     @JsonDeserialize(contentConverter = ClassTypeConverter::class)
-    val classType: ClassType,
-) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
+    override val classType: ClassType,
+) :
+    GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
+    ClassTypeHolder,
+    RarityLevelHolder {
 
-    override fun buildItemData(count: Int): ItemData.Builder {
-        val builder = super.buildItemData(count)
+    override fun buildItemData(): ItemData.Builder {
+        val builder = super.buildItemData()
         val armorBuilder =
             builder.armorBuilder
                 .addAllStats(stats.toRolledStats())

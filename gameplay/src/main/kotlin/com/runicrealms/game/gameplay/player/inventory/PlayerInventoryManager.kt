@@ -6,18 +6,20 @@ import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
+import com.runicrealms.trove.generated.api.schema.v1.ItemDataStack
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
-class PlayerInventoryManager @Inject constructor(
+class PlayerInventoryManager
+@Inject
+constructor(
     plugin: Plugin,
     private val templateRegistry: GameItemTemplateRegistry,
-    private val itemStackConverter: ItemStackConverter
-): Listener {
+    private val itemStackConverter: ItemStackConverter,
+) : Listener {
 
     private val logger = LoggerFactory.getLogger("gameplay")
 
@@ -28,28 +30,34 @@ class PlayerInventoryManager @Inject constructor(
     @EventHandler
     fun onCharacterJoin(event: GameCharacterJoinEvent) {
         try {
-            val items = event.character.withSyncCharacterData {
-                inventory.data.itemsMap
-            }
-            for ((slot, itemData) in items) {
-                val item = templateRegistry.generateGameItem(itemData)
-                val itemStack = item.generateItemStack()
-                event.character.player.inventory.setItem(slot, item.generateItemStack())
+            val items = event.character.withSyncCharacterData { inventory.data.itemsMap }
+            for ((slot, itemDataStack) in items) {
+                val item = templateRegistry.generateGameItem(itemDataStack.data)
+                event.character.player.inventory.setItem(
+                    slot,
+                    item.generateItemStack(itemDataStack.count),
+                )
             }
         } catch (exception: Exception) {
-            event.fail(IllegalStateException("Failed to load inventory for player ${event.character.player.name} ${event.character.player.uniqueId}", exception))
+            event.fail(
+                IllegalStateException(
+                    "Failed to load inventory for player ${event.character.player.name} ${event.character.player.uniqueId}",
+                    exception,
+                )
+            )
         }
     }
 
     @EventHandler
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        val items = HashMap<Int, ItemData>()
+        val items = HashMap<Int, ItemDataStack>()
         var i = 0
         for (item in event.character.player.inventory.contents) {
             if (item != null) {
                 val itemData = itemStackConverter.generateItemData(item)
                 if (itemData != null) {
-                    items[i++] = itemData
+                    items[i++] =
+                        ItemDataStack.newBuilder().setData(itemData).setCount(item.amount).build()
                 }
             }
             i++
@@ -60,5 +68,4 @@ class PlayerInventoryManager @Inject constructor(
             stageChanges(inventory)
         }
     }
-
 }

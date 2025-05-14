@@ -67,7 +67,7 @@ constructor(
                 .associateBy { it.identifier }
     }
 
-    override fun getTemplate(identifier: String): GameItemTemplate? {
+    override fun getItemTemplate(identifier: String): GameItemTemplate? {
         return templates[identifier]
     }
 
@@ -82,9 +82,13 @@ constructor(
         }
     }
 
-    override fun getGameItemPerkTemplate(identifier: String): GameItemPerkTemplate? {
+    override fun getItemTemplates(): Collection<GameItemTemplate> = templates.values
+
+    override fun getPerkTemplate(identifier: String): GameItemPerkTemplate? {
         return perks[identifier]
     }
+
+    override fun getPerkTemplates(): Collection<GameItemPerkTemplate> = perks.values
 
     override fun convertToGameItem(itemStack: ItemStack): GameItem? {
         return generateGameItem(generateItemData(itemStack) ?: return null)

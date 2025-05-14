@@ -98,10 +98,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                 val unified = playerLoginEvent.errors.map { it.message }.joinToString(", ")
                 event.player.kick(Component.text("Failed to load: $unified"))
                 for (error in playerLoginEvent.errors) {
-                    logger.error(
-                        "Failed to load player ${event.player.name}",
-                        error
-                    )
+                    logger.error("Failed to load player ${event.player.name}", error)
                 }
             }
         } catch (exception: Exception) {

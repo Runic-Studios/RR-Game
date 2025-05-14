@@ -31,6 +31,14 @@ constructor(
     var health = health
         private set
 
+    @Synchronized
+    internal fun addPerk(perk: ItemData.Perk) {
+        if (perks == null) {
+            perks = mutableSetOf()
+        }
+        perks!!.add(perk)
+    }
+
     fun hasItemPerks() = !perks.isNullOrEmpty()
 
     /** Adds the stats of another AddedStats object to the stats of this object */
@@ -45,7 +53,7 @@ constructor(
             if (this.perks != null) {
                 for (perk in this.perks!!) {
                     val perkType =
-                        perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID)
+                        perkTemplateRegistry.getPerkTemplate(perk.perkID)
                             ?: throw IllegalArgumentException(
                                 "Cannot find perk with type ${perk.perkID}"
                             )
@@ -55,7 +63,7 @@ constructor(
             if (moreStats.perks != null) {
                 for (perk in moreStats.perks!!) {
                     val perkType =
-                        perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID)
+                        perkTemplateRegistry.getPerkTemplate(perk.perkID)
                             ?: throw IllegalArgumentException(
                                 "Cannot find perk with type ${perk.perkID}"
                             )

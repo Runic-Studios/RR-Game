@@ -31,8 +31,8 @@ import org.bukkit.inventory.meta.PotionMeta
  */
 sealed class GameItem(protected var data: ItemData, val template: GameItemTemplate) {
 
-    open fun generateItemStack(menuDisplay: Boolean = false): ItemStack {
-        val itemStack = template.display.generateItem(data.count)
+    open fun generateItemStack(count: Int, menuDisplay: Boolean = false): ItemStack {
+        val itemStack = template.display.generateItem(count)
         val meta = itemStack.itemMeta ?: Bukkit.getItemFactory().getItemMeta(itemStack.type)
         meta.addAttributeModifier(Attribute.ATTACK_SPEED, attributeModifier)
         val lore = generateLore(menuDisplay)
@@ -72,6 +72,16 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     }
 
     protected abstract fun generateLore(menuDisplay: Boolean = false): MutableList<TextComponent>
+
+    fun setCustomData(key: String, value: String) {
+        val builder = data.toBuilder()
+        builder.customDataMap[key] = value
+        data = builder.build()
+    }
+
+    fun getCustomData(key: String): String? {
+        return data.customDataMap[key]
+    }
 
     protected fun ItemData.RolledStat.getRolledValue(range: GameItemTemplate.StatRange): Int {
         return range.min + (rollPercentage * range.max - range.min + 1).toInt()

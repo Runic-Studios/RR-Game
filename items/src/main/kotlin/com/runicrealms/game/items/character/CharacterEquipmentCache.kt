@@ -21,7 +21,6 @@ import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.EnumMap
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -195,8 +194,7 @@ constructor(
                 perks
                     .stream()
                     .map { perk: ItemData.Perk ->
-                        val perkTemplate =
-                            perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID)!!
+                        val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID)!!
                         if (perk.stacks > perkTemplate.maxStacks) {
                             itemPerksExceedingMax[perkTemplate] = perk.stacks
                             return@map ItemData.Perk.newBuilder()
@@ -399,8 +397,7 @@ constructor(
     }
 
     fun getWeapon(): GameItemWeapon? {
-        return if (weapon == null) null
-        else (if (canUseWeapon(weapon!!)) weapon else null)
+        return if (weapon == null) null else (if (canUseWeapon(weapon!!)) weapon else null)
     }
 
     fun getOffhand(): GameItemOffhand? {
@@ -421,7 +418,7 @@ constructor(
         // ONLY CALL SYNC
         val type = character.withSyncCharacterData { traits.data.classType }
         return weapon.weaponTemplate.level <= character.player.level &&
-                type == weapon.weaponTemplate.classType
+            type == weapon.weaponTemplate.classType
     }
 
     enum class StatHolderType {

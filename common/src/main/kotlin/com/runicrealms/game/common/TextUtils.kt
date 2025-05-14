@@ -13,6 +13,9 @@ fun Player.sendError(message: String) {
 fun String.colorFormat(altChar: Char = '&'): TextComponent =
     LegacyComponentSerializer.legacy(altChar).deserialize(this)
 
+fun TextComponent.toLegacy(altChar: Char = '&'): String =
+    LegacyComponentSerializer.legacy(altChar).serialize(this)
+
 object TextIcons {
     const val HEALTH_ICON: String = "❤"
     const val EMPTY_GEM_ICON: String = "◇"

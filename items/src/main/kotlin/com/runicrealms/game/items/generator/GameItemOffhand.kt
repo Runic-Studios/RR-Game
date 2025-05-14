@@ -26,7 +26,9 @@ constructor(
     templateRegistry: GameItemTemplateRegistry,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
     private val perkHandlerRegistry: GameItemPerkHandlerRegistry,
-) : GameItem(inputData, templateRegistry.getTemplate(inputData.templateID)!!), AddedStatsHolder {
+) :
+    GameItem(inputData, templateRegistry.getItemTemplate(inputData.templateID)!!),
+    AddedStatsHolder {
 
     val offhandTemplate = template as GameItemOffhandTemplate
 
@@ -100,7 +102,7 @@ constructor(
         val perkLore = LinkedList<TextComponent>()
         var atLeastOnePerk = false
         for (perk in offhandData.perksList) {
-            val perkTemplate = perkTemplateRegistry.getGameItemPerkTemplate(perk.perkID) ?: continue
+            val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
             val perkText =
                 Component.text()

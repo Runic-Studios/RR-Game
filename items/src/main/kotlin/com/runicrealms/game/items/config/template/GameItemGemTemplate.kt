@@ -33,8 +33,8 @@ class GameItemGemTemplate(
     val mainStat: StatType,
 ) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
 
-    override fun buildItemData(count: Int): ItemData.Builder {
-        val builder = super.buildItemData(count)
+    override fun buildItemData(): ItemData.Builder {
+        val builder = super.buildItemData()
         val gemBuilder = builder.gemBuilder
 
         val bonus =

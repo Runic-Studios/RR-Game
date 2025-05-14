@@ -6,6 +6,9 @@ import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.character.CharacterEquipmentCache
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
 import com.runicrealms.game.items.character.FlatStatsModifier
+import com.runicrealms.game.items.command.InventoryHelper
+import com.runicrealms.game.items.command.LootHelper
+import com.runicrealms.game.items.command.RunicItemCommand
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.dynamic.DynamicItemManager
 import com.runicrealms.game.items.dynamic.DynamicItemRegistry
@@ -39,6 +42,10 @@ class ItemsModule : AbstractModule() {
 
         bind(PlayerItemManager::class.java).asEagerSingleton()
         bind(CharacterEquipmentCacheRegistry::class.java).to(PlayerItemManager::class.java)
+
+        bind(LootHelper::class.java).asEagerSingleton()
+        bind(InventoryHelper::class.java).asEagerSingleton()
+        bind(RunicItemCommand::class.java).asEagerSingleton()
     }
 
     private fun <T : Any, U : Any> addFactory(objectType: KClass<T>, factoryType: KClass<U>) {

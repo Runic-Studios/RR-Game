@@ -7,9 +7,7 @@ import org.bukkit.event.HandlerList
 class GamePlayerJoinEvent(val player: GamePlayer) : Event(false) {
 
     internal var success = true
-    internal val errors by lazy {
-        HashSet<Throwable>()
-    }
+    internal val errors by lazy { HashSet<Throwable>() }
 
     fun fail(throwable: Throwable) {
         success = false

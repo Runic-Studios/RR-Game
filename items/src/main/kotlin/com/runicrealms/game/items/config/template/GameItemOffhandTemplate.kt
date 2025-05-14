@@ -33,14 +33,14 @@ class GameItemOffhandTemplate(
     @JsonProperty("item-perks")
     @JsonDeserialize(`as` = LinkedHashMap::class)
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
-    @JsonProperty("level") val level: Int,
+    @JsonProperty("level") override val level: Int,
     @JsonProperty("rarity")
     @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
-    val rarity: GameItemRarityType,
-) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
+    override val rarity: GameItemRarityType,
+) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties), RarityLevelHolder {
 
-    override fun buildItemData(count: Int): ItemData.Builder {
-        val builder = super.buildItemData(count)
+    override fun buildItemData(): ItemData.Builder {
+        val builder = super.buildItemData()
         val offhandBuilder =
             builder.offhandBuilder
                 .addAllStats(stats.toRolledStats())
