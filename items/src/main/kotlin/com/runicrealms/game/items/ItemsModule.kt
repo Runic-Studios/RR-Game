@@ -10,6 +10,7 @@ import com.runicrealms.game.items.command.InventoryHelper
 import com.runicrealms.game.items.command.LootHelper
 import com.runicrealms.game.items.command.RunicItemCommand
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
+import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
 import com.runicrealms.game.items.dynamic.DynamicItemManager
 import com.runicrealms.game.items.dynamic.DynamicItemRegistry
 import com.runicrealms.game.items.generator.GameItemArmor
@@ -36,7 +37,7 @@ class ItemsModule : AbstractModule() {
         bind(DynamicItemRegistry::class.java).to(DynamicItemManager::class.java)
 
         bind(GameItemManager::class.java).asEagerSingleton()
-        bind(GameItemPerkTemplateRegistry::class.java).to(GameItemManager::class.java)
+        bind(GameItemTemplateRegistry::class.java).to(GameItemManager::class.java)
         bind(GameItemPerkTemplateRegistry::class.java).to(GameItemManager::class.java)
         bind(ItemStackConverter::class.java).to(GameItemManager::class.java)
 

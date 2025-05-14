@@ -4,6 +4,7 @@ import com.google.inject.Guice
 import com.runicrealms.game.common.CommonModule
 import com.runicrealms.game.data.DataModule
 import com.runicrealms.game.gameplay.GameplayModule
+import com.runicrealms.game.items.ItemsModule
 import com.runicrealms.trove.client.TroveClientConfig
 import com.runicrealms.trove.client.TroveClientModule
 import java.util.UUID
@@ -19,7 +20,8 @@ class GamePlugin : JavaPlugin() {
         val commonModule = CommonModule()
         val dataModule = DataModule()
         val gameplayModule = GameplayModule()
-
+        val itemsModule = ItemsModule()
+        
         val injector =
             Guice.createInjector(
                 troveModule,
@@ -27,6 +29,7 @@ class GamePlugin : JavaPlugin() {
                 pluginModule,
                 dataModule,
                 gameplayModule,
+                itemsModule
             )
     }
 }
