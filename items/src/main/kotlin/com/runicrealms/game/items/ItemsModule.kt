@@ -19,6 +19,8 @@ import com.runicrealms.game.items.generator.GameItemGeneric
 import com.runicrealms.game.items.generator.GameItemOffhand
 import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
+import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
+import com.runicrealms.game.items.perk.GameItemPerkManager
 import kotlin.reflect.KClass
 
 class ItemsModule : AbstractModule() {
@@ -40,6 +42,9 @@ class ItemsModule : AbstractModule() {
         bind(GameItemTemplateRegistry::class.java).to(GameItemManager::class.java)
         bind(GameItemPerkTemplateRegistry::class.java).to(GameItemManager::class.java)
         bind(ItemStackConverter::class.java).to(GameItemManager::class.java)
+
+        bind(GameItemPerkManager::class.java).asEagerSingleton()
+        bind(GameItemPerkHandlerRegistry::class.java).to(GameItemPerkManager::class.java)
 
         bind(PlayerItemManager::class.java).asEagerSingleton()
         bind(CharacterEquipmentCacheRegistry::class.java).to(PlayerItemManager::class.java)
