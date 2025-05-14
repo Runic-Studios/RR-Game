@@ -89,6 +89,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
 
     @EventHandler
     suspend fun onPlayerJoin(event: PlayerJoinEvent) {
+        val startTime = System.currentTimeMillis()
         try {
             val createResult = withContext(plugin.asyncDispatcher) { createSession(event.player) }
             if (!createResult.isSuccess) {
@@ -120,6 +121,11 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
 
             val playerJoinEvent = GamePlayerJoinEvent(player)
             Bukkit.getPluginManager().callSuspendingEvent(playerJoinEvent, plugin).joinAll()
+
+            val time = System.currentTimeMillis() - startTime
+            logger.info(
+                "Finished pre-load/load/join for player ${event.player.uniqueId} in $time millis"
+            )
         } catch (exception: Exception) {
             logger.error("Failed to load player ${event.player.name}", exception)
             event.player.kick(Component.text("Failed to load: ${exception.message}"))
@@ -205,6 +211,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
     // NOTE: assumes you DON'T have a lock on the character data in the calling context!
     override suspend fun setCharacter(user: UUID, slot: Int?): Boolean {
         // Any context
+        val startTime = System.currentTimeMillis()
         val session = sessions[user] ?: return false
         return withContext(plugin.asyncDispatcher) {
             session.characterMutex.withLock { // Acquire lock async
@@ -255,6 +262,11 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                         Bukkit.getPluginManager()
                             .callSuspendingEvent(characterJoinEvent, plugin)
                             .joinAll()
+
+                        val time = System.currentTimeMillis() - startTime
+                        logger.info(
+                            "Finished pre-load/load/join for character $slot of player ${session.bukkitPlayer.uniqueId} in $time millis"
+                        )
                     } else {
                         endCharacterSession(session)
                     }

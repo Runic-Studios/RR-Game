@@ -103,6 +103,8 @@ constructor(
         //            RunicItems.getLootAPI().getLootTables().stream().map(LootTable::getIdentifier)
         //                .collect(Collectors.toSet<T>())
         //        }
+
+        commandManager.registerCommand(this)
     }
 
     @Subcommand("clear|c")

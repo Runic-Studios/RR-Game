@@ -1,6 +1,7 @@
 package com.runicrealms.game.gameplay.command
 
 import co.aikar.commands.BaseCommand
+import co.aikar.commands.PaperCommandManager
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Conditions
@@ -16,8 +17,14 @@ import org.bukkit.entity.Player
 
 @CommandAlias("character|char")
 @CommandPermission("runic.op")
-class CharacterCommand @Inject constructor(private val userDataRegistry: UserDataRegistry) :
+class CharacterCommand
+@Inject
+constructor(commandManager: PaperCommandManager, private val userDataRegistry: UserDataRegistry) :
     BaseCommand() {
+
+    init {
+        commandManager.registerCommand(this)
+    }
 
     @Conditions("is-op")
     @Subcommand("select")
