@@ -218,8 +218,8 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
             withContext(plugin.asyncDispatcher) {
                 session.characterMutex.withLock { // Acquire lock async
                     withContext(plugin.minecraftDispatcher) resultContext@{
-                        val oldCharacterData = session.characterData ?: return@resultContext true
-                        if (slot == oldCharacterData.slot) return@resultContext true
+                        val oldCharacterData = session.characterData
+                        if (slot == oldCharacterData?.slot) return@resultContext true
                         if (slot != null) {
                             val creationResult =
                                 withContext(plugin.asyncDispatcher) {
