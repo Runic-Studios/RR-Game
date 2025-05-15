@@ -6,20 +6,23 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Subcommand
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.runicrealms.game.data.UserDataRegistry
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 
 @CommandAlias("character|char")
 @CommandPermission("runic.op")
 class CharacterCommand
 @Inject
-constructor(commandManager: PaperCommandManager, private val userDataRegistry: UserDataRegistry) :
+constructor(commandManager: PaperCommandManager, private val userDataRegistry: UserDataRegistry, private val plugin: Plugin) :
     BaseCommand() {
 
     init {
@@ -37,14 +40,16 @@ constructor(commandManager: PaperCommandManager, private val userDataRegistry: U
                 Style.style(NamedTextColor.GOLD, TextDecoration.BOLD),
             )
         )
-        val success = runBlocking { userDataRegistry.setCharacter(player.uniqueId, slot) }
-        if (!success) {
-            player.sendMessage(
-                Component.text(
-                    "Could not switch to character $slotString, check console for details",
-                    NamedTextColor.RED,
+        plugin.launch {
+            val success = userDataRegistry.setCharacter(player.uniqueId, slot)
+            if (!success) {
+                player.sendMessage(
+                    Component.text(
+                        "Could not switch to character $slotString, check console for details",
+                        NamedTextColor.RED,
+                    )
                 )
-            )
+            }
         }
     }
 
