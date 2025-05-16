@@ -4,12 +4,13 @@ import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
+import javax.annotation.Nullable
 
 class FlatStatsModifier
 @AssistedInject
 constructor(
     @Assisted stats: MutableMap<StatType, Int>,
-    @Assisted itemPerks: MutableCollection<ItemData.Perk>?,
+    @Nullable @Assisted itemPerks: MutableCollection<ItemData.Perk>?,
     @Assisted health: Int,
     addStatsFactory: AddedStats.Factory,
 ) : StatsModifier {

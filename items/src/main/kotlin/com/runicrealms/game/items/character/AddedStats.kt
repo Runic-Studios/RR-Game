@@ -7,12 +7,13 @@ import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.HashMap
+import javax.annotation.Nullable
 
 class AddedStats
 @AssistedInject
 constructor(
     @Assisted val stats: MutableMap<StatType, Int>,
-    @Assisted perks: MutableCollection<ItemData.Perk>?,
+    @Nullable @Assisted perks: MutableCollection<ItemData.Perk>?,
     @Assisted health: Int,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
 ) {
