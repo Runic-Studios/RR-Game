@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory
 class GameYamlLoader {
 
     val yamlMapper =
-        ObjectMapper(YAMLFactory()).registerKotlinModule() {
-            enable(KotlinFeature.NullIsSameAsDefault)
-            enable(KotlinFeature.NullToEmptyMap)
-            enable(KotlinFeature.NullToEmptyCollection)
-        }.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        ObjectMapper(YAMLFactory())
+            .registerKotlinModule() {
+                enable(KotlinFeature.NullIsSameAsDefault)
+                enable(KotlinFeature.NullToEmptyMap)
+                enable(KotlinFeature.NullToEmptyCollection)
+            }
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
 
     /**

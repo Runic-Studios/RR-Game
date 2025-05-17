@@ -179,6 +179,9 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
             val character = session.characterData ?: return@withLock
             val characterSaveResult = character.save()
             if (!characterSaveResult.isSuccess) return characterSaveResult
+            if (players[session.bukkitPlayer.uniqueId] !is GameCharacter) {
+                session.characterData = null
+            }
         }
 
         return Result.success(Unit)
@@ -285,14 +288,15 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
         val character = players[session.bukkitPlayer.uniqueId] as? GameCharacter ?: return
         val characterQuitEvent = GameCharacterQuitEvent(character)
         Bukkit.getPluginManager().callSuspendingEvent(characterQuitEvent, plugin).joinAll()
-        session.characterData = null
         players[session.bukkitPlayer.uniqueId] = GamePlayer(plugin, session)
+        // NOTE: doesn't set character data to null! Responsibility of the calling method to do so
+        // (after saving)
     }
 
     private suspend fun endSession(user: UUID, save: Boolean) {
         // Minecraft game thread context
+        val startTime = System.currentTimeMillis()
         val session = sessions.remove(user) ?: return
-
         withContext(plugin.asyncDispatcher) {
             session.saveJob.cancelAndJoin()
 
@@ -325,6 +329,10 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                 )
             }
         }
+        val time = System.currentTimeMillis() - startTime
+        logger.info(
+            "Finished unload/quit/save for player ${session.bukkitPlayer.uniqueId} in $time millis"
+        )
     }
 
     override fun getPlayer(user: UUID): GamePlayer? = players[user]

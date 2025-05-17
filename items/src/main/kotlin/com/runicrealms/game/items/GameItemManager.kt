@@ -16,6 +16,7 @@ import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import de.tr7zw.nbtapi.NBT
 import java.io.File
+import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
@@ -90,6 +91,7 @@ constructor(
     }
 
     override fun generateItemData(itemStack: ItemStack): ItemData? {
+        if (itemStack.type == Material.AIR) return null
         val byteData = NBT.readNbt(itemStack).getByteArray("data") ?: return null
         try {
             val itemData = ItemData.parseFrom(byteData)

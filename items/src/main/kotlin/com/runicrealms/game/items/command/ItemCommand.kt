@@ -31,7 +31,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 
 @CommandAlias("runic|r")
 @Subcommand("item|i")
@@ -39,7 +38,6 @@ import org.bukkit.plugin.Plugin
 class ItemCommand
 @Inject
 constructor(
-    private val plugin: Plugin,
     commandManager: PaperCommandManager,
     private val itemTemplateRegistry: GameItemTemplateRegistry,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
