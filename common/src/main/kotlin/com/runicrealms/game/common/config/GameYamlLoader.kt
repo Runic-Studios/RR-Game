@@ -1,5 +1,6 @@
 package com.runicrealms.game.common.config
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
@@ -14,7 +15,8 @@ class GameYamlLoader {
             enable(KotlinFeature.NullIsSameAsDefault)
             enable(KotlinFeature.NullToEmptyMap)
             enable(KotlinFeature.NullToEmptyCollection)
-        }
+        }.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
 
     /**
      * Reads all YAML files in a given file or directory. Supports multiple YAML files existing

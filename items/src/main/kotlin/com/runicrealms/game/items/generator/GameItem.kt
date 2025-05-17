@@ -158,7 +158,7 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     companion object {
         private val attributeModifier =
             AttributeModifier(
-                NamespacedKey("game", "generic.attackSpeed"),
+                NamespacedKey("game", "generic.attack_speed"),
                 Int.MAX_VALUE.toDouble(),
                 AttributeModifier.Operation.ADD_NUMBER,
             )
