@@ -8,7 +8,7 @@ import net.kyori.adventure.text.TextComponent
 
 class GameItemPerkTemplate(
     identifier: String,
-    @JsonDeserialize(contentConverter = TextComponentConverter::class) val name: TextComponent,
+    @JsonDeserialize(converter = TextComponentConverter::class) val name: TextComponent,
     @JsonProperty("max-stacks") val maxStacks: Int = 1,
     @JsonDeserialize(contentConverter = TextComponentConverter::class)
     val lore: List<TextComponent>? = null,

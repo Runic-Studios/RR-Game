@@ -29,7 +29,7 @@ class GameItemGemTemplate(
     @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
     @JsonProperty("tier") val tier: Int,
     @JsonProperty("main-stat")
-    @JsonDeserialize(contentConverter = StatTypeConverter::class)
+    @JsonDeserialize(converter = StatTypeConverter::class)
     val mainStat: StatType,
 ) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties) {
 

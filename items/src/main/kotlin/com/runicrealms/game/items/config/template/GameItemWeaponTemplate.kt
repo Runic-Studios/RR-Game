@@ -38,10 +38,10 @@ class GameItemWeaponTemplate(
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
     @JsonProperty("level") override val level: Int,
     @JsonProperty("rarity")
-    @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
+    @JsonDeserialize(converter = GameItemRarityTypeConverter::class)
     override val rarity: GameItemRarityType,
     @JsonProperty("class")
-    @JsonDeserialize(contentConverter = ClassTypeConverter::class)
+    @JsonDeserialize(converter = ClassTypeConverter::class)
     override val classType: ClassType,
 ) :
     GameItemTemplate(id, display, tags, lore, triggers, extraProperties),

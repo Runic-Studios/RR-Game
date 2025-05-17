@@ -31,7 +31,7 @@ class GameItemArmorTemplate(
     @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
     @JsonProperty("level") override val level: Int,
     @JsonProperty("rarity")
-    @JsonDeserialize(contentConverter = GameItemRarityTypeConverter::class)
+    @JsonDeserialize(converter = GameItemRarityTypeConverter::class)
     override val rarity: GameItemRarityType,
     @JsonProperty("health") val health: Int,
     @JsonProperty("stats")
@@ -42,7 +42,7 @@ class GameItemArmorTemplate(
     @JsonDeserialize(`as` = LinkedHashMap::class)
     val defaultPerks: LinkedHashMap<String, Int> = LinkedHashMap(),
     @JsonProperty("class")
-    @JsonDeserialize(contentConverter = ClassTypeConverter::class)
+    @JsonDeserialize(converter = ClassTypeConverter::class)
     override val classType: ClassType,
 ) :
     GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
