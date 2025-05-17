@@ -2,12 +2,18 @@ package com.runicrealms.game.common.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
+import org.slf4j.LoggerFactory
 
 class GameYamlLoader {
 
-    val yamlMapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
+    val yamlMapper = ObjectMapper(YAMLFactory()).registerKotlinModule() {
+        enable(KotlinFeature.NullIsSameAsDefault)
+        enable(KotlinFeature.NullToEmptyMap)
+        enable(KotlinFeature.NullToEmptyCollection)
+    }
 
     /**
      * Reads all YAML files in a given file or directory. Supports multiple YAML files existing
@@ -17,21 +23,31 @@ class GameYamlLoader {
      * T, and throws exceptions if it fails.
      */
     inline fun <reified T : Any> readYaml(fileOrDirectory: File): List<T> {
-        // TODO don't throw exception when just one file fails
+        val logger = LoggerFactory.getLogger("common")
         if (!fileOrDirectory.exists()) return listOf()
         if (!fileOrDirectory.isDirectory) {
-            return yamlMapper
-                .readerFor(T::class.java)
-                .readValues<T>(fileOrDirectory)
-                .asSequence()
-                .toList()
+            try {
+                return yamlMapper
+                    .readerFor(T::class.java)
+                    .readValues<T>(fileOrDirectory)
+                    .asSequence()
+                    .toList()
+            } catch (exception: Exception) {
+                logger.error("Error parsing YAML file ${fileOrDirectory.name}, skipping", exception)
+                return listOf()
+            }
         } else {
             val extensions = listOf("yml", "yaml")
             return fileOrDirectory
                 .walkTopDown()
                 .filter { it.extension in extensions }
                 .flatMap { file ->
-                    yamlMapper.readerFor(T::class.java).readValues<T>(file).asSequence().toList()
+                    try {
+                        yamlMapper.readerFor(T::class.java).readValues<T>(file).asSequence().toList()
+                    } catch (exception: Exception) {
+                        logger.error("Error parsing YAML file ${file.name}, skipping", exception)
+                        return@flatMap listOf()
+                    }
                 }
                 .toList()
         }
