@@ -9,8 +9,6 @@ import co.aikar.commands.annotation.Subcommand
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.runicrealms.game.data.UserDataRegistry
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
@@ -22,8 +20,11 @@ import org.bukkit.plugin.Plugin
 @CommandPermission("runic.op")
 class CharacterCommand
 @Inject
-constructor(commandManager: PaperCommandManager, private val userDataRegistry: UserDataRegistry, private val plugin: Plugin) :
-    BaseCommand() {
+constructor(
+    commandManager: PaperCommandManager,
+    private val userDataRegistry: UserDataRegistry,
+    private val plugin: Plugin,
+) : BaseCommand() {
 
     init {
         commandManager.registerCommand(this)

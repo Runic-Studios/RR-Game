@@ -1,9 +1,7 @@
 package com.runicrealms.game.items
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
+import com.runicrealms.game.common.config.GameYamlLoader
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.config.template.GameItemTemplate
@@ -29,7 +27,7 @@ import org.bukkit.plugin.Plugin
 class GameItemManager
 @Inject
 constructor(
-    plugin: Plugin,
+    private val plugin: Plugin,
     private val gameItemArmorFactory: GameItemArmor.Factory,
     private val gameItemGemFactory: GameItemGem.Factory,
     private val gameItemGenericFactory: GameItemGeneric.Factory,
@@ -38,33 +36,30 @@ constructor(
 ) : GameItemPerkTemplateRegistry, GameItemTemplateRegistry, ItemStackConverter {
 
     private val templates = HashMap<String, GameItemTemplate>()
-    private val perks: Map<String, GameItemPerkTemplate>
+    private val perks = HashMap<String, GameItemPerkTemplate>()
+
+    internal fun readConfig() {
+        // NOTE: if this is run when there already exist config files in the
+        // maps, it just replaces/adds new ones and never removes them!
+        val itemsFolder = File(plugin.dataFolder, "items").also { it.mkdirs() }
+        val customFolder = File(itemsFolder, "custom").also { it.mkdirs() }
+        val scriptFolder = File(itemsFolder, "script").also { it.mkdirs() }
+        val perksFolder = File(itemsFolder, "perk").also { it.mkdirs() }
+
+        val loader = GameYamlLoader()
+
+        val customItems = loader.readYaml<GameItemTemplate>(customFolder).associateBy { it.id }
+        val scriptItems = loader.readYaml<GameItemTemplate>(scriptFolder).associateBy { it.id }
+        templates.putAll(customItems)
+        templates.putAll(scriptItems)
+
+        perks.putAll(
+            loader.readYaml<GameItemPerkTemplate>(perksFolder).associateBy { it.identifier }
+        )
+    }
 
     init {
-        val yamlMapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
-        val extensions = listOf("yml", "yaml")
-
-        val itemsTemplates =
-            File(plugin.dataFolder, "items")
-                .walkTopDown()
-                .filter { it.extension in extensions }
-                .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
-                .associateBy { it.id }
-        templates.putAll(itemsTemplates)
-        val scriptTemplates =
-            File(plugin.dataFolder, "scripts")
-                .walkTopDown()
-                .filter { it.extension in extensions }
-                .map { file -> yamlMapper.readValue(file, GameItemTemplate::class.java) }
-                .associateBy { it.id }
-        templates.putAll(scriptTemplates)
-
-        perks =
-            File(plugin.dataFolder, "itemperks")
-                .walkTopDown()
-                .filter { it.extension in extensions }
-                .map { file -> yamlMapper.readValue(file, GameItemPerkTemplate::class.java) }
-                .associateBy { it.identifier }
+        readConfig()
     }
 
     override fun getItemTemplate(identifier: String): GameItemTemplate? {

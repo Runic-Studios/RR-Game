@@ -233,7 +233,7 @@ constructor(
     }
 
     fun updateAllItems(onLogin: Boolean, callEvent: Boolean) {
-        check(!Bukkit.isPrimaryThread()) { "Cannot run update stats on main thread!" }
+        check(Bukkit.isPrimaryThread()) { "Cannot run update stats on async thread!" }
         updateHelmet()
         updateChestplate()
         updateLeggings()
@@ -246,7 +246,7 @@ constructor(
     }
 
     fun updateItems(onLogin: Boolean, vararg types: StatHolderType) {
-        check(Bukkit.isPrimaryThread()) { "Cannot run update stats on main thread!" }
+        check(Bukkit.isPrimaryThread()) { "Cannot run update stats on async thread!" }
         var hasUpdatedTotal = false
         for (type in types) {
             when (type) {

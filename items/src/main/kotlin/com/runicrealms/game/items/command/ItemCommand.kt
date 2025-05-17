@@ -33,9 +33,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
-@CommandAlias("ri|runicitems|runicitem")
+@CommandAlias("runic|r")
+@Subcommand("item|i")
 @CommandPermission("runic.op")
-class RunicItemCommand
+class ItemCommand
 @Inject
 constructor(
     private val plugin: Plugin,
