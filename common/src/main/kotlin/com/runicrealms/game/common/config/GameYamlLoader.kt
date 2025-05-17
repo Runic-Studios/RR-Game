@@ -19,7 +19,7 @@ class GameYamlLoader {
     inline fun <reified T : Any> readYaml(fileOrDirectory: File): List<T> {
         // TODO don't throw exception when just one file fails
         if (!fileOrDirectory.exists()) return listOf()
-        if (fileOrDirectory.isDirectory) {
+        if (!fileOrDirectory.isDirectory) {
             return yamlMapper
                 .readerFor(T::class.java)
                 .readValues<T>(fileOrDirectory)
