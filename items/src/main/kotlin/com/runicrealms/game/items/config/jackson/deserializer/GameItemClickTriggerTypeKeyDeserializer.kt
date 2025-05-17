@@ -10,12 +10,8 @@ import com.runicrealms.game.items.config.template.GameItemClickTrigger
  */
 class GameItemClickTriggerTypeKeyDeserializer : KeyDeserializer() {
 
-    override fun deserializeKey(key: String, context: DeserializationContext): Any? {
-        for (type in GameItemClickTrigger.Type.entries) {
-            if (type.name.equals(key, ignoreCase = true)) {
-                return type
-            }
-        }
-        return null
+    override fun deserializeKey(key: String, context: DeserializationContext): Any {
+        return GameItemClickTrigger.Type.getFromIdentifier(key)
+            ?: throw IllegalArgumentException("Unknown item click trigger type: $key")
     }
 }

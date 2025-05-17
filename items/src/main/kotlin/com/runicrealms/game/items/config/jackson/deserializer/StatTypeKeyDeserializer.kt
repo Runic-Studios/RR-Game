@@ -10,12 +10,12 @@ import com.runicrealms.trove.generated.api.schema.v1.StatType
  */
 class StatTypeKeyDeserializer : KeyDeserializer() {
 
-    override fun deserializeKey(key: String, context: DeserializationContext): Any? {
+    override fun deserializeKey(key: String, context: DeserializationContext): Any {
         for (type in StatType.entries) {
             if (type.name.equals(key, ignoreCase = true)) {
                 return type
             }
         }
-        return null
+        throw IllegalArgumentException("Unknown stat type: $key")
     }
 }

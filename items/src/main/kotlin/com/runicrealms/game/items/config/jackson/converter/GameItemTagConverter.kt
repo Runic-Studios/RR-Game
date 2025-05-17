@@ -6,5 +6,8 @@ import com.runicrealms.game.items.config.template.GameItemTag
 /** Jackson databind compatible converter for turning Strings into GameItemTags */
 class GameItemTagConverter : StdConverter<String, GameItemTag?>() {
 
-    override fun convert(value: String): GameItemTag? = GameItemTag.getFromIdentifier(value)
+    override fun convert(value: String): GameItemTag {
+        return GameItemTag.getFromIdentifier(value)
+            ?: throw IllegalArgumentException("Unknown item tag: $value")
+    }
 }

@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory
 
 class GameYamlLoader {
 
-    val yamlMapper = ObjectMapper(YAMLFactory()).registerKotlinModule() {
-        enable(KotlinFeature.NullIsSameAsDefault)
-        enable(KotlinFeature.NullToEmptyMap)
-        enable(KotlinFeature.NullToEmptyCollection)
-    }
+    val yamlMapper =
+        ObjectMapper(YAMLFactory()).registerKotlinModule() {
+            enable(KotlinFeature.NullIsSameAsDefault)
+            enable(KotlinFeature.NullToEmptyMap)
+            enable(KotlinFeature.NullToEmptyCollection)
+        }
 
     /**
      * Reads all YAML files in a given file or directory. Supports multiple YAML files existing
@@ -43,7 +44,11 @@ class GameYamlLoader {
                 .filter { it.extension in extensions }
                 .flatMap { file ->
                     try {
-                        yamlMapper.readerFor(T::class.java).readValues<T>(file).asSequence().toList()
+                        yamlMapper
+                            .readerFor(T::class.java)
+                            .readValues<T>(file)
+                            .asSequence()
+                            .toList()
                     } catch (exception: Exception) {
                         logger.error("Error parsing YAML file ${file.name}, skipping", exception)
                         return@flatMap listOf()
