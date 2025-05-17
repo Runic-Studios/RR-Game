@@ -52,7 +52,7 @@ class GameItemWeaponTemplate(
         val builder = super.buildItemData()
         val weaponBuilder =
             builder.weaponBuilder
-                .setSkinID(null) // No skin ID (default)
+                .setSkinID("") // No skin ID
                 .addAllStats(stats.toRolledStats())
                 .addAllPerks(defaultPerks.toPerks())
         builder.setWeapon(weaponBuilder.build())

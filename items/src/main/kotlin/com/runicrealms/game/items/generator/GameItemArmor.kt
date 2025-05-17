@@ -104,6 +104,7 @@ constructor(
 
         val statLore = LinkedList<TextComponent>()
         for (statType in StatType.entries) {
+            if (statType == StatType.UNRECOGNIZED) continue
             val statRoll = stats[statType]
             val statInfo = statType.getInfo()
             if (menuDisplay && statRoll != null && statRoll.second.min != statRoll.second.max) {

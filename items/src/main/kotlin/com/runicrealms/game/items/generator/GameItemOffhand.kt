@@ -79,16 +79,16 @@ constructor(
 
         val statLore = LinkedList<TextComponent>()
         for (statType in StatType.entries) {
-            val statRoll = stats[statType]
+            val statRoll = stats[statType] ?: continue
             val statInfo = statType.getInfo()
-            if (menuDisplay && statRoll != null && statRoll.second.min != statRoll.second.max) {
+            if (menuDisplay && statRoll.second.min != statRoll.second.max) {
                 statLore.add(
                     Component.text(
                         "+" + statRoll.second.min + "-" + statRoll.second.max + statInfo.icon,
                         Style.style(statInfo.color),
                     )
                 )
-            } else if (statRoll != null) {
+            } else {
                 val value = statRoll.first.getRolledValue(statRoll.second)
                 statLore.add(
                     Component.text(

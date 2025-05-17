@@ -16,7 +16,8 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
-@CommandAlias("character|char")
+@CommandAlias("runic|r")
+@Subcommand("character|char")
 @CommandPermission("runic.op")
 class CharacterCommand
 @Inject
