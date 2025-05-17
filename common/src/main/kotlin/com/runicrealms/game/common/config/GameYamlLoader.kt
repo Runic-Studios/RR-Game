@@ -35,7 +35,7 @@ class GameYamlLoader {
                 return yamlMapper
                     .readerFor(T::class.java)
                     .readValues<T>(fileOrDirectory)
-                    .asSequence()
+                    .readAll()
                     .toList()
             } catch (exception: Exception) {
                 logger.error("Error parsing YAML file ${fileOrDirectory.name}, skipping", exception)
@@ -51,7 +51,7 @@ class GameYamlLoader {
                         yamlMapper
                             .readerFor(T::class.java)
                             .readValues<T>(file)
-                            .asSequence()
+                            .readAll()
                             .toList()
                     } catch (exception: Exception) {
                         logger.error("Error parsing YAML file ${file.name}, skipping", exception)

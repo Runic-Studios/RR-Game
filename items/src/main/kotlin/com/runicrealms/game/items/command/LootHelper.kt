@@ -14,6 +14,8 @@ import java.util.LinkedList
 import java.util.Locale
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Stream
+import kotlin.math.max
+import kotlin.math.min
 import org.bukkit.plugin.Plugin
 
 class LootHelper
@@ -79,15 +81,15 @@ constructor(
         itemTypes: Set<ItemType>?,
         lqm: Float?, // TODO use lqm
     ): GameItemTemplate? {
-        val rarity: Set<GameItemRarityType?> =
-            if (!rarities.isNullOrEmpty()) rarities else setOf(rollRarity())
-        val options = mutableListOf<GameItemTemplate>()
+        val rarity = if (!rarities.isNullOrEmpty()) rarities else setOf(rollRarity())
+        val options = ArrayList<GameItemTemplate>()
+        val minLevel = min(range?.first ?: 0, range?.second ?: 0)
+        val maxLevel = max(range?.first ?: Int.MAX_VALUE, range?.second ?: Int.MAX_VALUE)
         for (template in itemTemplateRegistry.getItemTemplates()) {
             if (template !is RarityLevelHolder) continue
             if (!template.id.startsWith("script")) continue
-            if (range != null && range.first <= range.second) {
-                if (range.first > template.level && range.second < template.level) continue
-            }
+            if (template.level > maxLevel) continue
+            if (template.level < minLevel) continue
             if (!rarity.contains(template.rarity)) continue
             if (playerClass != null && playerClass != ClassType.ANY) {
                 if (template !is ClassTypeHolder) continue
@@ -104,7 +106,7 @@ constructor(
         if (!armorItems.containsKey(level) && !weaponItems.containsKey(level)) return emptyList()
         if (!armorItems.containsKey(level)) return weaponItems[level]!![rarity]!!
         if (!weaponItems.containsKey(level)) return armorItems[level]!![rarity]!!
-        return Stream.concat<GameItemTemplate>(
+        return Stream.concat(
                 armorItems[level]!![rarity]!!.stream(),
                 weaponItems[level]!![rarity]!!.stream(),
             )
