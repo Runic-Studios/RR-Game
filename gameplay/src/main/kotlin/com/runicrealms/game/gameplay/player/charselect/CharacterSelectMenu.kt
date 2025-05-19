@@ -34,6 +34,7 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val plugin: Plugin,
     private val characterSelectManager: CharacterSelectManager,
+    private val characterSelectHelper: CharacterSelectHelper,
     @Assisted private val player: Player,
     @Assisted private val charactersTraits: UserCharactersTraits,
 ) {
@@ -70,14 +71,14 @@ constructor(
                 if (addedSlots < slots) {
                     gui.addIngredient(
                         ingredientChar,
-                        CharacterSelectUtil.CHARACTER_CREATE_ITEM.addOnClick { _, _, _ -> },
+                        characterSelectHelper.characterCreateItem.addOnClick { _, _, _ -> },
                     )
                 } else {
                     val icon =
                         when {
-                            i >= 8 -> CharacterSelectUtil.ONLY_CHAMPION_CREATE_ITEM
-                            i >= 6 -> CharacterSelectUtil.ONLY_HERO_CREATE_ITEM
-                            i == 5 -> CharacterSelectUtil.ONLY_KNIGHT_CREATE_ITEM
+                            i >= 8 -> characterSelectHelper.onlyChampionCreateItem
+                            i >= 6 -> characterSelectHelper.onlyHeroCreateItem
+                            i == 5 -> characterSelectHelper.onlyKnightCreateItem
                             else -> null
                         } ?: continue
                     gui.addIngredient(ingredientChar, icon)
@@ -87,7 +88,7 @@ constructor(
 
         gui.addIngredient(
             'e',
-            CharacterSelectUtil.EXIT_GAME_ITEM.addOnClick { _, _, _ ->
+            characterSelectHelper.exitGameItem.addOnClick { _, _, _ ->
                 closeForAllViewers()
                 player.kick()
             },
@@ -100,11 +101,11 @@ constructor(
                 .setStructure(". . b . . . c . .")
                 .addIngredient(
                     'b',
-                    CharacterSelectUtil.GO_BACK_ITEM.addOnClick { _, _, _ -> openSelect() },
+                    characterSelectHelper.goBackItem.addOnClick { _, _, _ -> openSelect() },
                 )
                 .addIngredient(
                     'c',
-                    CharacterSelectUtil.CONFIRM_DELETION_ITEM.addOnClick { _, _, _ ->
+                    characterSelectHelper.confirmDeleteItem.addOnClick { _, _, _ ->
                         closeForAllViewers()
                         // TODO display deleting character title
                         plugin.launch { deleteCharacter(slot) }
@@ -119,7 +120,7 @@ constructor(
                 .setStructure("b . a c m r w . .")
                 .addIngredient(
                     'b',
-                    CharacterSelectUtil.GO_BACK_ITEM.addOnClick { _, _, _ -> openSelect() },
+                    characterSelectHelper.goBackItem.addOnClick { _, _, _ -> openSelect() },
                 )
                 .addIngredient('a', createChooseClassIcon(ClassType.ARCHER, slot))
                 .addIngredient('c', createChooseClassIcon(ClassType.CLERIC, slot))
@@ -147,7 +148,7 @@ constructor(
         val characterData =
             charactersTraits.characters[slot]?.data ?: return ItemStack(Material.AIR)
         val item =
-            CharacterSelectUtil.ClassIcon.fromClassType(characterData.classType).itemStack.clone()
+            CharacterSelectHelper.ClassIcon.fromClassType(characterData.classType).itemStack.clone()
         val meta = item.itemMeta!!
         val classTypeInfo = characterData.classType.getInfo()
         meta.displayName(
@@ -180,7 +181,7 @@ constructor(
     }
 
     private fun createChooseClassIcon(classType: ClassType, slot: Int): ControlItem<Gui> {
-        return CharacterSelectUtil.CLASS_ICONS[classType]!!.addOnClick { _, _, _ ->
+        return characterSelectHelper.classIcons[classType]!!.addOnClick { _, _, _ ->
             characterSelectManager.creationCharacterTypes[player.uniqueId] = classType
             plugin.launch { userDataRegistry.setCharacter(player.uniqueId, slot) }
         }

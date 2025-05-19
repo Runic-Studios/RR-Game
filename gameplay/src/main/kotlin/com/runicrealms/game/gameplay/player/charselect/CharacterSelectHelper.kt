@@ -1,6 +1,7 @@
 package com.runicrealms.game.gameplay.player.charselect
 
 import SubClassType
+import com.google.inject.Inject
 import com.runicrealms.game.common.breakLines
 import com.runicrealms.game.common.colorFormat
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
@@ -14,28 +15,29 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 
-object CharacterSelectUtil {
+class CharacterSelectHelper @Inject constructor() {
 
-    val CHARACTER_CREATE_ITEM: ItemStack = ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE, 1)
-    val ONLY_KNIGHT_CREATE_ITEM: ItemStack
-    val ONLY_HERO_CREATE_ITEM: ItemStack
-    val ONLY_CHAMPION_CREATE_ITEM: ItemStack
-    val GO_BACK_ITEM: ItemStack
-    val CONFIRM_DELETION_ITEM: ItemStack
-    val EXIT_GAME_ITEM: ItemStack
-    val CLASS_ICONS = HashMap<ClassType, ItemStack>()
+    val characterCreateItem: ItemStack = ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE, 1)
+    val onlyKnightCreateItem: ItemStack
+    val onlyHeroCreateItem: ItemStack
+    val onlyChampionCreateItem: ItemStack
+    val goBackItem: ItemStack
+    val confirmDeleteItem: ItemStack
+    val exitGameItem: ItemStack
+
+    val classIcons = HashMap<ClassType, ItemStack>()
 
     init {
-        val creationMeta = checkNotNull(CHARACTER_CREATE_ITEM.itemMeta)
+        val creationMeta = checkNotNull(characterCreateItem.itemMeta)
         creationMeta.isUnbreakable = true
         creationMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         creationMeta.displayName(
             Component.text("Create a Class", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD))
         )
-        CHARACTER_CREATE_ITEM.setItemMeta(creationMeta)
+        characterCreateItem.setItemMeta(creationMeta)
 
-        ONLY_KNIGHT_CREATE_ITEM = ItemStack(Material.BARRIER, 1)
-        val knightMeta = checkNotNull(ONLY_KNIGHT_CREATE_ITEM.itemMeta)
+        onlyKnightCreateItem = ItemStack(Material.BARRIER, 1)
+        val knightMeta = checkNotNull(onlyKnightCreateItem.itemMeta)
         knightMeta.isUnbreakable = true
         knightMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         knightMeta.displayName(
@@ -50,10 +52,10 @@ object CharacterSelectUtil {
                 .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED)))
                 .build()
         )
-        ONLY_KNIGHT_CREATE_ITEM.setItemMeta(knightMeta)
+        onlyKnightCreateItem.setItemMeta(knightMeta)
 
-        ONLY_HERO_CREATE_ITEM = ItemStack(Material.BARRIER, 1)
-        val heroMeta = checkNotNull(ONLY_HERO_CREATE_ITEM.itemMeta)
+        onlyHeroCreateItem = ItemStack(Material.BARRIER, 1)
+        val heroMeta = checkNotNull(onlyHeroCreateItem.itemMeta)
         heroMeta.isUnbreakable = true
         heroMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         heroMeta.displayName(
@@ -68,10 +70,10 @@ object CharacterSelectUtil {
                 .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED)))
                 .build()
         )
-        ONLY_HERO_CREATE_ITEM.setItemMeta(heroMeta)
+        onlyHeroCreateItem.setItemMeta(heroMeta)
 
-        ONLY_CHAMPION_CREATE_ITEM = ItemStack(Material.BARRIER, 1)
-        val championMeta = checkNotNull(ONLY_CHAMPION_CREATE_ITEM.itemMeta)
+        onlyChampionCreateItem = ItemStack(Material.BARRIER, 1)
+        val championMeta = checkNotNull(onlyChampionCreateItem.itemMeta)
         championMeta.isUnbreakable = true
         championMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         championMeta.displayName(
@@ -96,19 +98,19 @@ object CharacterSelectUtil {
                 )
                 .build()
         )
-        ONLY_CHAMPION_CREATE_ITEM.setItemMeta(championMeta)
+        onlyChampionCreateItem.setItemMeta(championMeta)
 
-        GO_BACK_ITEM = ItemStack(Material.BARRIER)
-        val goBackMeta = checkNotNull(GO_BACK_ITEM.itemMeta)
+        goBackItem = ItemStack(Material.BARRIER)
+        val goBackMeta = checkNotNull(goBackItem.itemMeta)
         goBackMeta.isUnbreakable = true
         goBackMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         goBackMeta.displayName(
             Component.text("Cancel", Style.style(NamedTextColor.RED, TextDecoration.BOLD))
         )
-        GO_BACK_ITEM.setItemMeta(goBackMeta)
+        goBackItem.setItemMeta(goBackMeta)
 
-        CONFIRM_DELETION_ITEM = ItemStack(Material.SLIME_BALL)
-        val confirmDeletionMeta = checkNotNull(CONFIRM_DELETION_ITEM.itemMeta)
+        confirmDeleteItem = ItemStack(Material.SLIME_BALL)
+        val confirmDeletionMeta = checkNotNull(confirmDeleteItem.itemMeta)
         confirmDeletionMeta.isUnbreakable = true
         confirmDeletionMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         confirmDeletionMeta.displayName(
@@ -122,7 +124,7 @@ object CharacterSelectUtil {
                 )
             )
         )
-        CONFIRM_DELETION_ITEM.setItemMeta(confirmDeletionMeta)
+        confirmDeleteItem.setItemMeta(confirmDeletionMeta)
 
         val archerItem = ClassIcon.ARCHER_ICON.itemStack.clone()
         val archerMeta = checkNotNull(archerItem.itemMeta)
@@ -159,7 +161,7 @@ object CharacterSelectUtil {
 
         archerMeta.lore(archerLore)
         archerItem.setItemMeta(archerMeta)
-        CLASS_ICONS[ClassType.ARCHER] = archerItem
+        classIcons[ClassType.ARCHER] = archerItem
 
         val clericItem = ClassIcon.CLERIC_ICON.itemStack.clone()
         val clericMeta = checkNotNull(clericItem.itemMeta)
@@ -190,7 +192,7 @@ object CharacterSelectUtil {
         }
         clericMeta.lore(clericLore)
         clericItem.setItemMeta(clericMeta)
-        CLASS_ICONS[ClassType.CLERIC] = clericItem
+        classIcons[ClassType.CLERIC] = clericItem
 
         val mageItem = ClassIcon.MAGE_ICON.itemStack.clone()
         val mageMeta = checkNotNull(mageItem.itemMeta)
@@ -222,7 +224,7 @@ object CharacterSelectUtil {
 
         mageMeta.lore(mageLore)
         mageItem.setItemMeta(mageMeta)
-        CLASS_ICONS[ClassType.MAGE] = mageItem
+        classIcons[ClassType.MAGE] = mageItem
 
         val rogueItem = ClassIcon.ROGUE_ICON.itemStack.clone()
         val rogueMeta = checkNotNull(rogueItem.itemMeta)
@@ -253,7 +255,7 @@ object CharacterSelectUtil {
         }
         rogueMeta.lore(rogueLore)
         rogueItem.setItemMeta(rogueMeta)
-        CLASS_ICONS[ClassType.ROGUE] = rogueItem
+        classIcons[ClassType.ROGUE] = rogueItem
 
         val warriorItem = ClassIcon.WARRIOR_ICON.itemStack.clone()
         val warriorMeta = checkNotNull(warriorItem.itemMeta)
@@ -285,12 +287,12 @@ object CharacterSelectUtil {
 
         warriorMeta.lore(warriorLore)
         warriorItem.setItemMeta(warriorMeta)
-        CLASS_ICONS[ClassType.WARRIOR] = warriorItem
+        classIcons[ClassType.WARRIOR] = warriorItem
 
-        EXIT_GAME_ITEM = ItemStack(Material.OAK_DOOR, 1)
-        val exitGameItemMeta = checkNotNull(EXIT_GAME_ITEM.itemMeta)
+        exitGameItem = ItemStack(Material.OAK_DOOR, 1)
+        val exitGameItemMeta = checkNotNull(exitGameItem.itemMeta)
         exitGameItemMeta.displayName("&r&cLeave the Realm".colorFormat())
-        EXIT_GAME_ITEM.setItemMeta(exitGameItemMeta)
+        exitGameItem.setItemMeta(exitGameItemMeta)
     }
 
     enum class ClassIcon(

@@ -1,12 +1,11 @@
 import com.runicrealms.game.common.getHead
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
-import org.bukkit.inventory.ItemStack
 
 enum class SubClassType(
     val text: String,
     val position: Int,
     val classType: ClassType,
-    val itemStack: ItemStack,
+    headURL: String,
     val description: String,
 ) {
     /*
@@ -16,21 +15,21 @@ enum class SubClassType(
         "Marksman",
         1,
         ClassType.ARCHER,
-        marksmanItem(),
+        "http://textures.minecraft.net/texture/5d4da7f7438519be202e58c91f29b869ebd9de2efb1bbf445f745d9fb12287",
         "Marksman is a master of mobility and long-range &cphysical⚔ &7attacks!",
     ),
     STORMSHOT(
         "Stormshot",
         2,
         ClassType.ARCHER,
-        stormshotItem(),
+        "http://textures.minecraft.net/texture/feb10cb8753da80030320be23891a13ffc282d85e6d2b786bcef4ebf231ad2ea",
         "Stormshot is a master of lightning &3magicʔ&7, slinging area-of-effect spells!",
     ),
     WARDEN(
         "Warden",
         3,
         ClassType.ARCHER,
-        wardenItem(),
+        "http://textures.minecraft.net/texture/558f16bff64988c44e7bcc2ca7852eb39b24e60edaad5fe4883f679e0f3c962",
         "Warden is the keeper of the forest, &ahealing✦ &7allies through the power of nature!",
     ),
 
@@ -41,21 +40,21 @@ enum class SubClassType(
         "Bard",
         1,
         ClassType.CLERIC,
-        bardItem(),
+        "http://textures.minecraft.net/texture/ec56f8f96d141e2ab42a589326c6abf635786fa2c8709efd46fdf29f7a2c9274",
         "Bard is a hybrid &3magicalʔ &7and &cphysical⚔ &7fighter who controls the flow of battle with &aally buffs &7and &aenemy debuffs&7!",
     ),
     LIGHTBRINGER(
         "Lightbringer",
         2,
         ClassType.CLERIC,
-        lightbringerItem(),
+        "http://textures.minecraft.net/texture/a39a04a2e16d09bc83665f76c78008c3d74cbda1818e801e13be6e7c4bc2f824",
         "Lightbringer blasts enemies with light to &aheal✦ &7allies and keep them strong!",
     ),
     STARWEAVER(
         "Starweaver",
         3,
         ClassType.CLERIC,
-        starweaverItem(),
+        "http://textures.minecraft.net/texture/ca2435d27afedc5a6c400310c8dbaad6cf602c0d7fade4a175cee669eccf5507",
         "Starweaver calls upon the heavens to &ashield &7allies and disable enemies!",
     ),
 
@@ -66,21 +65,21 @@ enum class SubClassType(
         "Cryomancer",
         1,
         ClassType.MAGE,
-        cryomancerItem(),
+        "http://textures.minecraft.net/texture/3168b3b880e80efcbfcc7047aa70c165b53721d538edb6cbad5c3608e8d311fe",
         "Cryomancer freezes and slows enemies with &fcrowd control&7!",
     ),
     PYROMANCER(
         "Pyromancer",
         2,
         ClassType.MAGE,
-        pyromancerItem(),
+        "http://textures.minecraft.net/texture/4080bbefca87dc0f36536b6508425cfc4b95ba6e8f5e6a46ff9e9cb488a9ed",
         "Pyromancer deals powerful area-of-effect &3magicʔ &7damage!",
     ),
     SPELLSWORD(
         "Spellsword",
         3,
         ClassType.MAGE,
-        spellswordItem(),
+        "http://textures.minecraft.net/texture/fe0323773c0da5b417718500a448ae3dbf87d49ac068cd53f01502f4c0316153",
         "Spellsword uses magical melee attacks to &ashield &7allies!",
     ),
 
@@ -91,14 +90,14 @@ enum class SubClassType(
         "Corsair",
         1,
         ClassType.ROGUE,
-        corsairItem(),
+        "http://textures.minecraft.net/texture/b85c1ee61f2bd443c0a9e617f37203cdff440bfa2d00b6dd36ff834cd8702d9",
         "Corsair uses &cphysical⚔ " + "&7projectiles to control the flow of battle!",
     ),
     NIGHTCRAWLER(
         "Nightcrawler",
         2,
         ClassType.ROGUE,
-        nightcrawlerItem(),
+        "http://textures.minecraft.net/texture/6274e1605233425091f7b2837a4bb8f4c804dac80db9e4f599f535c03afab0f8",
         "Nightcrawler emerges " +
             "from the &8shadows &7to quickly burst an opponent with &cphysical⚔ &7strikes!",
     ),
@@ -106,7 +105,7 @@ enum class SubClassType(
         "Witch Hunter",
         3,
         ClassType.ROGUE,
-        witchHunterItem(),
+        "http://textures.minecraft.net/texture/6a14a4d2d02dcd26a1755eb8561b71b34d59f4518d9944a142c2e115688677d1",
         "Witch Hunter brands a single enemy " + "for persecution!",
     ),
 
@@ -117,23 +116,25 @@ enum class SubClassType(
         "Berserker",
         1,
         ClassType.WARRIOR,
-        berserkerItem(),
+        "http://textures.minecraft.net/texture/26f43caadb4033c41c7f34702c47ff3b21ce97710c8d65307f5876ee45c3f4e5",
         "Berserker fights ferociously with &cphysical⚔ &7attacks that cleave enemies!",
     ),
     DREADLORD(
         "Dreadlord",
         2,
         ClassType.WARRIOR,
-        dreadlordItem(),
+        "http://textures.minecraft.net/texture/6d7b1d4eabf35350382b465649964a4f5ad81fbc0c9f4149634829db83d69a3",
         "Dreadlord is a &3magicalʔ &7knight that harvests the souls of enemies!",
     ),
     PALADIN(
         "Paladin",
         3,
         ClassType.WARRIOR,
-        paladinItem(),
+        "http://textures.minecraft.net/texture/ef63aa9a3f9832353fd78fe6979639c709c1056c7a81163d29ef94d09925c3 ",
         "Paladin is a hybrid &3magicalʔ &7fighter and &fdefensive■ &7tank!",
     );
+
+    val item = getHead(headURL)
 
     companion object {
         val ARCHER_SUBCLASSES: MutableSet<SubClassType> = LinkedHashSet()
@@ -156,97 +157,4 @@ enum class SubClassType(
             }
         }
     }
-}
-
-private fun marksmanItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWQ0ZGE3Zjc0Mzg1MTliZTIwMmU1OGM5MWYyOWI4NjllYmQ5ZGUyZWZiMWJiZjQ0NWY3NDVkOWZiMTIyODcifX19"
-    )
-}
-
-private fun stormshotItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmViMTBjYjg3NTNkYTgwMDMwMzIwYmUyMzg5MWExM2ZmYzI4MmQ4NWU2ZDJiNzg2YmNlZjRlYmYyMzFhZDJlYSJ9fX0="
-    )
-}
-
-private fun wardenItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTU4ZjE2YmZmNjQ5ODhjNDRlN2JjYzJjYTc4NTJlYjM5YjI0ZTYwZWRhYWQ1ZmU0ODgzZjY3OWUwZjNjOTYyIn19fQ=="
-    )
-}
-
-private fun bardItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3" +
-            "RleHR1cmUvZWM1NmY4Zjk2ZDE0MWUyYWI0MmE1ODkzMjZjNmFiZjYzNTc4NmZhMmM4NzA5ZWZkNDZmZGYyOWY3YTJjOTI3NCJ9fX0="
-    )
-}
-
-private fun starweaverItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTM5YTA0YTJlMTZkMDliYzgzNjY1Zjc2Yzc4MDA4YzNkNzRjYmRhMTgxOGU4MDFlMTNiZTZlN2M0YmMyZjgyNCJ9fX0="
-    )
-}
-
-private fun lightbringerItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2EyNDM1ZDI3YWZlZGM1YTZjNDAwMzEwYzhkYmFhZDZjZjYwMmMwZDdmYWRlNGExNzVjZWU2NjllY2NmNTUwNyJ9fX0="
-    )
-}
-
-private fun cryomancerItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzE2OGIzYjg4MGU4MGVmY2JmY2M3MDQ3YWE3MGMxNjViNTM3MjFkNTM4ZWRiNmNiYWQ1YzM2MDhlOGQzMTFmZSJ9fX0="
-    )
-}
-
-private fun pyromancerItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3R" +
-            "leHR1cmUvNDA4MGJiZWZjYTg3ZGMwZjM2NTM2YjY1MDg0MjVjZmM0Yjk1YmE2ZThmNWU2YTQ2ZmY5ZTljYjQ4OGE5ZWQifX19"
-    )
-}
-
-private fun spellswordItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmUwMzIzNzczYzBkYTViNDE3NzE4NTAwYTQ0OGFlM2RiZjg3ZDQ5YWMwNjhjZDUzZjAxNTAyZjRjMDMxNjE1MyJ9fX0="
-    )
-}
-
-private fun nightcrawlerItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg1YzFlZTYxZjJiZDQ0M2MwYTllNjE3ZjM3MjAzY2RmZjQ0MGJmYTJkMDBiNmRkMzZmZjgzNGNkODcwMmQ5In19fQ=="
-    )
-}
-
-private fun witchHunterItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjI3NGUxNjA1MjMzNDI1MDkxZjdiMjgzN2E0YmI4ZjRjODA0ZGFjODBkYjllNGY1OTlmNTM1YzAzYWZhYjBmOCJ9fX0="
-    )
-}
-
-private fun corsairItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmExNGE0ZDJkMDJkY2QyNmExNzU1ZWI4NTYxYjcxYjM0ZDU5ZjQ1MThkOTk0NGExNDJjMmUxMTU2ODg2NzdkMSJ9fX0="
-    )
-}
-
-private fun berserkerItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjZmNDNjYWFkYjQwMzNjNDFjN2YzNDcwMmM0N2ZmM2IyMWNlOTc3MTBjOGQ2NTMwN2Y1ODc2ZWU0NWMzZjRlNSJ9fX0="
-    )
-}
-
-private fun dreadlordItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmQ3YjFkNGVhYmYzNTM1MDM4MmI0NjU2NDk5NjRhNGY1YWQ4MWZiYzBjOWY0MTQ5NjM0ODI5ZGI4M2Q2OWEzIn19fQ=="
-    )
-}
-
-private fun paladinItem(): ItemStack {
-    return getHead(
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3R" +
-            "leHR1cmUvZWY2M2FhOWEzZjk4MzIzNTNmZDc4ZmU2OTc5NjM5YzcwOWMxMDU2YzdhODExNjNkMjllZjk0ZDA5OTI1YzMifX19"
-    )
 }
