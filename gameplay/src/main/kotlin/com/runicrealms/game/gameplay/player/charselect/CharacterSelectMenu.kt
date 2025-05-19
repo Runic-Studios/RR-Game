@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.addOnClick
+import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.util.MAX_CHARACTERS
@@ -71,7 +72,9 @@ constructor(
                 if (addedSlots < slots) {
                     gui.addIngredient(
                         ingredientChar,
-                        characterSelectHelper.characterCreateItem.addOnClick { _, _, _ -> },
+                        characterSelectHelper.characterCreateItem.addOnClick { _, _, _ ->
+                            openAdd(i)
+                        },
                     )
                 } else {
                     val icon =
@@ -90,10 +93,16 @@ constructor(
             'e',
             characterSelectHelper.exitGameItem.addOnClick { _, _, _ ->
                 closeForAllViewers()
-                player.kick()
+                player.kick("&aGoodbye!".colorFormat())
             },
         )
-        Window.single().setGui(gui).build(player).open()
+
+        Window.single()
+            .setGui(gui)
+            .addCloseHandler {
+                openSelect()
+            }
+            .build(player).open()
     }
 
     fun openDelete(slot: Int) {
@@ -112,7 +121,13 @@ constructor(
                         plugin.launch { deleteCharacter(slot) }
                     },
                 )
-        Window.single().setGui(gui).build(player).open()
+        Window.single()
+            .setGui(gui)
+            .addCloseHandler {
+                openSelect()
+            }
+            .build(player)
+            .open()
     }
 
     fun openAdd(slot: Int) {
@@ -128,7 +143,13 @@ constructor(
                 .addIngredient('m', createChooseClassIcon(ClassType.MAGE, slot))
                 .addIngredient('r', createChooseClassIcon(ClassType.ROGUE, slot))
                 .addIngredient('w', createChooseClassIcon(ClassType.WARRIOR, slot))
-        Window.single().setGui(gui).build(player).open()
+        Window.single()
+            .setGui(gui)
+            .addCloseHandler {
+                openSelect()
+            }
+            .build(player)
+            .open()
     }
 
     private suspend fun deleteCharacter(slot: Int) {
