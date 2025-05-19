@@ -130,7 +130,7 @@ enum class SubClassType(
         "Paladin",
         3,
         ClassType.WARRIOR,
-        "http://textures.minecraft.net/texture/ef63aa9a3f9832353fd78fe6979639c709c1056c7a81163d29ef94d09925c3 ",
+        "http://textures.minecraft.net/texture/ef63aa9a3f9832353fd78fe6979639c709c1056c7a81163d29ef94d09925c3",
         "Paladin is a hybrid &3magicalʔ &7fighter and &fdefensive■ &7tank!",
     );
 
