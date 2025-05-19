@@ -7,15 +7,18 @@ import com.runicrealms.game.common.WORLD_NAME
 import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
+import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerJoinEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.text.Component
+import nl.odalitadevelopments.menus.OdalitaMenus
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -26,6 +29,7 @@ class CharacterSelectManager
 constructor(
     private val plugin: Plugin,
     private val userDataRegistry: UserDataRegistry,
+    private val odalitaMenus: OdalitaMenus,
     private val characterSelectMenuFactory: CharacterSelectMenu.Factory,
 ) : Listener {
 
@@ -42,23 +46,34 @@ constructor(
     // Necessary to use GameCharacterPreLoadEvent to set the character's class
     val creationCharacterTypes = ConcurrentHashMap<UUID, ClassType>()
 
-    @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {
-        // Runs before any data has been loaded!
-        event.joinMessage(Component.text(""))
-        event.player.inventory.clear()
-        event.player.isInvulnerable = true
-        event.player.level = 0
-        event.player.exp = 0F
-        event.player.foodLevel = 20
-        event.player.teleport(SPAWN_BOX)
-        event.player.gameMode = GameMode.SURVIVAL
+    private fun sendToSelection(player: Player) {
+        player.inventory.clear()
+        player.isInvulnerable = true
+        player.level = 0
+        player.exp = 0F
+        player.foodLevel = 20
+        player.teleport(SPAWN_BOX)
+        player.gameMode = GameMode.SURVIVAL
         // TODO display loading characters
-        event.player.sendMessage("&aLoading your character information...".colorFormat())
+        player.sendMessage("&aLoading your character information...".colorFormat())
     }
 
     @EventHandler
-    fun onPlayerJoin(event: GamePlayerJoinEvent) {
+    fun onPlayerJoin(event: PlayerJoinEvent) {
+        // Before any player data is loaded
+        event.joinMessage(Component.text(""))
+        sendToSelection(event.player)
+    }
+
+    @EventHandler
+    fun onGameCharacterQuit(event: GameCharacterQuitEvent) {
+        // When a player quits, or tries to select a new character
+        sendToSelection(event.character.bukkitPlayer)
+    }
+
+    @EventHandler
+    fun onGamePlayerJoin(event: GamePlayerJoinEvent) {
+        // After we have loaded player data
         plugin.launch {
             val traits =
                 userDataRegistry.loadUserCharactersTraits(event.player.bukkitPlayer.uniqueId)
@@ -68,18 +83,23 @@ constructor(
                 )
                 return@launch
             }
-            characterSelectMenuFactory.create(event.player.bukkitPlayer, traits).openSelect()
+            if (!event.player.bukkitPlayer.isOnline) return@launch
+            odalitaMenus.openMenu(
+                characterSelectMenuFactory.create(traits),
+                event.player.bukkitPlayer,
+            )
         }
     }
 
     @EventHandler
-    fun onQuit(event: GamePlayerQuitEvent) {
+    fun onGamePlayerQuit(event: GamePlayerQuitEvent) {
+        // When a player quits
         creationCharacterTypes.remove(event.player.bukkitPlayer.uniqueId)
     }
 
     // For players creating characters
     @EventHandler
-    fun onCharacterPreLoad(event: GameCharacterPreLoadEvent) {
+    fun onGameCharacterPreLoad(event: GameCharacterPreLoadEvent) {
         with(event.characterData) {
             if (!empty) return
             val classType = creationCharacterTypes.remove(event.user) ?: return

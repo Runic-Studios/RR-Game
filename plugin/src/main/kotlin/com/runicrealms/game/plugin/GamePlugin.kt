@@ -9,13 +9,14 @@ import com.runicrealms.trove.client.TroveClientConfig
 import com.runicrealms.trove.client.TroveClientModule
 import java.util.UUID
 import org.bukkit.plugin.java.JavaPlugin
-import xyz.xenondevs.invui.InvUI
+import org.slf4j.LoggerFactory
 
 class GamePlugin : JavaPlugin() {
 
+    private val logger = LoggerFactory.getLogger("plugin")
+
     override fun onEnable() {
-        // Setup InvUI
-        InvUI.getInstance().setPlugin(this)
+        val startTime = System.currentTimeMillis()
 
         // Setup Trove
         val troveServerID = "paper-" + UUID.randomUUID().toString().substring(0, 7)
@@ -37,5 +38,8 @@ class GamePlugin : JavaPlugin() {
                 gameplayModule,
                 itemsModule,
             )
+
+        val time = System.currentTimeMillis() - startTime
+        logger.info("Finished loading and injecting Game in $time millis")
     }
 }

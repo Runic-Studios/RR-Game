@@ -2,7 +2,6 @@ main: com.runicrealms.game.plugin.GamePlugin
 name: Game
 version: '3.0'
 api-version: 1.21.4
-loader: com.runicrealms.game.plugin.GamePluginLoader
 dependencies:
   server:
     Velagones:

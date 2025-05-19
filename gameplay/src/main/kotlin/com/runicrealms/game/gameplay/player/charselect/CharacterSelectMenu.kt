@@ -1,174 +1,62 @@
 package com.runicrealms.game.gameplay.player.charselect
 
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.game.common.addOnClick
 import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.util.MAX_CHARACTERS
 import com.runicrealms.trove.client.user.UserCharactersTraits
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import de.tr7zw.nbtapi.NBT
 import java.util.ArrayList
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import java.util.function.Supplier
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
+import nl.odalitadevelopments.menus.OdalitaMenus
+import nl.odalitadevelopments.menus.annotations.Menu
+import nl.odalitadevelopments.menus.contents.MenuContents
+import nl.odalitadevelopments.menus.contents.action.MenuCloseResult
+import nl.odalitadevelopments.menus.contents.pos.SlotPos
+import nl.odalitadevelopments.menus.items.ClickableItem
+import nl.odalitadevelopments.menus.items.DisplayItem
+import nl.odalitadevelopments.menus.items.buttons.OpenMenuItem
+import nl.odalitadevelopments.menus.menu.providers.PlayerMenuProvider
+import nl.odalitadevelopments.menus.menu.type.MenuType
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
-import xyz.xenondevs.invui.gui.Gui
-import xyz.xenondevs.invui.item.impl.controlitem.ControlItem
-import xyz.xenondevs.invui.window.Window
 
+@Menu(title = "Select Your Character", type = MenuType.CHEST_3_ROW)
 class CharacterSelectMenu
 @AssistedInject
 constructor(
     private val userDataRegistry: UserDataRegistry,
     private val plugin: Plugin,
-    private val characterSelectManager: CharacterSelectManager,
     private val characterSelectHelper: CharacterSelectHelper,
-    @Assisted private val player: Player,
-    @Assisted private val charactersTraits: UserCharactersTraits,
-) {
+    private val odalitaMenus: OdalitaMenus,
+    @Assisted private val userCharactersTraits: UserCharactersTraits,
+) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(player: Player, charactersTraits: UserCharactersTraits): CharacterSelectMenu
+        fun create(userCharactersTraits: UserCharactersTraits): CharacterSelectMenu
     }
+
+    @Inject private lateinit var characterAddMenuFactory: CharacterAddMenu.Factory
+
+    @Inject private lateinit var characterDeleteMenuFactory: CharacterDeleteMenu.Factory
 
     @Volatile private var hasSelected = false
 
-    fun openSelect() {
-        val gui =
-            Gui.normal().setStructure(". . 0 1 2 3 4 . .", ". . 5 6 7 8 9 . .", "# # # # e # # # #")
-
-        val slots = 5 // TODO DonorRank.getDonorRank(player).getClassSlots()
-        var addedSlots = 0
-        for (i in 0 until MAX_CHARACTERS) {
-            val ingredientChar = i.toString().first()
-            val traits = charactersTraits.characters[i]
-            if (traits != null) {
-                gui.addIngredient(
-                    ingredientChar,
-                    createSelectIcon(i).addOnClick { _, _, event ->
-                        closeForAllViewers()
-                        if (hasSelected) return@addOnClick
-                        hasSelected = true
-                        val slot =
-                            NBT.readNbt(event.currentItem).getInteger("slot") ?: return@addOnClick
-                        plugin.launch { userDataRegistry.setCharacter(player.uniqueId, slot) }
-                    },
-                )
-                addedSlots++
-            } else {
-                if (addedSlots < slots) {
-                    gui.addIngredient(
-                        ingredientChar,
-                        characterSelectHelper.characterCreateItem.addOnClick { _, _, _ ->
-                            openAdd(i)
-                        },
-                    )
-                } else {
-                    val icon =
-                        when {
-                            i >= 8 -> characterSelectHelper.onlyChampionCreateItem
-                            i >= 6 -> characterSelectHelper.onlyHeroCreateItem
-                            i == 5 -> characterSelectHelper.onlyKnightCreateItem
-                            else -> null
-                        } ?: continue
-                    gui.addIngredient(ingredientChar, icon)
-                }
-            }
-        }
-
-        gui.addIngredient(
-            'e',
-            characterSelectHelper.exitGameItem.addOnClick { _, _, _ ->
-                closeForAllViewers()
-                player.kick("&aGoodbye!".colorFormat())
-            },
-        )
-
-        Window.single()
-            .setGui(gui)
-            .addCloseHandler {
-                openSelect()
-            }
-            .build(player).open()
-    }
-
-    fun openDelete(slot: Int) {
-        val gui =
-            Gui.normal()
-                .setStructure(". . b . . . c . .")
-                .addIngredient(
-                    'b',
-                    characterSelectHelper.goBackItem.addOnClick { _, _, _ -> openSelect() },
-                )
-                .addIngredient(
-                    'c',
-                    characterSelectHelper.confirmDeleteItem.addOnClick { _, _, _ ->
-                        closeForAllViewers()
-                        // TODO display deleting character title
-                        plugin.launch { deleteCharacter(slot) }
-                    },
-                )
-        Window.single()
-            .setGui(gui)
-            .addCloseHandler {
-                openSelect()
-            }
-            .build(player)
-            .open()
-    }
-
-    fun openAdd(slot: Int) {
-        val gui =
-            Gui.normal()
-                .setStructure("b . a c m r w . .")
-                .addIngredient(
-                    'b',
-                    characterSelectHelper.goBackItem.addOnClick { _, _, _ -> openSelect() },
-                )
-                .addIngredient('a', createChooseClassIcon(ClassType.ARCHER, slot))
-                .addIngredient('c', createChooseClassIcon(ClassType.CLERIC, slot))
-                .addIngredient('m', createChooseClassIcon(ClassType.MAGE, slot))
-                .addIngredient('r', createChooseClassIcon(ClassType.ROGUE, slot))
-                .addIngredient('w', createChooseClassIcon(ClassType.WARRIOR, slot))
-        Window.single()
-            .setGui(gui)
-            .addCloseHandler {
-                openSelect()
-            }
-            .build(player)
-            .open()
-    }
-
-    private suspend fun deleteCharacter(slot: Int) {
-        // TODO actually implement this with trove
-        withContext(plugin.asyncDispatcher) {
-            player.sendMessage(
-                Component.text(
-                    "Deleting characters is not currently supported",
-                    Style.style(NamedTextColor.RED),
-                )
-            )
-            delay(2500)
-            openSelect()
-        }
-    }
-
     private fun createSelectIcon(slot: Int): ItemStack {
         val characterData =
-            charactersTraits.characters[slot]?.data ?: return ItemStack(Material.AIR)
+            userCharactersTraits.characters[slot]?.data ?: return ItemStack(Material.AIR)
         val item =
             CharacterSelectHelper.ClassIcon.fromClassType(characterData.classType).itemStack.clone()
         val meta = item.itemMeta!!
@@ -202,10 +90,68 @@ constructor(
         return item
     }
 
-    private fun createChooseClassIcon(classType: ClassType, slot: Int): ControlItem<Gui> {
-        return characterSelectHelper.classIcons[classType]!!.addOnClick { _, _, _ ->
-            characterSelectManager.creationCharacterTypes[player.uniqueId] = classType
-            plugin.launch { userDataRegistry.setCharacter(player.uniqueId, slot) }
+    override fun onLoad(player: Player, menuContents: MenuContents) {
+        val slots = 5 // TODO DonorRank.getDonorRank(player).getClassSlots()
+        var addedSlots = 0
+        for (i in 0 until MAX_CHARACTERS) {
+            val slotPos = SlotPos.of(i / 5, i % 5 + 2)
+            val traits = userCharactersTraits.characters[i]
+            if (traits != null) {
+                menuContents.set(
+                    slotPos,
+                    ClickableItem.of(createSelectIcon(i)) { event ->
+                        if (!event.isRightClick) {
+                            hasSelected = true
+                            event.whoClicked.closeInventory()
+                            if (hasSelected) return@of
+                            val slot =
+                                NBT.readNbt(event.currentItem).getInteger("slot") ?: return@of
+                            plugin.launch { userDataRegistry.setCharacter(player.uniqueId, slot) }
+                        } else {
+                            odalitaMenus.openMenu(
+                                characterDeleteMenuFactory.create(i, userCharactersTraits),
+                                event.whoClicked as Player,
+                            )
+                        }
+                    },
+                )
+                addedSlots++
+            } else {
+                if (addedSlots < slots) {
+                    menuContents.set(
+                        slotPos,
+                        OpenMenuItem.of(
+                            characterSelectHelper.characterCreateItem,
+                            characterAddMenuFactory.create(i, userCharactersTraits),
+                        ),
+                    )
+                } else {
+                    val icon =
+                        when {
+                            i >= 8 -> characterSelectHelper.onlyChampionCreateItem
+                            i >= 6 -> characterSelectHelper.onlyHeroCreateItem
+                            i == 5 -> characterSelectHelper.onlyKnightCreateItem
+                            else -> null
+                        } ?: continue
+                    menuContents.set(slotPos, DisplayItem.of(icon))
+                }
+            }
         }
+
+        menuContents.set(
+            SlotPos.of(2, 4),
+            ClickableItem.of(characterSelectHelper.exitGameItem) { event ->
+                event.whoClicked.closeInventory()
+                player.kick("&aGoodbye!".colorFormat())
+            },
+        )
+
+        menuContents
+            .events()
+            .onClose(
+                Supplier<MenuCloseResult> {
+                    if (hasSelected) MenuCloseResult.CLOSE else MenuCloseResult.KEEP_OPEN
+                }
+            )
     }
 }

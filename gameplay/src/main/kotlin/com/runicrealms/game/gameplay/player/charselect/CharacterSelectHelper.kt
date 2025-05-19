@@ -313,6 +313,7 @@ class CharacterSelectHelper @Inject constructor() {
             if (meta is Damageable) {
                 meta.damage = damage
             }
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
         }
 
         companion object {
