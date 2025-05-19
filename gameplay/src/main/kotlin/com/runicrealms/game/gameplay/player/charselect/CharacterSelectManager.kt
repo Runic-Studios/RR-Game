@@ -66,7 +66,7 @@ constructor(
                 )
                 return@launch
             }
-            characterSelectMenuFactory.create(event.player.bukkitPlayer, traits)
+            characterSelectMenuFactory.create(event.player.bukkitPlayer, traits).openSelect()
         }
     }
 
