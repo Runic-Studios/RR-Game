@@ -14,6 +14,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -29,7 +30,7 @@ constructor(
 ) : Listener {
 
     companion object {
-        private val SPAWN_BOX = Location(Bukkit.getWorld(WORLD_NAME), -2271.5, 2.0, 2289.5)
+        private val SPAWN_BOX = Location(Bukkit.getWorld(WORLD_NAME), -2271.5, 1.0, 2289.5)
     }
 
     init {
@@ -51,6 +52,7 @@ constructor(
         event.player.exp = 0F
         event.player.foodLevel = 20
         event.player.teleport(SPAWN_BOX)
+        event.player.gameMode = GameMode.SURVIVAL
         // TODO display loading characters
         event.player.sendMessage("&aLoading your character information...".colorFormat())
     }
