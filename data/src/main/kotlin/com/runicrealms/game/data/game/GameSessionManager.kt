@@ -16,6 +16,7 @@ import com.runicrealms.game.data.event.GamePlayerLoadEvent
 import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.trove.client.TroveClient
+import com.runicrealms.trove.client.user.UserCharactersTraits
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Job
@@ -201,7 +202,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
         val player = playerResult.getOrNull()!!
 
         withContext(plugin.minecraftDispatcher) {
-            val preLoadEvent = GamePlayerPreLoadEvent(player)
+            val preLoadEvent = GamePlayerPreLoadEvent(bukkitPlayer.uniqueId, player)
             Bukkit.getPluginManager().callSuspendingEvent(preLoadEvent, plugin).joinAll()
             player.empty = false
         }
@@ -237,7 +238,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                             }
                             val characterData = creationResult.getOrNull()!!
 
-                            val preLoadEvent = GameCharacterPreLoadEvent(characterData)
+                            val preLoadEvent = GameCharacterPreLoadEvent(user, characterData)
                             Bukkit.getPluginManager()
                                 .callSuspendingEvent(preLoadEvent, plugin)
                                 .joinAll()
@@ -343,4 +344,14 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
 
     override fun getAllCharacters(): Collection<GameCharacter> =
         players.values.filter { it !is GameCharacter }.map { it as GameCharacter }
+
+    override suspend fun loadUserCharactersTraits(user: UUID): UserCharactersTraits? {
+        val session = sessions[user] ?: return null
+        val result = session.claim.loadCharactersTraits()
+        if (!result.isSuccess) {
+            logger.error("Failed to load user $user characters traits", result.exceptionOrNull()!!)
+            return null
+        }
+        return result.getOrNull()
+    }
 }

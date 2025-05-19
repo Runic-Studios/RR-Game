@@ -34,13 +34,13 @@ constructor(
 
     @EventHandler
     fun onCharacterJoin(event: GameCharacterJoinEvent) {
-        cachedPlayerStats[event.character.player.uniqueId] =
+        cachedPlayerStats[event.character.bukkitPlayer.uniqueId] =
             equipmentFactory.create(event.character)
     }
 
     @EventHandler
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        cachedPlayerStats.remove(event.character.player.uniqueId)
+        cachedPlayerStats.remove(event.character.bukkitPlayer.uniqueId)
     }
 
     @EventHandler(

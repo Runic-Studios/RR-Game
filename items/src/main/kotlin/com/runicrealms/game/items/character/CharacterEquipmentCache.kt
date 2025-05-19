@@ -222,8 +222,8 @@ constructor(
                 // non-weapon item, to a new weapon
                 // Here, the total perks would not be changing for the final swap but we still play
                 // the deactivation noise with cooldown
-                character.player.playSound(
-                    character.player.location,
+                character.bukkitPlayer.playSound(
+                    character.bukkitPlayer.location,
                     Sound.BLOCK_BEACON_DEACTIVATE,
                     1.0f,
                     2.0f,
@@ -266,73 +266,73 @@ constructor(
     }
 
     private fun updateHelmet() {
-        val itemStack = character.player.inventory.helmet
+        val itemStack = character.bukkitPlayer.inventory.helmet
         try {
             helmet =
                 if (itemStack == null) null
                 else itemStackConverter.convertToGameItem(itemStack) as? GameItemArmor
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} helmet!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} helmet!")
             exception.printStackTrace()
             helmet = null
         }
         if (helmet?.addedStats?.hasItemPerks() == true)
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
     }
 
     private fun updateChestplate() {
-        val itemStack = character.player.inventory.chestplate
+        val itemStack = character.bukkitPlayer.inventory.chestplate
         try {
             chestplate =
                 if (itemStack == null) null
                 else itemStackConverter.convertToGameItem(itemStack) as? GameItemArmor
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} chestplate!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} chestplate!")
             exception.printStackTrace()
             chestplate = null
         }
         if (chestplate?.addedStats?.hasItemPerks() == true)
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
     }
 
     private fun updateLeggings() {
-        val itemStack = character.player.inventory.leggings
+        val itemStack = character.bukkitPlayer.inventory.leggings
         try {
             leggings =
                 if (itemStack == null) null
                 else itemStackConverter.convertToGameItem(itemStack) as? GameItemArmor
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} leggings!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} leggings!")
             exception.printStackTrace()
             leggings = null
         }
         if (leggings?.addedStats?.hasItemPerks() == true)
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
     }
 
     private fun updateBoots() {
-        val itemStack = character.player.inventory.boots
+        val itemStack = character.bukkitPlayer.inventory.boots
         try {
             boots =
                 if (itemStack == null) null
                 else itemStackConverter.convertToGameItem(itemStack) as? GameItemArmor
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} boots!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} boots!")
             exception.printStackTrace()
             boots = null
         }
         if (boots?.addedStats?.hasItemPerks() == true)
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
     }
 
     // This one also updates the total because we need to update total before we change the recent
     // weapon to the current one
     private fun updateWeaponAndTotal(onLogin: Boolean) {
-        val itemStack = character.player.inventory.itemInMainHand
+        val itemStack = character.bukkitPlayer.inventory.itemInMainHand
         try {
             weapon = itemStackConverter.convertToGameItem(itemStack) as? GameItemWeapon
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} weapon!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} weapon!")
             exception.printStackTrace()
             weapon = null
         }
@@ -351,7 +351,7 @@ constructor(
             //            container.getItemModifier().write(0,
             // player.getInventory().getItemInMainHand()); // ItemStack
             //            ProtocolLibrary.getProtocolManager().sendServerPacket(player, container);
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
         }
 
         // For item perks warmup
@@ -365,17 +365,17 @@ constructor(
     }
 
     private fun updateOffhand() {
-        val itemStack = character.player.inventory.itemInOffHand
+        val itemStack = character.bukkitPlayer.inventory.itemInOffHand
         try {
             offhand = itemStackConverter.convertToGameItem(itemStack) as? GameItemOffhand
         } catch (exception: Exception) {
-            logger.error("Error loading player ${character.player.name} offhand!")
+            logger.error("Error loading player ${character.bukkitPlayer.name} offhand!")
             exception.printStackTrace()
             offhand = null
         }
 
         if (offhand?.addedStats?.hasItemPerks() == true)
-            character.player.updateInventory() // Update dynamic lore
+            character.bukkitPlayer.updateInventory() // Update dynamic lore
     }
 
     fun getHelmet(): GameItemArmor? {
@@ -415,7 +415,7 @@ constructor(
     private fun canUseWeapon(weapon: GameItemWeapon): Boolean {
         // ONLY CALL SYNC
         val type = character.withSyncCharacterData { traits.data.classType }
-        return weapon.weaponTemplate.level <= character.player.level &&
+        return weapon.weaponTemplate.level <= character.bukkitPlayer.level &&
             type == weapon.weaponTemplate.classType
     }
 

@@ -1,6 +1,7 @@
 package com.runicrealms.game.data.event
 
 import com.runicrealms.trove.client.user.UserCharacterData
+import java.util.UUID
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
@@ -13,7 +14,8 @@ import org.bukkit.event.HandlerList
  *
  * This event cannot be failed.
  */
-class GameCharacterPreLoadEvent(val characterData: UserCharacterData) : Event(false) {
+class GameCharacterPreLoadEvent(val user: UUID, val characterData: UserCharacterData) :
+    Event(false) {
 
     companion object {
         private val HANDLERS = HandlerList()

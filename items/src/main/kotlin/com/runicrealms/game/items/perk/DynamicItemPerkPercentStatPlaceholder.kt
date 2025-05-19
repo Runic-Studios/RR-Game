@@ -28,7 +28,7 @@ class DynamicItemPerkPercentStatPlaceholder(
         val basePercentage = roundToNearestHundredth(supplier() * 100)
         var percentage =
             if (
-                this.getEquippedSlot(viewer.player, gameItem, itemStack) != null
+                this.getEquippedSlot(viewer.bukkitPlayer, gameItem, itemStack) != null
             ) { // Item is equipped
                 handler.getCurrentStacks(viewer) * basePercentage
             } else {

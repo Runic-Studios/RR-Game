@@ -49,7 +49,7 @@ class GameItemPerkManager @Inject constructor(private val plugin: Plugin) :
         }
 
         if (event.playSounds) {
-            with(event.character.player) {
+            with(event.character.bukkitPlayer) {
                 if (activated && !deactivated) {
                     playSound(location, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 2.0f)
                 } else if (!activated && deactivated) {

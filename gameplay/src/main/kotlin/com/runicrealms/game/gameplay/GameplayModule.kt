@@ -1,10 +1,14 @@
 package com.runicrealms.game.gameplay
 
 import com.google.inject.AbstractModule
+import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
+import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
+import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
 import com.runicrealms.game.gameplay.player.inventory.PlayerInventoryManager
 import com.runicrealms.game.gameplay.tips.TipsDataListener
+import kotlin.reflect.KClass
 
 class GameplayModule : AbstractModule() {
 
@@ -16,5 +20,16 @@ class GameplayModule : AbstractModule() {
         bind(PlayerInventoryManager::class.java).asEagerSingleton()
 
         bind(CharacterCommand::class.java).asEagerSingleton()
+
+        bind(CharacterSelectManager::class.java).asEagerSingleton()
+        addFactory(CharacterSelectMenu::class, CharacterSelectMenu.Factory::class)
+    }
+
+    private fun <T : Any, U : Any> addFactory(objectType: KClass<T>, factoryType: KClass<U>) {
+        install(
+            FactoryModuleBuilder()
+                .implement(objectType.java, objectType.java)
+                .build(factoryType.java)
+        )
     }
 }

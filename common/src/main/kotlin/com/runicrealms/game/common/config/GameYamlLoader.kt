@@ -48,11 +48,7 @@ class GameYamlLoader {
                 .filter { it.extension in extensions }
                 .flatMap { file ->
                     try {
-                        yamlMapper
-                            .readerFor(T::class.java)
-                            .readValues<T>(file)
-                            .readAll()
-                            .toList()
+                        yamlMapper.readerFor(T::class.java).readValues<T>(file).readAll().toList()
                     } catch (exception: Exception) {
                         logger.error("Error parsing YAML file ${file.name}, skipping", exception)
                         return@flatMap listOf()

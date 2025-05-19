@@ -70,9 +70,9 @@ protected constructor(
      */
     fun updateActive(character: GameCharacter, stacks: Int) {
         if (stacks > 0) {
-            active.add(character.player.uniqueId)
+            active.add(character.bukkitPlayer.uniqueId)
         } else {
-            active.remove(character.player.uniqueId)
+            active.remove(character.bukkitPlayer.uniqueId)
         }
         onChange(character, stacks)
     }
@@ -82,7 +82,7 @@ protected constructor(
      * automatically capped by the maximum.
      */
     fun getCurrentStacks(character: GameCharacter): Int {
-        val cache = equipmentRegistry.cachedPlayerStats[character.player.uniqueId] ?: return 0
+        val cache = equipmentRegistry.cachedPlayerStats[character.bukkitPlayer.uniqueId] ?: return 0
         val activePerks = cache.totalStats.perks
         if (activePerks != null) {
             for (perk in activePerks) {
@@ -99,7 +99,7 @@ protected constructor(
      * capped by the maximum number of stacks for this perk.
      */
     fun getCurrentUncappedStacks(character: GameCharacter): Int {
-        val cache = equipmentRegistry.cachedPlayerStats[character.player.uniqueId] ?: return 0
+        val cache = equipmentRegistry.cachedPlayerStats[character.bukkitPlayer.uniqueId] ?: return 0
         val activePerks = cache.itemPerksExceedingMax
         val uncappedStacks = activePerks.getOrDefault(template, 0)
         if (uncappedStacks != 0) return uncappedStacks
@@ -133,6 +133,6 @@ protected constructor(
 
     @EventHandler
     private fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        active.remove(event.character.player.uniqueId)
+        active.remove(event.character.bukkitPlayer.uniqueId)
     }
 }

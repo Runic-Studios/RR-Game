@@ -95,14 +95,14 @@ constructor(
                 true
             ) { // TODO RunicCore.getRegionAPI().isSafezone(player.location)) { // prevent hunger
                 // loss in capital cities
-                if (character.player.foodLevel < 20) {
-                    restoreHunger(character.player)
+                if (character.bukkitPlayer.foodLevel < 20) {
+                    restoreHunger(character.bukkitPlayer)
                 }
                 continue
             }
-            if (character.player.foodLevel <= STARVATION_HUNGER_LEVEL) continue
-            if (character.player.saturation > 0) continue
-            character.player.foodLevel -= 1
+            if (character.bukkitPlayer.foodLevel <= STARVATION_HUNGER_LEVEL) continue
+            if (character.bukkitPlayer.saturation > 0) continue
+            character.bukkitPlayer.foodLevel -= 1
         }
     }
 

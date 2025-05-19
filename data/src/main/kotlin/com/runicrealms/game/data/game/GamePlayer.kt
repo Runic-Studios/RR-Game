@@ -13,7 +13,7 @@ import org.bukkit.plugin.Plugin
 open class GamePlayer
 internal constructor(protected val plugin: Plugin, internal val gameSession: GameSession) {
 
-    val player = gameSession.bukkitPlayer
+    val bukkitPlayer = gameSession.bukkitPlayer
 
     /**
      * ALL CALLS to withPlayerData MUST be on the Minecraft game thread!

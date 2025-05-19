@@ -33,7 +33,7 @@ constructor(
             val items = event.character.withSyncCharacterData { inventory.data.itemsMap }
             for ((slot, itemDataStack) in items) {
                 val item = templateRegistry.generateGameItem(itemDataStack.data)
-                event.character.player.inventory.setItem(
+                event.character.bukkitPlayer.inventory.setItem(
                     slot,
                     item.generateItemStack(itemDataStack.count),
                 )
@@ -41,7 +41,7 @@ constructor(
         } catch (exception: Exception) {
             event.fail(
                 IllegalStateException(
-                    "Failed to load inventory for player ${event.character.player.name} ${event.character.player.uniqueId}",
+                    "Failed to load inventory for player ${event.character.bukkitPlayer.name} ${event.character.bukkitPlayer.uniqueId}",
                     exception,
                 )
             )
@@ -52,7 +52,7 @@ constructor(
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
         val items = HashMap<Int, ItemDataStack>()
         var i = 0
-        for (item in event.character.player.inventory.contents) {
+        for (item in event.character.bukkitPlayer.inventory.contents) {
             if (item != null) {
                 val itemData = itemStackConverter.generateItemData(item)
                 if (itemData != null) {

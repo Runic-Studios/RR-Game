@@ -21,6 +21,7 @@ subprojects {
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://repo.dmulloy2.net/repository/public/")
         maven("https://repo.aikar.co/content/groups/aikar/")
+        maven("https://repo.xenondevs.xyz/releases")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -65,6 +66,10 @@ subprojects {
         compileOnly(rootProject.libs.velagones.paper)
         compileOnly(rootProject.libs.nbtapi)
         compileOnly(rootProject.libs.protocollib)
+
+        // Provided dependencies through paper plugin loader
+        implementation(rootProject.libs.invui)
+        implementation(rootProject.libs.invui.kotlin)
     }
 }
 

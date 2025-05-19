@@ -26,7 +26,9 @@ open class DynamicItemPerkStatPlaceholder(
     ): String {
         val base: Int = supplier()
         val value =
-            if (getEquippedSlot(viewer.player, gameItem, itemStack) != null) { // Item is equipped
+            if (
+                getEquippedSlot(viewer.bukkitPlayer, gameItem, itemStack) != null
+            ) { // Item is equipped
                 handler.getCurrentStacks(viewer) * base
             } else {
                 val addedStats = (gameItem as AddedStatsHolder).addedStats

@@ -49,7 +49,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
      */
     fun addMana(character: GameCharacter, amount: Int) {
         // Sync context
-        val player = character.player
+        val player = character.bukkitPlayer
         val mana = currentManaList[player.uniqueId]!!
         val maxMana: Int = calculateMaxMana(character)
         if (mana < maxMana)
@@ -80,7 +80,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
     /** Task to regen health with appropriate modifiers */
     private suspend fun regenHealth(character: GameCharacter) {
         // Sync context
-        val player = character.player
+        val player = character.bukkitPlayer
         val regenAmount =
             (HEALTH_REGEN_BASE_VALUE + (HEALTH_REGEN_LEVEL_MULTIPLIER * player.level)).toInt()
         if (true) { // TODO !RunicCore.getCombatAPI().isInCombat(player.uniqueId)) {
@@ -95,7 +95,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
     /** Periodic task to regenerate mana for all online players */
     private suspend fun regenMana(character: GameCharacter) {
         // Sync context
-        val player = character.player
+        val player = character.bukkitPlayer
         val mana =
             if (currentManaList.containsKey(player.uniqueId)) currentManaList[player.uniqueId]!!
             else (BASE_MANA + getManaPerLv(character)).toInt()
@@ -125,7 +125,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
         // Sync context
         val maxMana: Int
         // recalculate max mana based on player level
-        val player = character.player
+        val player = character.bukkitPlayer
         val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)) as Int
         // grab extra mana from wisdom
         val wisdomBoost: Double =

@@ -26,7 +26,7 @@ class DynamicItemPerkStacksTextPlaceholder(
     ): String {
         val stacks: Int = handler.getCurrentUncappedStacks(viewer)
         val component =
-            if (getEquippedSlot(viewer.player, gameItem, itemStack) != null) {
+            if (getEquippedSlot(viewer.bukkitPlayer, gameItem, itemStack) != null) {
                 val stacksColor =
                     if (stacks > handler.template.maxStacks) NamedTextColor.RED
                     else NamedTextColor.WHITE
