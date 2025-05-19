@@ -26,7 +26,7 @@ class CommonModule : AbstractModule() {
     private class OdalitaMenusProvider @Inject constructor(private val plugin: JavaPlugin) :
         Provider<OdalitaMenus> {
         override fun get(): OdalitaMenus {
-            return OdalitaMenus.getInstance(plugin)
+            return OdalitaMenus.createInstance(plugin)
         }
     }
 
