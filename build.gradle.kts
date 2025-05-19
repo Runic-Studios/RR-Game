@@ -68,8 +68,8 @@ subprojects {
         compileOnly(rootProject.libs.protocollib)
 
         // Provided dependencies through paper plugin loader
-        implementation(rootProject.libs.invui)
-        implementation(rootProject.libs.invui.kotlin)
+        compileOnly(rootProject.libs.invui)
+        compileOnly(rootProject.libs.invui.kotlin)
     }
 }
 

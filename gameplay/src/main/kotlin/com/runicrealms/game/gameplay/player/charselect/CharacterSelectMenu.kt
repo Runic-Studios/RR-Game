@@ -93,6 +93,7 @@ constructor(
                 player.kick()
             },
         )
+        Window.single().setGui(gui).build(player).open()
     }
 
     fun openDelete(slot: Int) {
