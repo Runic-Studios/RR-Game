@@ -40,8 +40,10 @@ constructor(
 
     private fun createChooseClassIcon(classType: ClassType): ClickableItem {
         return ClickableItem.of(characterSelectHelper.classIcons[classType]!!) { event ->
+            hasSelected = true
             event.whoClicked.closeInventory()
             characterSelectManager.creationCharacterTypes[event.whoClicked.uniqueId] = classType
+            event.whoClicked.sendMessage("&aCreating your character...")
             plugin.launch { userDataRegistry.setCharacter(event.whoClicked.uniqueId, slot) }
         }
     }

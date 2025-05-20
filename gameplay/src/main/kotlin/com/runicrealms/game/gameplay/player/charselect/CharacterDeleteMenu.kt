@@ -6,6 +6,7 @@ import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.trove.client.user.UserCharactersTraits
+import java.util.function.Supplier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
@@ -14,6 +15,7 @@ import net.kyori.adventure.text.format.Style
 import nl.odalitadevelopments.menus.OdalitaMenus
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
+import nl.odalitadevelopments.menus.contents.action.MenuCloseResult
 import nl.odalitadevelopments.menus.items.ClickableItem
 import nl.odalitadevelopments.menus.items.buttons.OpenMenuItem
 import nl.odalitadevelopments.menus.menu.providers.PlayerMenuProvider
@@ -37,6 +39,8 @@ constructor(
     }
 
     @Inject private lateinit var characterSelectMenuFactory: CharacterSelectMenu.Factory
+
+    @Volatile private var hasSelected = false
 
     private suspend fun deleteCharacter(player: Player) {
         // TODO actually implement this with trove
@@ -63,8 +67,17 @@ constructor(
         menuContents.set(
             6,
             ClickableItem.of(characterSelectHelper.confirmDeleteItem) { event ->
+                hasSelected = true
+                event.whoClicked.closeInventory()
                 plugin.launch { deleteCharacter(event.whoClicked as Player) }
             },
         )
+        menuContents
+            .events()
+            .onClose(
+                Supplier<MenuCloseResult> {
+                    if (hasSelected) MenuCloseResult.CLOSE else MenuCloseResult.KEEP_OPEN
+                }
+            )
     }
 }

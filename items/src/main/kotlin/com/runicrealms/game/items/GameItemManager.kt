@@ -92,9 +92,11 @@ constructor(
 
     override fun generateItemData(itemStack: ItemStack): ItemData? {
         if (itemStack.type == Material.AIR) return null
+        if (!NBT.readNbt(itemStack).hasTag("data")) return null
         val byteData = NBT.readNbt(itemStack).getByteArray("data") ?: return null
         try {
             val itemData = ItemData.parseFrom(byteData)
+            if (itemData.templateID.isNullOrEmpty()) return null
             return itemData
         } catch (exception: Exception) {
             exception.printStackTrace()
