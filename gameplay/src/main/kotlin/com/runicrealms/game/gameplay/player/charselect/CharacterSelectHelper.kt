@@ -128,8 +128,6 @@ class CharacterSelectHelper @Inject constructor() {
 
         val archerItem = ClassIcon.ARCHER_ICON.itemStack.clone()
         val archerMeta = checkNotNull(archerItem.itemMeta)
-        archerMeta.isUnbreakable = true
-        archerMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         archerMeta.displayName(
             Component.text("Archer ⚔", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD))
         )
@@ -196,8 +194,6 @@ class CharacterSelectHelper @Inject constructor() {
 
         val mageItem = ClassIcon.MAGE_ICON.itemStack.clone()
         val mageMeta = checkNotNull(mageItem.itemMeta)
-        mageMeta.isUnbreakable = true
-        mageMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
         mageMeta.displayName(
             Component.text("Mage ʔ", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD))
         )
@@ -228,8 +224,6 @@ class CharacterSelectHelper @Inject constructor() {
 
         val rogueItem = ClassIcon.ROGUE_ICON.itemStack.clone()
         val rogueMeta = checkNotNull(rogueItem.itemMeta)
-        rogueMeta.isUnbreakable = true
-        rogueMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
         rogueMeta.displayName(
             Component.text("Rogue ⚔", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD))
         )
@@ -259,8 +253,6 @@ class CharacterSelectHelper @Inject constructor() {
 
         val warriorItem = ClassIcon.WARRIOR_ICON.itemStack.clone()
         val warriorMeta = checkNotNull(warriorItem.itemMeta)
-        warriorMeta.isUnbreakable = true
-        warriorMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
         warriorMeta.displayName(
             Component.text("Warrior ■", Style.style(NamedTextColor.GREEN, TextDecoration.BOLD))
         )
@@ -313,7 +305,9 @@ class CharacterSelectHelper @Inject constructor() {
             if (meta is Damageable) {
                 meta.damage = damage
             }
+            meta.isUnbreakable = true
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
+            itemStack.itemMeta = meta
         }
 
         companion object {

@@ -125,6 +125,7 @@ constructor(
                             characterAddMenuFactory.create(i, userCharactersTraits),
                         ),
                     )
+                    addedSlots++
                 } else {
                     val icon =
                         when {
