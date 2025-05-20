@@ -67,6 +67,7 @@ constructor(
         menuContents.set(
             6,
             ClickableItem.of(characterSelectHelper.confirmDeleteItem) { event ->
+                if (hasSelected) return@of
                 hasSelected = true
                 event.whoClicked.closeInventory()
                 plugin.launch { deleteCharacter(event.whoClicked as Player) }

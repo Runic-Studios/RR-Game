@@ -101,12 +101,14 @@ constructor(
                     slotPos,
                     ClickableItem.of(createSelectIcon(i)) { event ->
                         if (!event.isRightClick) {
+                            if (hasSelected) return@of
                             hasSelected = true
                             event.whoClicked.closeInventory()
-                            if (hasSelected) return@of
                             val slot =
                                 NBT.readNbt(event.currentItem).getInteger("slot") ?: return@of
-                            plugin.launch { userDataRegistry.setCharacter(player.uniqueId, slot) }
+                            plugin.launch {
+                                userDataRegistry.setCharacter(player.uniqueId, slot)
+                            }
                         } else {
                             odalitaMenus.openMenu(
                                 characterDeleteMenuFactory.create(i, userCharactersTraits),

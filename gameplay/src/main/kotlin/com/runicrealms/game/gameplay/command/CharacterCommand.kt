@@ -2,12 +2,15 @@ package com.runicrealms.game.gameplay.command
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.PaperCommandManager
+import co.aikar.commands.annotation.CatchUnknown
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Conditions
+import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
+import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -18,7 +21,6 @@ import org.bukkit.plugin.Plugin
 
 @CommandAlias("runic|r")
 @Subcommand("character|char")
-@CommandPermission("runic.op")
 class CharacterCommand
 @Inject
 constructor(
@@ -31,34 +33,16 @@ constructor(
         commandManager.registerCommand(this)
     }
 
-    @Conditions("is-op")
-    @Subcommand("select")
-    fun onSelectCommand(player: Player, args: Array<String?>) {
-        val slot = if (args.isEmpty()) null else args[0]?.toIntOrNull()
-        val slotString = slot?.toString() ?: "EMPTY"
-        player.sendMessage(
-            Component.text(
-                "Switching to character $slotString",
-                Style.style(NamedTextColor.GOLD, TextDecoration.BOLD),
-            )
-        )
+    @Default
+    @CatchUnknown
+    fun onCommand(player: Player) {
+        player.sendMessage("&aLogging you out...".colorFormat())
         plugin.launch {
-            val success = userDataRegistry.setCharacter(player.uniqueId, slot)
+            val success = userDataRegistry.setCharacter(player.uniqueId, null)
             if (!success) {
-                player.sendMessage(
-                    Component.text(
-                        "Could not switch to character $slotString, check console for details",
-                        NamedTextColor.RED,
-                    )
-                )
+                player.sendMessage("&cCould not switch your characters! Try again later.".colorFormat())
             }
         }
     }
-
-    //    @Conditions("is-op")
-    //    @Subcommand("create")
-    //    fun onCreateCommand(player: Player, args: Array<String?>) {
-    //
-    //    }
 
 }

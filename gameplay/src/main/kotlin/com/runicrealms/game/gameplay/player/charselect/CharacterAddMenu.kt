@@ -40,6 +40,7 @@ constructor(
 
     private fun createChooseClassIcon(classType: ClassType): ClickableItem {
         return ClickableItem.of(characterSelectHelper.classIcons[classType]!!) { event ->
+            if (hasSelected) return@of
             hasSelected = true
             event.whoClicked.closeInventory()
             characterSelectManager.creationCharacterTypes[event.whoClicked.uniqueId] = classType

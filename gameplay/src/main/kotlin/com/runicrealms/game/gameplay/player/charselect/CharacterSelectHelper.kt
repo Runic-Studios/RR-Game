@@ -48,8 +48,8 @@ class CharacterSelectHelper @Inject constructor() {
                         Style.style(NamedTextColor.RED, TextDecoration.BOLD),
                     )
                 )
-                .append(Component.text("Knight", Style.style(NamedTextColor.AQUA)))
-                .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED)))
+                .append(Component.text("Knight", Style.style(NamedTextColor.AQUA, TextDecoration.BOLD)))
+                .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED, TextDecoration.BOLD)))
                 .build()
         )
         onlyKnightCreateItem.setItemMeta(knightMeta)
@@ -66,8 +66,8 @@ class CharacterSelectHelper @Inject constructor() {
                         Style.style(NamedTextColor.RED, TextDecoration.BOLD),
                     )
                 )
-                .append(Component.text("Hero", Style.style(NamedTextColor.YELLOW)))
-                .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED)))
+                .append(Component.text("Hero", Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD)))
+                .append(Component.text(" rank to use this slot", Style.style(NamedTextColor.RED, TextDecoration.BOLD)))
                 .build()
         )
         onlyHeroCreateItem.setItemMeta(heroMeta)
@@ -307,7 +307,7 @@ class CharacterSelectHelper @Inject constructor() {
             }
             meta.isUnbreakable = true
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES)
-            itemStack.itemMeta = meta
+            itemStack.setItemMeta(meta)
         }
 
         companion object {
