@@ -10,7 +10,7 @@ import org.bukkit.plugin.Plugin
  * This class is a wrapper around the GameSession for interaction with a user's player and character
  * data, including reading and staging changes to either.
  */
-class GameCharacter internal constructor(plugin: Plugin, gameSession: GameSession) :
+class GameCharacter internal constructor(plugin: Plugin, gameSession: GameSession, val slot: Int) :
     GamePlayer(plugin, gameSession) {
 
     /**

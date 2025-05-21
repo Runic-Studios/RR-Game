@@ -26,7 +26,7 @@ constructor(
     private val equipmentFactory: CharacterEquipmentCache.Factory,
 ) : Listener, CharacterEquipmentCacheRegistry {
 
-    override val cachedPlayerStats = ConcurrentHashMap<UUID, CharacterEquipmentCache>()
+    override val cachedCharacterStats = ConcurrentHashMap<UUID, CharacterEquipmentCache>()
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
@@ -34,13 +34,13 @@ constructor(
 
     @EventHandler
     fun onCharacterJoin(event: GameCharacterJoinEvent) {
-        cachedPlayerStats[event.character.bukkitPlayer.uniqueId] =
+        cachedCharacterStats[event.character.bukkitPlayer.uniqueId] =
             equipmentFactory.create(event.character)
     }
 
     @EventHandler
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        cachedPlayerStats.remove(event.character.bukkitPlayer.uniqueId)
+        cachedCharacterStats.remove(event.character.bukkitPlayer.uniqueId)
     }
 
     @EventHandler(
@@ -51,9 +51,9 @@ constructor(
         val player: Player = event.player
         val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
         val uuid = player.uniqueId
-        if (!cachedPlayerStats.containsKey(uuid)) return
+        if (!cachedCharacterStats.containsKey(uuid)) return
         if (event.isCancelled) return
-        val holder = cachedPlayerStats[uuid] ?: return
+        val holder = cachedCharacterStats[uuid] ?: return
         when (event.type) {
             ArmorEquipEvent.ArmorType.HELMET ->
                 holder.updateItems(false, CharacterEquipmentCache.StatHolderType.HELMET)

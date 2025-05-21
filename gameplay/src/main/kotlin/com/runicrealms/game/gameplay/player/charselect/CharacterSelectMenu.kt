@@ -112,8 +112,8 @@ constructor(
                                 characterSelectManager.setLoading(player, false)
                                 player.showTitle(
                                     Title.title(
-                                        "&6Welcome to the Realm!".colorFormat(),
-                                        Component.empty(),
+                                        "&6Welcome".colorFormat(),
+                                        "&6to the Realm!".colorFormat(),
                                         Title.Times.times(
                                             Duration.ZERO,
                                             Duration.ofMillis(1500),

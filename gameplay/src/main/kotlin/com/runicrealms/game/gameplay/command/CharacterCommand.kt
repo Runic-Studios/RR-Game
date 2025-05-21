@@ -29,7 +29,7 @@ constructor(
     @CatchUnknown
     fun onCommand(player: Player) {
         plugin.launch {
-            if (userDataRegistry.getCharacter(player.uniqueId) != null) {
+            if (userDataRegistry.getCharacter(player.uniqueId) == null) {
                 player.sendMessage("&cYou can't use this command right now.".colorFormat())
                 return@launch
             }

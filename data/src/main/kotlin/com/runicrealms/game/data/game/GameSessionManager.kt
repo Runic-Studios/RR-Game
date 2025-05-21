@@ -246,7 +246,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
 
                             session.characterData = characterData
 
-                            val character = GameCharacter(plugin, session)
+                            val character = GameCharacter(plugin, session, slot)
                             players[session.bukkitPlayer.uniqueId] = character
 
                             val characterLoadEvent = GameCharacterLoadEvent(character)

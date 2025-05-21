@@ -63,7 +63,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
      * @param player to calculate mana for
      * @return the mana per level
      */
-    private fun getManaPerLv(character: GameCharacter): Double {
+    fun getManaPerLv(character: GameCharacter): Double {
         // Sync context
         return character.withSyncCharacterData {
             when (traits.data.classType) {

@@ -3,13 +3,16 @@ package com.runicrealms.game.gameplay.player.charselect
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
-import com.runicrealms.game.common.WORLD_NAME
+import com.runicrealms.game.common.ALTERRA_NAME
 import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
+import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerJoinEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
+import com.runicrealms.game.data.extension.toTrove
+import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -33,10 +36,11 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val odalitaMenus: OdalitaMenus,
     private val characterSelectMenuFactory: CharacterSelectMenu.Factory,
+    private val saveZoneRegistry: SaveZoneRegistry,
 ) : Listener {
 
     companion object {
-        private val SPAWN_BOX = Location(Bukkit.getWorld(WORLD_NAME), -2271.5, 1.0, 2289.5)
+        private val SPAWN_BOX = Location(Bukkit.getWorld(ALTERRA_NAME), -2271.5, 1.0, 2289.5)
     }
 
     init {
@@ -52,6 +56,7 @@ constructor(
 
     fun setLoading(player: Player, loading: Boolean) {
         if (loading) {
+            if (isLoading.contains(player.uniqueId)) return
             isLoading.add(player.uniqueId)
             plugin.launch {
                 var dots = 0
@@ -62,8 +67,7 @@ constructor(
                     )
                     dots++
                     dots %= 4
-                    player.resetTitle()
-                    delay(500)
+                    delay(200)
                 }
             }
         } else {
@@ -74,8 +78,6 @@ constructor(
     private fun sendToSelection(player: Player) {
         player.inventory.clear()
         player.isInvulnerable = true
-        player.level = 0
-        player.exp = 0F
         player.foodLevel = 20
         player.teleport(SPAWN_BOX)
         player.gameMode = GameMode.SURVIVAL
@@ -128,10 +130,19 @@ constructor(
         with(event.characterData) {
             if (!empty) return
             val classType = creationCharacterTypes.remove(event.user) ?: return
+
+            // Set initial traits
             traits.data.classType = classType
             traits.data.exp = 0
             traits.data.level = 0
+            traits.data.location = saveZoneRegistry.TUTORIAL.location.toTrove()
+
             stageChanges(traits)
         }
+    }
+
+    @EventHandler
+    fun onGameCharacterJoin(event: GameCharacterJoinEvent) {
+        event.character.bukkitPlayer.isInvulnerable = false
     }
 }

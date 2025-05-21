@@ -1,4 +1,4 @@
-package com.runicrealms.game.gameplay.player.inventory
+package com.runicrealms.game.gameplay.character
 
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
@@ -13,7 +13,7 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
-class PlayerInventoryManager
+class CharacterInventoryManager
 @Inject
 constructor(
     plugin: Plugin,

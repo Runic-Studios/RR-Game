@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
+import com.fasterxml.jackson.module.kotlin.readValuesTyped
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 import org.slf4j.LoggerFactory
 
 class GameYamlLoader {
 
-    val yamlMapper =
+    val yamlMapper: ObjectMapper =
         ObjectMapper(YAMLFactory())
             .registerKotlinModule() {
                 enable(KotlinFeature.NullIsSameAsDefault)
@@ -32,10 +33,11 @@ class GameYamlLoader {
         if (!fileOrDirectory.exists()) return listOf()
         if (!fileOrDirectory.isDirectory) {
             try {
+                val yamlParser = yamlMapper.factory.createParser(fileOrDirectory)
                 return yamlMapper
                     .readerFor(T::class.java)
-                    .readValues<T>(fileOrDirectory)
-                    .readAll()
+                    .readValuesTyped<T>(yamlParser)
+                    .asSequence()
                     .toList()
             } catch (exception: Exception) {
                 logger.error("Error parsing YAML file ${fileOrDirectory.name}, skipping", exception)
@@ -48,7 +50,12 @@ class GameYamlLoader {
                 .filter { it.extension in extensions }
                 .flatMap { file ->
                     try {
-                        yamlMapper.readerFor(T::class.java).readValues<T>(file).readAll().toList()
+                        val yamlParser = yamlMapper.factory.createParser(file)
+                        yamlMapper
+                            .readerFor(T::class.java)
+                            .readValuesTyped<T>(yamlParser)
+                            .asSequence()
+                            .toList()
                     } catch (exception: Exception) {
                         logger.error("Error parsing YAML file ${file.name}, skipping", exception)
                         return@flatMap listOf()

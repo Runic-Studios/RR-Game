@@ -20,7 +20,7 @@ protected constructor(
     ): EquippedSlot? {
         val template = gameItem.template
         val cache =
-            characterEquipmentCacheRegistry.cachedPlayerStats[player.uniqueId] ?: return null
+            characterEquipmentCacheRegistry.cachedCharacterStats[player.uniqueId] ?: return null
         // We haven't loaded yet
 
         if (ArmorEquipEvent.ArmorType.matchType(itemStack) != null) {
