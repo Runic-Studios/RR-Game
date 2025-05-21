@@ -10,6 +10,7 @@ import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.util.MAX_CHARACTERS
 import com.runicrealms.trove.client.user.UserCharactersTraits
 import de.tr7zw.nbtapi.NBT
+import java.time.Duration
 import java.util.ArrayList
 import java.util.function.Supplier
 import net.kyori.adventure.text.Component
@@ -17,6 +18,7 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.title.Title
 import nl.odalitadevelopments.menus.OdalitaMenus
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
@@ -29,7 +31,6 @@ import nl.odalitadevelopments.menus.menu.providers.PlayerMenuProvider
 import nl.odalitadevelopments.menus.menu.type.MenuType
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
@@ -52,6 +53,8 @@ constructor(
 
     @Inject private lateinit var characterDeleteMenuFactory: CharacterDeleteMenu.Factory
 
+    @Inject private lateinit var characterSelectManager: CharacterSelectManager
+
     @Volatile private var hasSelected = false
 
     private fun createSelectIcon(slot: Int): ItemStack {
@@ -67,9 +70,6 @@ constructor(
                 Style.style(NamedTextColor.GREEN, TextDecoration.BOLD),
             )
         )
-        meta.isUnbreakable = true
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         val lore = ArrayList<TextComponent>(3)
         lore.add(
             Component.text()
@@ -106,8 +106,21 @@ constructor(
                             event.whoClicked.closeInventory()
                             val slot =
                                 NBT.readNbt(event.currentItem).getInteger("slot") ?: return@of
+                            characterSelectManager.setLoading(player, true)
                             plugin.launch {
                                 userDataRegistry.setCharacter(player.uniqueId, slot)
+                                characterSelectManager.setLoading(player, false)
+                                player.showTitle(
+                                    Title.title(
+                                        "&6Welcome to the Realm!".colorFormat(),
+                                        Component.empty(),
+                                        Title.Times.times(
+                                            Duration.ZERO,
+                                            Duration.ofMillis(1500),
+                                            Duration.ofMillis(500),
+                                        ),
+                                    )
+                                )
                             }
                         } else {
                             odalitaMenus.openMenu(

@@ -35,7 +35,7 @@ constructor(
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(slot: Int, userCharactersTraits: UserCharactersTraits): CharacterAddMenu
+        fun create(slot: Int, userCharactersTraits: UserCharactersTraits): CharacterDeleteMenu
     }
 
     @Inject private lateinit var characterSelectMenuFactory: CharacterSelectMenu.Factory
@@ -57,6 +57,7 @@ constructor(
     }
 
     override fun onLoad(player: Player, menuContents: MenuContents) {
+        println("hello")
         menuContents.set(
             2,
             OpenMenuItem.of(

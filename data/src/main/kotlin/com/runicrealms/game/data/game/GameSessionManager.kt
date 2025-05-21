@@ -274,7 +274,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
                                 "Finished pre-load/load/join for character $slot of player ${session.bukkitPlayer.uniqueId} in $time millis"
                             )
                         } else {
-                            endCharacterSession(session)
+                            endCharacterSession(session, false)
                         }
                         return@resultContext true
                     }
@@ -284,10 +284,10 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
     }
 
     // NOTe: assumes you have a lock on the character data in the calling context!
-    private suspend fun endCharacterSession(session: GameSession) {
+    private suspend fun endCharacterSession(session: GameSession, isOnLogout: Boolean) {
         // Minecraft game thread context
         val character = players[session.bukkitPlayer.uniqueId] as? GameCharacter ?: return
-        val characterQuitEvent = GameCharacterQuitEvent(character)
+        val characterQuitEvent = GameCharacterQuitEvent(character, isOnLogout)
         Bukkit.getPluginManager().callSuspendingEvent(characterQuitEvent, plugin).joinAll()
         players[session.bukkitPlayer.uniqueId] = GamePlayer(plugin, session)
         // NOTE: doesn't set character data to null! Responsibility of the calling method to do so
@@ -302,7 +302,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
             session.saveJob.cancelAndJoin()
 
             session.characterMutex.withLock {
-                withContext(plugin.minecraftDispatcher) { endCharacterSession(session) }
+                withContext(plugin.minecraftDispatcher) { endCharacterSession(session, true) }
             }
         }
 

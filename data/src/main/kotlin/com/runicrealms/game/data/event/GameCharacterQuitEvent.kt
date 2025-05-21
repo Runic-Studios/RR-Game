@@ -8,7 +8,7 @@ import org.bukkit.event.HandlerList
  * Fires SYNCHRONOUSLY after a player quits their character, but just before we save and destroy
  * their data.
  */
-class GameCharacterQuitEvent(val character: GameCharacter) : Event(false) {
+class GameCharacterQuitEvent(val character: GameCharacter, val isOnLogout: Boolean) : Event(false) {
 
     companion object {
         private val HANDLERS = HandlerList()

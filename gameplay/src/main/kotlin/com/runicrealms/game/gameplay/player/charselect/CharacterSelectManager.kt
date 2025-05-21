@@ -13,7 +13,9 @@ import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.title.Title
 import nl.odalitadevelopments.menus.OdalitaMenus
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -46,6 +48,29 @@ constructor(
     // Necessary to use GameCharacterPreLoadEvent to set the character's class
     val creationCharacterTypes = ConcurrentHashMap<UUID, ClassType>()
 
+    private val isLoading = HashSet<UUID>()
+
+    fun setLoading(player: Player, loading: Boolean) {
+        if (loading) {
+            isLoading.add(player.uniqueId)
+            plugin.launch {
+                var dots = 0
+                while (isLoading.contains(player.uniqueId)) {
+                    val dotsText = ".".repeat(dots)
+                    player.showTitle(
+                        Title.title("&aLoading$dotsText".colorFormat(), Component.empty())
+                    )
+                    dots++
+                    dots %= 4
+                    player.resetTitle()
+                    delay(500)
+                }
+            }
+        } else {
+            if (isLoading.remove(player.uniqueId)) player.clearTitle()
+        }
+    }
+
     private fun sendToSelection(player: Player) {
         player.inventory.clear()
         player.isInvulnerable = true
@@ -54,41 +79,41 @@ constructor(
         player.foodLevel = 20
         player.teleport(SPAWN_BOX)
         player.gameMode = GameMode.SURVIVAL
-        // TODO display loading characters
-        player.sendMessage("&aLoading your character information...".colorFormat())
+        setLoading(player, true)
+    }
+
+    private fun openSelectionMenu(player: Player) {
+        plugin.launch {
+            val traits = userDataRegistry.loadUserCharactersTraits(player.uniqueId)
+            if (traits == null) {
+                player.sendMessage("&cFailed to load your characters traits!".colorFormat())
+                return@launch
+            }
+            if (!player.isOnline) return@launch
+            odalitaMenus.openMenu(characterSelectMenuFactory.create(traits), player)
+            setLoading(player, false)
+        }
     }
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         // Before any player data is loaded
-        event.joinMessage(Component.text(""))
         sendToSelection(event.player)
     }
 
     @EventHandler
     fun onGameCharacterQuit(event: GameCharacterQuitEvent) {
         // When a player quits, or tries to select a new character
-        sendToSelection(event.character.bukkitPlayer)
+        if (!event.isOnLogout) {
+            sendToSelection(event.character.bukkitPlayer)
+            openSelectionMenu(event.character.bukkitPlayer)
+        }
     }
 
     @EventHandler
     fun onGamePlayerJoin(event: GamePlayerJoinEvent) {
         // After we have loaded player data
-        plugin.launch {
-            val traits =
-                userDataRegistry.loadUserCharactersTraits(event.player.bukkitPlayer.uniqueId)
-            if (traits == null) {
-                event.player.bukkitPlayer.sendMessage(
-                    "&cFailed to load your characters traits!".colorFormat()
-                )
-                return@launch
-            }
-            if (!event.player.bukkitPlayer.isOnline) return@launch
-            odalitaMenus.openMenu(
-                characterSelectMenuFactory.create(traits),
-                event.player.bukkitPlayer,
-            )
-        }
+        openSelectionMenu(event.player.bukkitPlayer)
     }
 
     @EventHandler

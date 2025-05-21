@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.trove.client.user.UserCharactersTraits
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
@@ -44,7 +45,7 @@ constructor(
             hasSelected = true
             event.whoClicked.closeInventory()
             characterSelectManager.creationCharacterTypes[event.whoClicked.uniqueId] = classType
-            event.whoClicked.sendMessage("&aCreating your character...")
+            event.whoClicked.sendMessage("&aCreating your character...".colorFormat())
             plugin.launch { userDataRegistry.setCharacter(event.whoClicked.uniqueId, slot) }
         }
     }
