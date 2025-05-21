@@ -3,6 +3,10 @@ package com.runicrealms.game.gameplay
 import com.google.inject.AbstractModule
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.runicrealms.game.gameplay.character.CharacterInventoryManager
+import com.runicrealms.game.gameplay.character.CharacterTraitsManager
+import com.runicrealms.game.gameplay.character.util.CharacterHealthHelper
+import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
+import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.charselect.CharacterAddMenu
@@ -20,9 +24,14 @@ class GameplayModule : AbstractModule() {
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
 
-        bind(CharacterInventoryManager::class.java).asEagerSingleton()
-
         bind(CharacterCommand::class.java).asEagerSingleton()
+
+        bind(CharacterHealthHelper::class.java).asEagerSingleton()
+        bind(CharacterLevelHelper::class.java).asEagerSingleton()
+        bind(SaveZoneRegistry::class.java).asEagerSingleton()
+
+        bind(CharacterInventoryManager::class.java).asEagerSingleton()
+        bind(CharacterTraitsManager::class.java).asEagerSingleton()
 
         bind(CharacterSelectManager::class.java).asEagerSingleton()
         bind(CharacterSelectHelper::class.java).asEagerSingleton()

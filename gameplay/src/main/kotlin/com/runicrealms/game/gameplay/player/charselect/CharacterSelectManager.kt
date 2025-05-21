@@ -14,6 +14,7 @@ import com.runicrealms.game.data.event.GamePlayerQuitEvent
 import com.runicrealms.game.data.extension.toTrove
 import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
+import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.delay
@@ -63,7 +64,11 @@ constructor(
                 while (isLoading.contains(player.uniqueId)) {
                     val dotsText = ".".repeat(dots)
                     player.showTitle(
-                        Title.title("&aLoading$dotsText".colorFormat(), Component.empty())
+                        Title.title(
+                            "&aLoading$dotsText".colorFormat(),
+                            Component.empty(),
+                            Title.Times.times(Duration.ZERO, Duration.ofSeconds(10), Duration.ZERO),
+                        )
                     )
                     dots++
                     dots %= 4
