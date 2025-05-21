@@ -42,9 +42,14 @@ constructor(
         return ClickableItem.of(characterSelectHelper.classIcons[classType]!!) { event ->
             if (hasSelected) return@of
             hasSelected = true
+            val player = event.whoClicked as Player
             event.whoClicked.closeInventory()
             characterSelectManager.creationCharacterTypes[event.whoClicked.uniqueId] = classType
-            plugin.launch { userDataRegistry.setCharacter(event.whoClicked.uniqueId, slot) }
+            characterSelectManager.setLoading(player, true)
+            plugin.launch {
+                userDataRegistry.setCharacter(event.whoClicked.uniqueId, slot)
+                characterSelectManager.setLoading(player, false)
+            }
         }
     }
 

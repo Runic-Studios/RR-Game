@@ -322,7 +322,7 @@ constructor(
     @Syntax("<level-min> <level-max> [amount]")
     @CommandCompletion("@range:0-60 @range:0-60 @nothing")
     fun onCommandGetRange(player: Player, args: Array<String>) {
-        if (args.size == 1) {
+        if (args.size < 2) {
             player.sendMessage(
                 "$PREFIX&dInvalid syntax! Please check &7/runicitem help".colorFormat()
             )

@@ -220,6 +220,7 @@ constructor(private val troveClient: TroveClient, private val plugin: Plugin) :
         val session = sessions[user] ?: return false
         return withTimeout(5000) {
             withContext(plugin.asyncDispatcher) {
+                saveSession(session) // Save before loading
                 session.characterMutex.withLock { // Acquire lock async
                     withContext(plugin.minecraftDispatcher) resultContext@{
                         val oldCharacterData = session.characterData
