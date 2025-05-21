@@ -6,7 +6,7 @@ import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import com.google.inject.Inject
-import com.runicrealms.game.common.colorFormat
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.items.GameItemManager
 import org.bukkit.command.CommandSender
 

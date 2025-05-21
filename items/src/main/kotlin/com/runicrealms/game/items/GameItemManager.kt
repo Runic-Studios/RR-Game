@@ -2,10 +2,10 @@ package com.runicrealms.game.items
 
 import com.google.inject.Inject
 import com.runicrealms.game.common.config.GameYamlLoader
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.generator.GameItem
 import com.runicrealms.game.items.generator.GameItemArmor
 import com.runicrealms.game.items.generator.GameItemGem
@@ -47,8 +47,10 @@ constructor(
         val scriptFolder = File(itemsFolder, "script").also { it.mkdirs() }
         val perksFolder = File(itemsFolder, "perk").also { it.mkdirs() }
 
-        val customItems = GameYamlLoader.readYaml<GameItemTemplate>(customFolder).associateBy { it.id }
-        val scriptItems = GameYamlLoader.readYaml<GameItemTemplate>(scriptFolder).associateBy { it.id }
+        val customItems =
+            GameYamlLoader.readYaml<GameItemTemplate>(customFolder).associateBy { it.id }
+        val scriptItems =
+            GameYamlLoader.readYaml<GameItemTemplate>(scriptFolder).associateBy { it.id }
         templates.putAll(customItems)
         templates.putAll(scriptItems)
 

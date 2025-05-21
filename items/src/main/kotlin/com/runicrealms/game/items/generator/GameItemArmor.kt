@@ -2,13 +2,13 @@ package com.runicrealms.game.items.generator
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.game.common.TextIcons
+import com.runicrealms.game.common.util.TextIcons
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.items.character.AddedStats
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.config.item.GameItemArmorTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.util.GemStatUtil
 import com.runicrealms.game.items.util.ItemLoreBuilder

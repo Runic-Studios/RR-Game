@@ -11,15 +11,15 @@ import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
 import com.google.inject.Inject
-import com.runicrealms.game.common.colorFormat
-import com.runicrealms.game.common.toLegacy
+import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLegacy
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getClassTypeFromIdentifier
-import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.game.items.config.item.ClassTypeHolder
+import com.runicrealms.game.items.config.item.ClassTypeRequirementHolder
 import com.runicrealms.game.items.config.item.GameItemRarityType
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.generator.AddedStatsHolder
 import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
@@ -497,7 +497,7 @@ constructor(
         for (i in 1..5) {
             val template = itemTemplateRegistry.getItemTemplate(args[i] ?: continue) ?: continue
 
-            var itemClass = (template as? ClassTypeHolder)?.classType
+            var itemClass = (template as? ClassTypeRequirementHolder)?.classType
             if (itemClass == null || itemClass != classType) continue
             // TODO check works
             target.inventory.addItem(

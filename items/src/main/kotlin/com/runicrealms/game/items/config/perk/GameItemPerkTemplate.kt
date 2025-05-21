@@ -7,10 +7,10 @@ import java.util.Locale
 import net.kyori.adventure.text.TextComponent
 
 class GameItemPerkTemplate(
-    @JsonProperty("id")
-    identifier: String,
+    @JsonProperty("id") identifier: String,
     @JsonProperty("name")
-    @JsonDeserialize(converter = TextComponentConverter::class) val name: TextComponent,
+    @JsonDeserialize(converter = TextComponentConverter::class)
+    val name: TextComponent,
     @JsonProperty("max-stacks") val maxStacks: Int = 1,
     @JsonProperty("lore")
     @JsonDeserialize(contentConverter = TextComponentConverter::class)

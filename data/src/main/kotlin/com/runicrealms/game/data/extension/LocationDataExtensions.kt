@@ -1,7 +1,7 @@
 package com.runicrealms.game.data.extension
 
-import com.runicrealms.game.common.ALTERRA_NAME
-import com.runicrealms.game.common.DUNGEONS_NAME
+import com.runicrealms.game.common.util.ALTERRA_NAME
+import com.runicrealms.game.common.util.DUNGEONS_NAME
 import com.runicrealms.trove.generated.api.schema.v1.LocationData
 import org.bukkit.Bukkit
 import org.bukkit.Location

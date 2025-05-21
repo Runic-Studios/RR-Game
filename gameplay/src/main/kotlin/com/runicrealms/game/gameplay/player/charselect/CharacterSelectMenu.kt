@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.game.common.colorFormat
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.util.MAX_CHARACTERS

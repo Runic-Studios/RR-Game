@@ -1,8 +1,8 @@
 package com.runicrealms.game.common.config.converter
 
 import com.fasterxml.jackson.databind.util.StdConverter
-import com.runicrealms.game.common.TextIcons
-import com.runicrealms.game.common.colorFormat
+import com.runicrealms.game.common.util.TextIcons
+import com.runicrealms.game.common.util.colorFormat
 import net.kyori.adventure.text.TextComponent
 
 /** Jackson databind compatible converter for turning Strings into TextComponents */

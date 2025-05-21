@@ -1,4 +1,4 @@
-package com.runicrealms.game.common
+package com.runicrealms.game.common.util
 
 import java.net.URI
 import java.util.UUID

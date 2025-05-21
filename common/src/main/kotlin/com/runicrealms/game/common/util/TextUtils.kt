@@ -1,4 +1,4 @@
-package com.runicrealms.game.common
+package com.runicrealms.game.common.util
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -21,8 +21,10 @@ fun TextComponent.toLegacy(altChar: Char = '&'): String =
     LegacyComponentSerializer.legacy(altChar).serialize(this)
 
 object TextIcons {
-    const val HEALTH_ICON: String = "❤"
-    const val EMPTY_GEM_ICON: String = "◇"
+    const val HEALTH_ICON = "❤"
+    const val EMPTY_GEM_ICON = "◇"
+    val X_ICON = "&c✘".colorFormat().toLegacy()
+    val CHECKMARK_ICON = "&a✔".colorFormat().toLegacy()
 }
 
 fun String.breakLines(lineLength: Int = LINE_LENGTH): List<String> {

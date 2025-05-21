@@ -3,8 +3,8 @@ package com.runicrealms.game.gameplay.player.charselect
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
-import com.runicrealms.game.common.ALTERRA_NAME
-import com.runicrealms.game.common.colorFormat
+import com.runicrealms.game.common.util.ALTERRA_NAME
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
@@ -26,6 +26,7 @@ import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.Plugin
@@ -130,7 +131,7 @@ constructor(
     }
 
     // For players creating characters
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW) // Run early
     fun onGameCharacterPreLoad(event: GameCharacterPreLoadEvent) {
         with(event.characterData) {
             if (!empty) return

@@ -1,13 +1,14 @@
 package com.runicrealms.game.items.command
 
 import com.google.inject.Inject
-import com.runicrealms.game.items.config.item.ClassTypeHolder
+import com.runicrealms.game.items.config.item.ClassTypeRequirementHolder
 import com.runicrealms.game.items.config.item.GameItemArmorTemplate
 import com.runicrealms.game.items.config.item.GameItemRarityType
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.item.GameItemWeaponTemplate
-import com.runicrealms.game.items.config.item.RarityLevelHolder
+import com.runicrealms.game.items.config.item.LevelRequirementHolder
+import com.runicrealms.game.items.config.item.RarityTypeHolder
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.EnumMap
 import java.util.LinkedList
@@ -86,13 +87,14 @@ constructor(
         val minLevel = min(range?.first ?: 0, range?.second ?: 0)
         val maxLevel = max(range?.first ?: Int.MAX_VALUE, range?.second ?: Int.MAX_VALUE)
         for (template in itemTemplateRegistry.getItemTemplates()) {
-            if (template !is RarityLevelHolder) continue
+            if (template !is RarityTypeHolder) continue
+            if (template !is LevelRequirementHolder) continue
             if (!template.id.startsWith("script")) continue
             if (template.level > maxLevel) continue
             if (template.level < minLevel) continue
             if (!rarity.contains(template.rarity)) continue
             if (playerClass != null && playerClass != ClassType.ANY) {
-                if (template !is ClassTypeHolder) continue
+                if (template !is ClassTypeRequirementHolder) continue
                 if (template.classType != playerClass) continue
             }
             if (itemTypes != null && !itemTypes.contains(ItemType.getItemType(template))) continue
@@ -205,7 +207,8 @@ constructor(
     fun sortItems(templates: Map<String, GameItemTemplate>) {
         for ((identifier, template) in templates) {
             if (!identifier.startsWith("script")) continue
-            if (template !is RarityLevelHolder) continue
+            if (template !is RarityTypeHolder) continue
+            if (template !is LevelRequirementHolder) continue
             val rarityItems =
                 when (template) {
                     is GameItemArmorTemplate -> armorItems

@@ -1,8 +1,8 @@
 package com.runicrealms.game.gameplay.character.util
 
 import com.google.inject.Inject
-import com.runicrealms.game.common.colorFormat
-import com.runicrealms.game.common.sendCenteredMessage
+import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.sendCenteredMessage
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.gameplay.player.RegenManager

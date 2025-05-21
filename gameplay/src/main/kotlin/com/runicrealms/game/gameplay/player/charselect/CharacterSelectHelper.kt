@@ -2,8 +2,8 @@ package com.runicrealms.game.gameplay.player.charselect
 
 import SubClassType
 import com.google.inject.Inject
-import com.runicrealms.game.common.breakLines
-import com.runicrealms.game.common.colorFormat
+import com.runicrealms.game.common.util.breakLines
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.HashMap
 import net.kyori.adventure.text.Component

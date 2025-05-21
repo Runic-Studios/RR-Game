@@ -1,4 +1,4 @@
-import com.runicrealms.game.common.getHead
+import com.runicrealms.game.common.util.getHead
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 
 enum class SubClassType(

@@ -37,7 +37,10 @@ class GameItemOffhandTemplate(
     @JsonProperty("rarity")
     @JsonDeserialize(converter = GameItemRarityTypeConverter::class)
     override val rarity: GameItemRarityType,
-) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties), RarityLevelHolder {
+) :
+    GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
+    RarityTypeHolder,
+    LevelRequirementHolder {
 
     override fun buildItemData(): ItemData.Builder {
         val builder = super.buildItemData()

@@ -1,7 +1,6 @@
 package com.runicrealms.game.items.config.item
 
-interface RarityLevelHolder {
+interface LevelRequirementHolder {
 
     val level: Int
-    val rarity: GameItemRarityType
 }

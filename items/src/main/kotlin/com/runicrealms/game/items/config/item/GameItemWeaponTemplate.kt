@@ -45,8 +45,9 @@ class GameItemWeaponTemplate(
     override val classType: ClassType,
 ) :
     GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
-    ClassTypeHolder,
-    RarityLevelHolder {
+    ClassTypeRequirementHolder,
+    RarityTypeHolder,
+    LevelRequirementHolder {
 
     override fun buildItemData(): ItemData.Builder {
         val builder = super.buildItemData()
