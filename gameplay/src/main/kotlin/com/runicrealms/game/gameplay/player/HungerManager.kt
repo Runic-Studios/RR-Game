@@ -5,7 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.data.UserDataRegistry
-import com.runicrealms.game.items.config.template.GameItemTag
+import com.runicrealms.game.items.config.item.GameItemTag
 import com.runicrealms.game.items.generator.ItemStackConverter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

@@ -50,7 +50,7 @@ protected constructor(
      *
      * Null indicates no lore
      */
-    open fun getLoreSection(): List<TextComponent>? {
+    open fun getLoreSection(): List<TextComponent> {
         return template.lore
     }
 

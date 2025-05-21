@@ -1,7 +1,7 @@
 package com.runicrealms.game.items.config.jackson.converter
 
 import com.fasterxml.jackson.databind.util.StdConverter
-import com.runicrealms.game.items.config.template.GameItemRarityType
+import com.runicrealms.game.items.config.item.GameItemRarityType
 
 /** Jackson databind compatible converter for turning Strings into ItemRarityTypes */
 class GameItemRarityTypeConverter : StdConverter<String, GameItemRarityType?>() {

@@ -1,4 +1,4 @@
-package com.runicrealms.game.items.config.template
+package com.runicrealms.game.items.config.item
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo

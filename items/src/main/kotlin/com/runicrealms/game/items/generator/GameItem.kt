@@ -1,6 +1,6 @@
 package com.runicrealms.game.items.generator
 
-import com.runicrealms.game.items.config.template.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
 import de.tr7zw.nbtapi.NBT

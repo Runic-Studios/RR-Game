@@ -1,17 +1,19 @@
-package com.runicrealms.game.items.config.template
+package com.runicrealms.game.items.config.item
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.runicrealms.game.common.config.converter.ClassTypeConverter
 import com.runicrealms.game.common.config.converter.TextComponentConverter
 import com.runicrealms.game.items.config.jackson.converter.GameItemRarityTypeConverter
 import com.runicrealms.game.items.config.jackson.converter.GameItemTagConverter
 import com.runicrealms.game.items.config.jackson.deserializer.GameItemClickTriggerTypeKeyDeserializer
 import com.runicrealms.game.items.config.jackson.deserializer.StatTypeKeyDeserializer
+import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import com.runicrealms.trove.generated.api.schema.v1.StatType
 import net.kyori.adventure.text.TextComponent
 
-class GameItemOffhandTemplate(
+class GameItemWeaponTemplate(
     @JsonProperty("id") id: String,
     @JsonProperty("display") display: DisplayableItem,
     @JsonProperty("tags")
@@ -27,6 +29,7 @@ class GameItemOffhandTemplate(
     )
     triggers: LinkedHashMap<GameItemClickTrigger.Type, String> = LinkedHashMap(),
     @JsonProperty("extra") extraProperties: Map<String, Any> = mapOf(),
+    @JsonProperty("damage") val damage: DamageRange,
     @JsonProperty("stats")
     @JsonDeserialize(keyUsing = StatTypeKeyDeserializer::class, `as` = LinkedHashMap::class)
     val stats: LinkedHashMap<StatType, StatRange> = LinkedHashMap(),
@@ -37,15 +40,22 @@ class GameItemOffhandTemplate(
     @JsonProperty("rarity")
     @JsonDeserialize(converter = GameItemRarityTypeConverter::class)
     override val rarity: GameItemRarityType,
-) : GameItemTemplate(id, display, tags, lore, triggers, extraProperties), RarityLevelHolder {
+    @JsonProperty("class")
+    @JsonDeserialize(converter = ClassTypeConverter::class)
+    override val classType: ClassType,
+) :
+    GameItemTemplate(id, display, tags, lore, triggers, extraProperties),
+    ClassTypeHolder,
+    RarityLevelHolder {
 
     override fun buildItemData(): ItemData.Builder {
         val builder = super.buildItemData()
-        val offhandBuilder =
-            builder.offhandBuilder
+        val weaponBuilder =
+            builder.weaponBuilder
+                .setSkinID("") // No skin ID
                 .addAllStats(stats.toRolledStats())
                 .addAllPerks(defaultPerks.toPerks())
-        builder.setOffhand(offhandBuilder.build())
+        builder.setWeapon(weaponBuilder.build())
         return builder
     }
 }

@@ -1,8 +1,8 @@
 package com.runicrealms.game.gameplay.character.util
 
 import com.google.inject.Inject
-import com.runicrealms.game.items.config.template.GameItemTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.ItemStackConverter
 import org.bukkit.Bukkit
 import org.bukkit.Location

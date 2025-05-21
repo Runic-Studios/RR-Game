@@ -16,10 +16,10 @@ import com.runicrealms.game.common.toLegacy
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getClassTypeFromIdentifier
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.game.items.config.template.ClassTypeHolder
-import com.runicrealms.game.items.config.template.GameItemRarityType
-import com.runicrealms.game.items.config.template.GameItemTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.ClassTypeHolder
+import com.runicrealms.game.items.config.item.GameItemRarityType
+import com.runicrealms.game.items.config.item.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.AddedStatsHolder
 import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
@@ -50,7 +50,7 @@ constructor(
         val templateIdentifiers = itemTemplateRegistry.getItemTemplates().map { it.id }
 
         commandManager.commandCompletions.registerAsyncCompletion("item-ids") { context ->
-            return@registerAsyncCompletion if (!context.sender.isOp) templateIdentifiers
+            return@registerAsyncCompletion if (context.sender.isOp) templateIdentifiers
             else emptySet()
         }
 

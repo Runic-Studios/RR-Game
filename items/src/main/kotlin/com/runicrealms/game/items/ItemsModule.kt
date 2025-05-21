@@ -11,7 +11,7 @@ import com.runicrealms.game.items.command.ItemCommand
 import com.runicrealms.game.items.command.LootHelper
 import com.runicrealms.game.items.command.ReloadItemsCommand
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.dynamic.DynamicItemManager
 import com.runicrealms.game.items.dynamic.DynamicItemRegistry
 import com.runicrealms.game.items.generator.GameItemArmor

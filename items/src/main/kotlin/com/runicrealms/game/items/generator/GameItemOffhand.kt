@@ -5,9 +5,9 @@ import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.game.items.config.template.GameItemOffhandTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemOffhandTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.util.ItemLoreBuilder
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
@@ -118,7 +118,7 @@ constructor(
                     .build()
             perkLore.add(perkText)
             val handlerLore = handler.getLoreSection()
-            if (handlerLore != null) perkLore.addAll(handlerLore)
+            perkLore.addAll(handlerLore)
             perkLore.add(Component.text(""))
             atLeastOnePerk = true
         }

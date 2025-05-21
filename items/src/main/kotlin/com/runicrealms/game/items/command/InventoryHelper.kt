@@ -2,7 +2,7 @@ package com.runicrealms.game.items.command
 
 import com.google.inject.Inject
 import com.runicrealms.game.common.colorFormat
-import com.runicrealms.game.items.config.template.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.generator.ItemStackConverter
 import org.bukkit.Material
 import org.bukkit.command.CommandSender

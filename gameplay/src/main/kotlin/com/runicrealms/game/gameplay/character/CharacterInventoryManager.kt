@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.trove.generated.api.schema.v1.ItemDataStack
 import org.bukkit.Bukkit
@@ -60,7 +60,6 @@ constructor(
                         ItemDataStack.newBuilder().setData(itemData).setCount(item.amount).build()
                 }
             }
-            i++
         }
         event.character.withSyncCharacterData {
             inventory.data.clearItems()

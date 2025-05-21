@@ -1,13 +1,13 @@
 package com.runicrealms.game.items.command
 
 import com.google.inject.Inject
-import com.runicrealms.game.items.config.template.ClassTypeHolder
-import com.runicrealms.game.items.config.template.GameItemArmorTemplate
-import com.runicrealms.game.items.config.template.GameItemRarityType
-import com.runicrealms.game.items.config.template.GameItemTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
-import com.runicrealms.game.items.config.template.GameItemWeaponTemplate
-import com.runicrealms.game.items.config.template.RarityLevelHolder
+import com.runicrealms.game.items.config.item.ClassTypeHolder
+import com.runicrealms.game.items.config.item.GameItemArmorTemplate
+import com.runicrealms.game.items.config.item.GameItemRarityType
+import com.runicrealms.game.items.config.item.GameItemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemWeaponTemplate
+import com.runicrealms.game.items.config.item.RarityLevelHolder
 import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.EnumMap
 import java.util.LinkedList

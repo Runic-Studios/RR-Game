@@ -1,4 +1,4 @@
-package com.runicrealms.game.items.config.template
+package com.runicrealms.game.items.config.item
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent

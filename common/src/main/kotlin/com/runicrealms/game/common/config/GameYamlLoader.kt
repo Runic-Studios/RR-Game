@@ -3,17 +3,18 @@ package com.runicrealms.game.common.config
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.readValues
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 import org.slf4j.LoggerFactory
 
-class GameYamlLoader {
+object GameYamlLoader {
 
     val yamlMapper: ObjectMapper =
         ObjectMapper(YAMLFactory())
-            .registerKotlinModule() {
+            .registerKotlinModule {
                 enable(KotlinFeature.NullIsSameAsDefault)
                 enable(KotlinFeature.NullToEmptyMap)
                 enable(KotlinFeature.NullToEmptyCollection)
@@ -47,7 +48,7 @@ class GameYamlLoader {
                 .flatMap { file ->
                     try {
                         val yamlParser = yamlMapper.factory.createParser(file)
-                        yamlMapper.readValues<T>(yamlParser).readAll().toList()
+                        return@flatMap yamlMapper.readValues<T>(yamlParser).readAll().toList()
                     } catch (exception: Exception) {
                         logger.error("Error parsing YAML file ${file.name}, skipping", exception)
                         return@flatMap listOf()

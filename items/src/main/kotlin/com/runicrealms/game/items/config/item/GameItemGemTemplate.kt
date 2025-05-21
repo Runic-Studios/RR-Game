@@ -1,4 +1,4 @@
-package com.runicrealms.game.items.config.template
+package com.runicrealms.game.items.config.item
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize

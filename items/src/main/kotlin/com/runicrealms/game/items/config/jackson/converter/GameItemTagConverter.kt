@@ -1,7 +1,7 @@
 package com.runicrealms.game.items.config.jackson.converter
 
 import com.fasterxml.jackson.databind.util.StdConverter
-import com.runicrealms.game.items.config.template.GameItemTag
+import com.runicrealms.game.items.config.item.GameItemTag
 
 /** Jackson databind compatible converter for turning Strings into GameItemTags */
 class GameItemTagConverter : StdConverter<String, GameItemTag?>() {

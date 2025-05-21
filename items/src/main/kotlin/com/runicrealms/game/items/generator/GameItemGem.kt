@@ -3,8 +3,8 @@ package com.runicrealms.game.items.generator
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.extension.getInfo
-import com.runicrealms.game.items.config.template.GameItemGemTemplate
-import com.runicrealms.game.items.config.template.GameItemTemplateRegistry
+import com.runicrealms.game.items.config.item.GameItemGemTemplate
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.util.GemStatUtil
 import com.runicrealms.game.items.util.ItemLoreBuilder
 import com.runicrealms.trove.generated.api.schema.v1.ItemData
