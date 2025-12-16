@@ -17,7 +17,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://nexus.runicrealms.com/repository/maven-public/")
+        maven("https://reposilite.runicrealms.com/releases/")
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://repo.dmulloy2.net/repository/public/")
         maven("https://repo.aikar.co/content/groups/aikar/")
