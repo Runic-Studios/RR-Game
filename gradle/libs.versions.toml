@@ -42,6 +42,6 @@ grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
 protobuf-java = "com.google.protobuf:protobuf-java:4.30.1"
 
 # Plugin dependencies
-velagones-paper = "com.runicrealms.velagones:velagones-paper:0.1.4"
+velagones-paper = "com.runicrealms.velagones:velagones-paper:0.1.5"
 nbtapi = "de.tr7zw:item-nbt-api-plugin:2.15.5"
 protocollib = "net.dmulloy2:ProtocolLib:5.4.0"
