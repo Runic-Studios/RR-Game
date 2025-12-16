@@ -44,4 +44,4 @@ protobuf-java = "com.google.protobuf:protobuf-java:4.30.1"
 # Plugin dependencies
 velagones-paper = "com.runicrealms.velagones:velagones-paper:0.1.4"
 nbtapi = "de.tr7zw:item-nbt-api-plugin:2.15.5"
-protocollib = "com.comphenix.protocol:ProtocolLib:5.4.0"
+protocollib = "net.dmulloy2:ProtocolLib:5.4.0"
