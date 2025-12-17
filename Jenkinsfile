@@ -8,8 +8,8 @@ pipeline {
     }
 
     environment {
-        ARTIFACT_NAME = 'game'
-        PROJECT_NAME = 'Game'
+        ARTIFACT_NAME = 'rr-game'
+        PROJECT_NAME = 'RR Game'
         REGISTRY = 'registry.runicrealms.com'
         REGISTRY_PROJECT = 'library'
     }
@@ -52,7 +52,7 @@ pipeline {
         stage('Update Realm-Velocity and Realm-Paper Manifests') {
             steps {
                 container('agent-java-21') {
-                    updateManifest('dev', 'Realm-Paper', 'artifact-manifest.yaml', env.ARTIFACT_NAME, env.GIT_COMMIT.take(7), 'artifacts.velagones.tag')
+                    updateManifest('dev', 'Realm-Paper', 'artifact-manifest.yaml', env.ARTIFACT_NAME, env.GIT_COMMIT.take(7), 'artifacts.rr-game.tag')
                 }
             }
         }
@@ -62,7 +62,7 @@ pipeline {
             }
             steps {
                 container('agent-java-21') {
-                    createPR('Velagones', 'Realm-Paper', 'dev', 'main')
+                    createPR('RR-Game', 'Realm-Paper', 'dev', 'main')
                 }
             }
         }

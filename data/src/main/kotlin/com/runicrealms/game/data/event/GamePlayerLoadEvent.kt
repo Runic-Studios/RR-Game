@@ -1,0 +1,31 @@
+package com.runicrealms.game.data.event
+
+import com.runicrealms.game.data.game.GamePlayer
+import org.bukkit.event.Event
+import org.bukkit.event.HandlerList
+
+/**
+ * Fires SYNCHRONOUSLY after:
+ * - player joins
+ * - we load character data (successfully)
+ *
+ * This event can be "failed", which will kick the player and not fire the GamePlayerJoinEvent
+ */
+class GamePlayerLoadEvent(val player: GamePlayer) : Event(false) {
+
+    internal var success = true
+    internal val errors by lazy { HashSet<Throwable>() }
+
+    fun fail(throwable: Throwable) {
+        success = false
+        errors.add(throwable)
+    }
+
+    companion object {
+        private val HANDLERS = HandlerList()
+
+        @JvmStatic fun getHandlerList() = HANDLERS
+    }
+
+    override fun getHandlers() = HANDLERS
+}

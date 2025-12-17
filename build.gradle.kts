@@ -9,7 +9,7 @@ plugins {
 
 group = "com.runicrealms.game.plugin"
 
-version = "3.0"
+version = "0.1.0"
 
 repositories { mavenCentral() }
 
@@ -17,7 +17,10 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://nexus.runicrealms.com/repository/maven-snapshots/")
+        maven("https://reposilite.runicrealms.com/releases/")
+        maven("https://repo.codemc.io/repository/maven-public/")
+        maven("https://repo.dmulloy2.net/repository/public/")
+        maven("https://repo.aikar.co/content/groups/aikar/")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -37,8 +40,10 @@ subprojects {
 
         // Configuration and Injection
         implementation(rootProject.libs.guice)
+        implementation(rootProject.libs.guice.assistedinject)
         implementation(rootProject.libs.jackson.kotlin)
         implementation(rootProject.libs.jackson.databind)
+        implementation(rootProject.libs.jackson.dataformat.yaml)
 
         // Trove
         implementation(rootProject.libs.trove.client)
@@ -51,6 +56,16 @@ subprojects {
         implementation(rootProject.libs.mccoroutine.api)
         implementation(rootProject.libs.mccoroutine.core)
         implementation(rootProject.libs.kotlinx.coroutine)
+
+        // Shaded dependencies
+        implementation(rootProject.libs.adventure.legacy)
+        implementation(rootProject.libs.aikar.commands)
+        implementation(rootProject.libs.odalitamenus)
+
+        // Plugin dependencies
+        compileOnly(rootProject.libs.velagones.paper)
+        compileOnly(rootProject.libs.nbtapi)
+        compileOnly(rootProject.libs.protocollib)
     }
 }
 

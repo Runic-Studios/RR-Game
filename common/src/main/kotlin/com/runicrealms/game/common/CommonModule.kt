@@ -1,29 +1,39 @@
 package com.runicrealms.game.common
 
+import co.aikar.commands.PaperCommandManager
 import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import com.google.inject.spi.InjectionPoint
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Scopes
+import com.runicrealms.game.common.command.CommonCompletions
+import nl.odalitadevelopments.menus.OdalitaMenus
+import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.java.JavaPlugin
 
 class CommonModule : AbstractModule() {
 
-    @Provides
-    fun provideLogger(injectionPoint: InjectionPoint): Logger {
-        val clazz = injectionPoint.member.declaringClass
-        val pkg = clazz.packageName
+    override fun configure() {
+        bind(PaperCommandManager::class.java)
+            .toProvider(PaperCommandManagerProvider::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(CommonCompletions::class.java).asEagerSingleton()
 
-        val regex = Regex("""com\.runicrealms\.game\.([^.]+)\..+""")
-        val match = regex.matchEntire(pkg)
+        bind(OdalitaMenus::class.java)
+            .toProvider(OdalitaMenusProvider::class.java)
+            .`in`(Scopes.SINGLETON)
+    }
 
-        val loggerName =
-            if (match != null) {
-                val subsystem = match.groupValues[1].replaceFirstChar { it.uppercase() }
-                subsystem
-            } else {
-                clazz.simpleName
-            }
+    private class OdalitaMenusProvider @Inject constructor(private val plugin: JavaPlugin) :
+        Provider<OdalitaMenus> {
+        override fun get(): OdalitaMenus {
+            return OdalitaMenus.createInstance(plugin)
+        }
+    }
 
-        return LoggerFactory.getLogger(loggerName)
+    private class PaperCommandManagerProvider @Inject constructor(private val plugin: Plugin) :
+        Provider<PaperCommandManager?> {
+        override fun get(): PaperCommandManager {
+            return PaperCommandManager(plugin)
+        }
     }
 }

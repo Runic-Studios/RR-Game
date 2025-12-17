@@ -1,4 +1,4 @@
-package com.runicrealms.game.data
+package com.runicrealms.game.data.game
 
 import com.runicrealms.trove.client.user.UserCharacterData
 import com.runicrealms.trove.client.user.UserClaim
@@ -7,7 +7,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import org.bukkit.entity.Player
 
-data class GameSession(
+/**
+ * This class represents any user that has connected to the server, and that we have loaded their
+ * player data (but not necessarily character data).
+ *
+ * This class is internal only to the data module. No interaction with it can occur outside.
+ *
+ * For modifying player and character data, see GamePlayer and GameCharacter.
+ */
+internal data class GameSession(
     val claim: UserClaim,
     val playerData: UserPlayerData,
     val bukkitPlayer: Player,
@@ -16,5 +24,5 @@ data class GameSession(
     var characterData: UserCharacterData? = null
         internal set
 
-    val characterMutex = Mutex()
+    internal val characterMutex = Mutex()
 }

@@ -1,7 +1,7 @@
 package com.runicrealms.game.gameplay.tips
 
 import com.google.inject.Inject
-import com.runicrealms.game.data.event.GamePlayerDataLoadEvent
+import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -14,7 +14,8 @@ class TipsDataListener @Inject constructor(plugin: Plugin) : Listener {
     }
 
     @EventHandler
-    fun onGamePlayerCreate(event: GamePlayerDataLoadEvent) {
+    fun onGamePlayerCreate(event: GamePlayerPreLoadEvent) {
+        if (!event.playerData.empty) return
         with(event.playerData) {
             settings.data.setTips(true)
             stageChanges(settings)
