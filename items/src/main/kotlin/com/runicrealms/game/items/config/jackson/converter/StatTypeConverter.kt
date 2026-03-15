@@ -1,7 +1,7 @@
 package com.runicrealms.game.items.config.jackson.converter
 
 import com.fasterxml.jackson.databind.util.StdConverter
-import com.runicrealms.trove.generated.api.schema.v1.StatType
+import com.runicrealms.game.common.StatType
 
 /** Jackson databind compatible converter for turning Strings into ItemStatTypes */
 class StatTypeConverter : StdConverter<String, StatType?>() {

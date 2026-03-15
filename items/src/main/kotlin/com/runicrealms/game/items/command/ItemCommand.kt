@@ -15,6 +15,7 @@ import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.toLegacy
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getClassTypeFromIdentifier
+import com.runicrealms.game.data.model.Perk
 import com.runicrealms.game.items.config.item.ClassTypeRequirementHolder
 import com.runicrealms.game.items.config.item.GameItemRarityType
 import com.runicrealms.game.items.config.item.GameItemTemplate
@@ -22,7 +23,6 @@ import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.generator.AddedStatsHolder
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import java.util.Locale
 import java.util.stream.Stream
 import kotlinx.coroutines.runBlocking
@@ -482,9 +482,7 @@ constructor(
         }
 
         val classType = runBlocking {
-            userDataRegistry.getCharacter(target.uniqueId)?.withCharacterData {
-                traits.data.classType
-            }
+            userDataRegistry.getCharacter(target.uniqueId)?.withCharacterData { traits.classType }
         }
 
         if (classType == null) {
@@ -558,7 +556,7 @@ constructor(
 
         // inefficient i know but i don't care it only runs on command and is async
         val perks = item.addedStats.perks ?: mutableSetOf()
-        val newPerks = LinkedHashSet<ItemData.Perk>()
+        val newPerks = LinkedHashSet<Perk>()
 
         for (perk in perks) {
             if (perk.perkID != type.identifier) {
@@ -566,9 +564,7 @@ constructor(
             }
         }
         if (stacks > 0) {
-            newPerks.add(
-                ItemData.Perk.newBuilder().setPerkID(type.identifier).setStacks(stacks).build()
-            )
+            newPerks.add(Perk(perkID = type.identifier, stacks = stacks))
         }
 
         item.addedStats.perks?.clear()

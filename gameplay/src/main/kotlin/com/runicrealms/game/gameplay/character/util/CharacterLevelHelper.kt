@@ -1,12 +1,12 @@
 package com.runicrealms.game.gameplay.character.util
 
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.sendCenteredMessage
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.gameplay.player.RegenManager
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.time.Duration
 import kotlin.math.cbrt
 import kotlin.math.pow
@@ -62,7 +62,7 @@ class CharacterLevelHelper @Inject constructor(private val regenManager: RegenMa
         var currentLevel = player.level
         if (currentLevel >= MAX_LEVEL) return
         character.withSyncCharacterData {
-            val currentExp = traits.data.exp + expGained
+            val currentExp = traits.exp + expGained
 
             // If the player's actual level is incorrect based on their total exp, adjust level
             if (calculateExpectedLv(currentExp) != currentLevel) {
@@ -84,10 +84,10 @@ class CharacterLevelHelper @Inject constructor(private val regenManager: RegenMa
                 proportion = 0.0
             }
 
-            traits.data.exp = currentExp
-            traits.data.level = currentLevel
+            traits.exp = currentExp
+            traits.level = currentLevel
+
             player.exp = proportion.toFloat()
-            stageChanges(traits)
         }
     }
 
@@ -99,7 +99,7 @@ class CharacterLevelHelper @Inject constructor(private val regenManager: RegenMa
      */
     private fun sendLevelMessage(character: GameCharacter, classLv: Int) {
         character.withSyncCharacterData {
-            val classType = traits.data.classType
+            val classType = traits.classType
             val className = classType.getInfo().name
             val player = character.bukkitPlayer
             player.showTitle(

@@ -3,11 +3,12 @@ package com.runicrealms.game.items.generator
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.extension.getInfo
+import com.runicrealms.game.data.model.GemData
+import com.runicrealms.game.data.model.ItemData
 import com.runicrealms.game.items.config.item.GameItemGemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.util.GemStatUtil
 import com.runicrealms.game.items.util.ItemLoreBuilder
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -25,10 +26,12 @@ constructor(@Assisted inputData: ItemData, templateRegistry: GameItemTemplateReg
         fun create(data: ItemData): GameItemGem
     }
 
+    private val gemData = data.typeData as GemData
+
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
         val lore = mutableListOf<TextComponent>()
 
-        for (stat in data.gem.bonus.statsList) {
+        for (stat in gemData.bonus.stats) {
             if (stat.amount == 0) continue
             val statInfo = stat.type.getInfo()
             lore.add(
@@ -43,7 +46,7 @@ constructor(@Assisted inputData: ItemData, templateRegistry: GameItemTemplateReg
             .appendLines(
                 Component.text()
                     .append(Component.text("Req Slots ", Style.style(NamedTextColor.GRAY)))
-                    .append(Component.text(GemStatUtil.getGemSlots(data.gem.bonus.tier)))
+                    .append(Component.text(GemStatUtil.getGemSlots(gemData.bonus.tier)))
                     .build()
             )
             .newLine()

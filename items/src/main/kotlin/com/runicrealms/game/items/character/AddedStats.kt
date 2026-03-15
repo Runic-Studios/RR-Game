@@ -2,10 +2,10 @@ package com.runicrealms.game.items.character
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
+import com.runicrealms.game.data.model.Perk
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.HashMap
 import javax.annotation.Nullable
 
@@ -13,7 +13,7 @@ class AddedStats
 @AssistedInject
 constructor(
     @Assisted val stats: MutableMap<StatType, Int>,
-    @Nullable @Assisted perks: MutableCollection<ItemData.Perk>?,
+    @Nullable @Assisted perks: MutableCollection<Perk>?,
     @Assisted health: Int,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
 ) {
@@ -21,7 +21,7 @@ constructor(
     interface Factory {
         fun create(
             stats: MutableMap<StatType, Int>,
-            perks: MutableCollection<ItemData.Perk>?,
+            perks: MutableCollection<Perk>?,
             health: Int,
         ): AddedStats
     }
@@ -33,7 +33,7 @@ constructor(
         private set
 
     @Synchronized
-    internal fun addPerk(perk: ItemData.Perk) {
+    internal fun addPerk(perk: Perk) {
         if (perks == null) {
             perks = mutableSetOf()
         }
@@ -50,7 +50,7 @@ constructor(
             stats[stat] = stats.getOrDefault(stat, 0) + moreStats.stats[stat]!!
         }
         if (perks != null || moreStats.perks != null) {
-            val perks = HashMap<GameItemPerkTemplate, Int>()
+            val perksMap = HashMap<GameItemPerkTemplate, Int>()
             if (this.perks != null) {
                 for (perk in this.perks!!) {
                     val perkType =
@@ -58,7 +58,7 @@ constructor(
                             ?: throw IllegalArgumentException(
                                 "Cannot find perk with type ${perk.perkID}"
                             )
-                    perks[perkType] = perks.getOrDefault(perkType, 0) + perk.stacks
+                    perksMap[perkType] = perksMap.getOrDefault(perkType, 0) + perk.stacks
                 }
             }
             if (moreStats.perks != null) {
@@ -68,20 +68,15 @@ constructor(
                             ?: throw IllegalArgumentException(
                                 "Cannot find perk with type ${perk.perkID}"
                             )
-                    perks[perkType] = perks.getOrDefault(perkType, 0) + perk.stacks
+                    perksMap[perkType] = perksMap.getOrDefault(perkType, 0) + perk.stacks
                 }
             }
             this.perks?.clear()
             if (this.perks == null) {
                 this.perks = mutableSetOf()
             }
-            for ((perkType, stacks) in perks) {
-                val perk =
-                    ItemData.Perk.newBuilder()
-                        .setPerkID(perkType.identifier)
-                        .setStacks(stacks)
-                        .build()
-                this.perks!!.add(perk)
+            for ((perkType, stacks) in perksMap) {
+                this.perks!!.add(Perk(perkID = perkType.identifier, stacks = stacks))
             }
         }
     }

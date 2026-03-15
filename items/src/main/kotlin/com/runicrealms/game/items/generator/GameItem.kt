@@ -1,10 +1,15 @@
 package com.runicrealms.game.items.generator
 
+import com.runicrealms.game.common.StatType
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.Perk
+import com.runicrealms.game.data.model.RolledStat
 import com.runicrealms.game.items.config.item.GameItemTemplate
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import de.tr7zw.nbtapi.NBT
 import java.util.concurrent.ThreadLocalRandom
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.encodeToByteArray
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import org.bukkit.Bukkit
@@ -18,8 +23,8 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.PotionMeta
 
 /**
- * This class (and its subclasses) are meant to be very lightweight wrappers around the
- * protobuf-generated class ItemData.
+ * This class (and its subclasses) are meant to be very lightweight wrappers around the item data
+ * model.
  *
  * These classes should provide easy conversion from ItemData into ItemStacks (through lore and item
  * generation), as well as useful information like added stats.
@@ -29,6 +34,7 @@ import org.bukkit.inventory.meta.PotionMeta
  *
  * We NEED loading of this class to be as fast as possible since it occurs extremely frequently.
  */
+@OptIn(ExperimentalSerializationApi::class)
 sealed class GameItem(protected var data: ItemData, val template: GameItemTemplate) {
 
     open fun generateItemStack(count: Int, menuDisplay: Boolean = false): ItemStack {
@@ -64,9 +70,11 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         meta.lore(lore)
         itemStack.setItemMeta(meta)
 
-        // Modify NBT
-        NBT.modify(itemStack) {
-            it.setByteArray("data", data.toByteArray()) // TODO determine if needed when menuDisplay
+        NBT.modify(itemStack) { compound ->
+            compound.setByteArray(
+                "data",
+                Cbor.encodeToByteArray(data),
+            ) // TODO determine if needed when menuDisplay
         }
         return itemStack
     }
@@ -74,24 +82,22 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     protected abstract fun generateLore(menuDisplay: Boolean = false): MutableList<TextComponent>
 
     fun setCustomData(key: String, value: String) {
-        val builder = data.toBuilder()
-        builder.customDataMap[key] = value
-        data = builder.build()
+        data = data.copy(customData = data.customData + (key to value))
     }
 
     fun getCustomData(key: String): String? {
-        return data.customDataMap[key]
+        return data.customData[key]
     }
 
-    protected fun ItemData.RolledStat.getRolledValue(range: GameItemTemplate.StatRange): Int {
-        return range.min + (rollPercentage * range.max - range.min + 1).toInt()
+    protected fun RolledStat.getRolledValue(range: GameItemTemplate.StatRange): Int {
+        return range.min + (rollPercentage * (range.max - range.min + 1)).toInt()
     }
 
     protected fun correctStatRolls(
-        rolls: List<ItemData.RolledStat>,
+        rolls: List<RolledStat>,
         ranges: Map<StatType, GameItemTemplate.StatRange>,
     ): CorrectedStatRolls {
-        val correctedRolls = mutableListOf<ItemData.RolledStat>()
+        val correctedRolls = mutableListOf<RolledStat>()
         val calculatedRolls = LinkedHashMap<StatType, Int>()
         var modified = false
         for (roll in rolls) {
@@ -105,10 +111,10 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         for ((statType, statRange) in ranges) {
             if (calculatedRolls.containsKey(statType)) continue
             val roll =
-                ItemData.RolledStat.newBuilder()
-                    .setType(statType)
-                    .setRollPercentage(ThreadLocalRandom.current().nextDouble())
-                    .build()
+                RolledStat(
+                    type = statType,
+                    rollPercentage = ThreadLocalRandom.current().nextDouble(),
+                )
             correctedRolls.add(roll)
             modified = true
             calculatedRolls[statType] = roll.getRolledValue(statRange)
@@ -117,21 +123,21 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
     }
 
     protected data class CorrectedStatRolls(
-        val correctedRolls: List<ItemData.RolledStat>,
+        val correctedRolls: List<RolledStat>,
         val calculatedRolls: LinkedHashMap<StatType, Int>,
         val modified: Boolean,
     )
 
     protected fun correctPerks(
-        existingPerks: List<ItemData.Perk>,
+        existingPerks: List<Perk>,
         defaultPerks: Map<String, Int>,
     ): CorrectedPerks {
-        val correctedPerks = mutableListOf<ItemData.Perk>()
+        val correctedPerks = mutableListOf<Perk>()
         var modified = false
         for (existingPerk in existingPerks) {
             val defaultStacks = defaultPerks.getOrDefault(existingPerk.perkID, 0)
             if (defaultStacks > existingPerk.stacks) {
-                correctedPerks.add(existingPerk.toBuilder().setStacks(defaultStacks).build())
+                correctedPerks.add(existingPerk.copy(stacks = defaultStacks))
                 modified = true
             } else {
                 correctedPerks.add(existingPerk)
@@ -139,21 +145,13 @@ sealed class GameItem(protected var data: ItemData, val template: GameItemTempla
         }
         for ((defaultPerkID, defaultPerkStacks) in defaultPerks) {
             if (existingPerks.any { it.perkID == defaultPerkID }) continue
-            correctedPerks.add(
-                ItemData.Perk.newBuilder()
-                    .setPerkID(defaultPerkID)
-                    .setStacks(defaultPerkStacks)
-                    .build()
-            )
+            correctedPerks.add(Perk(perkID = defaultPerkID, stacks = defaultPerkStacks))
             modified = true
         }
         return CorrectedPerks(correctedPerks, modified)
     }
 
-    protected data class CorrectedPerks(
-        val correctedPerks: List<ItemData.Perk>,
-        val modified: Boolean,
-    )
+    protected data class CorrectedPerks(val correctedPerks: List<Perk>, val modified: Boolean)
 
     companion object {
         private val attributeModifier =

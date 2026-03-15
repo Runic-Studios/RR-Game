@@ -7,8 +7,8 @@ import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.extension.getInfo
+import com.runicrealms.game.data.model.CharacterTraits
 import com.runicrealms.game.data.util.MAX_CHARACTERS
-import com.runicrealms.trove.client.user.UserCharactersTraits
 import de.tr7zw.nbtapi.NBT
 import java.time.Duration
 import java.util.ArrayList
@@ -42,11 +42,12 @@ constructor(
     private val plugin: Plugin,
     private val characterSelectHelper: CharacterSelectHelper,
     private val odalitaMenus: OdalitaMenus,
-    @Assisted private val userCharactersTraits: UserCharactersTraits,
+    /** Map of slot index to CharacterTraits (null entries = empty slot). */
+    @Assisted private val userCharactersTraits: Map<Int, CharacterTraits>,
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(userCharactersTraits: UserCharactersTraits): CharacterSelectMenu
+        fun create(userCharactersTraits: Map<Int, CharacterTraits>): CharacterSelectMenu
     }
 
     @Inject private lateinit var characterAddMenuFactory: CharacterAddMenu.Factory
@@ -58,12 +59,10 @@ constructor(
     @Volatile private var hasSelected = false
 
     private fun createSelectIcon(slot: Int): ItemStack {
-        val characterData =
-            userCharactersTraits.characters[slot]?.data ?: return ItemStack(Material.AIR)
-        val item =
-            CharacterSelectHelper.ClassIcon.fromClassType(characterData.classType).itemStack.clone()
+        val traits = userCharactersTraits[slot] ?: return ItemStack(Material.AIR)
+        val item = CharacterSelectHelper.ClassIcon.fromClassType(traits.classType).itemStack.clone()
         val meta = item.itemMeta!!
-        val classTypeInfo = characterData.classType.getInfo()
+        val classTypeInfo = traits.classType.getInfo()
         meta.displayName(
             Component.text(
                 classTypeInfo.name,
@@ -74,13 +73,13 @@ constructor(
         lore.add(
             Component.text()
                 .append(Component.text("Level: ", Style.style(NamedTextColor.GRAY)))
-                .append(Component.text(characterData.level, Style.style(NamedTextColor.GREEN)))
+                .append(Component.text(traits.level, Style.style(NamedTextColor.GREEN)))
                 .build()
         )
         lore.add(
             Component.text()
                 .append(Component.text("Exp: ", Style.style(NamedTextColor.GRAY)))
-                .append(Component.text(characterData.exp, Style.style(NamedTextColor.GREEN)))
+                .append(Component.text(traits.exp, Style.style(NamedTextColor.GREEN)))
                 .build()
         )
         lore.add(Component.text("[Right click] to delete", Style.style(NamedTextColor.GREEN)))
@@ -95,7 +94,7 @@ constructor(
         var addedSlots = 0
         for (i in 0 until MAX_CHARACTERS) {
             val slotPos = SlotPos.of(i / 5, i % 5 + 2)
-            val traits = userCharactersTraits.characters[i]
+            val traits = userCharactersTraits[i]
             if (traits != null) {
                 menuContents.set(
                     slotPos,

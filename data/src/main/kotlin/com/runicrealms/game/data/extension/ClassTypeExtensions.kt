@@ -1,6 +1,6 @@
 package com.runicrealms.game.data.extension
 
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
+import com.runicrealms.game.common.ClassType
 
 data class ClassTypeInfo(val name: String)
 
@@ -12,7 +12,6 @@ val classTypeInfo =
         ClassType.WARRIOR to ClassTypeInfo("Warrior"),
         ClassType.ROGUE to ClassTypeInfo("Rogue"),
         ClassType.ANY to ClassTypeInfo("Any"),
-        ClassType.UNRECOGNIZED to ClassTypeInfo("Unrecognized"),
     )
 
 fun ClassType.getInfo(): ClassTypeInfo {

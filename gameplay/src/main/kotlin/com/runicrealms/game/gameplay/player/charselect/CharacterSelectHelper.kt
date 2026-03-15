@@ -1,10 +1,10 @@
 package com.runicrealms.game.gameplay.player.charselect
 
-import SubClassType
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
+import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.common.util.breakLines
 import com.runicrealms.game.common.util.colorFormat
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.HashMap
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor

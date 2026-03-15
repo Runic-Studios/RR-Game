@@ -6,6 +6,12 @@ import com.runicrealms.game.data.menu.GameCharacterMenuProviderLoader
 import com.runicrealms.game.data.menu.GameMenuProviderRegistry
 import com.runicrealms.game.data.menu.GamePlayerMenuProviderLoader
 
+/**
+ * Guice module for the data layer.
+ *
+ * MongoDB connection, repository, and lock bindings are provided by [config.MongoModule], which
+ * must be installed alongside this module in [com.runicrealms.game.plugin.GamePlugin].
+ */
 class DataModule : AbstractModule() {
 
     override fun configure() {

@@ -4,6 +4,7 @@ import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktfmt)
 }
 
@@ -25,6 +26,7 @@ subprojects {
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.kapt")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
 
@@ -34,6 +36,8 @@ subprojects {
         // Kotlin
         implementation(rootProject.libs.kotlin.stdlib)
         implementation(rootProject.libs.kotlin.test)
+        implementation(rootProject.libs.kotlinx.serialization.core)
+        implementation(rootProject.libs.kotlinx.serialization.cbor)
 
         // Paper
         compileOnly(rootProject.libs.paper.api)
@@ -45,12 +49,9 @@ subprojects {
         implementation(rootProject.libs.jackson.databind)
         implementation(rootProject.libs.jackson.dataformat.yaml)
 
-        // Trove
-        implementation(rootProject.libs.trove.client)
-        implementation(rootProject.libs.grpc.kotlinstub)
-        implementation(rootProject.libs.grpc.netty)
-        implementation(rootProject.libs.grpc.protobuf)
-        implementation(rootProject.libs.protobuf.java)
+        // MongoDB
+        implementation(rootProject.libs.mongodb.driver)
+        implementation(rootProject.libs.mongodb.bson)
 
         // Coroutines
         implementation(rootProject.libs.mccoroutine.api)

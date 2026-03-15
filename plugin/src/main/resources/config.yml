@@ -1,0 +1,5 @@
+# Game plugin configuration
+#
+# database-name: The MongoDB database to connect to.
+#   Use "realm" for the live environment and "realm-dev" for development.
+database-name: "realm-dev"
