@@ -7,13 +7,13 @@ follow. When in doubt, refer here first.
 
 ## 1. Style Constraints:
 
-- Avoid using double emdashes and instead favour 
 - Favour Canadian English unless the name of a word comes from a spelling derived from Minecraft
   or an external plugin (i.e. "armor" is spelt without a "u" in Minecraft)
-- Avoid using ASCII arrows and instead do ones like "->"
+- Avoid using ASCII arrows (→) and instead do ones like "->"
 - Always write out "exception" instead of "e" for variable names.
-  - Avoid single letter variable names, unless in Go.
+  - Avoid single letter variable names, unless in writing in Go.
 - Do not quote this AGENTS.md file in comments when making changes, just follow the rules without quoting.
+- Avoid using emdashes (—) and instead favour colons or parenthesis
 
 ---
 
@@ -140,3 +140,13 @@ gameCharacter.withSyncCharacterData {
 
 Do **not** access `gameSession` or `gameSession.document` from outside the `data` module.
 Do **not** use `.copy(...)` chains to build updated objects; assign fields directly instead.
+
+### 6. Logging
+
+- All logging within this plugin should be done through a logger created by a LoggerFactory
+  whose name corresponds to the gradle module the class is located in.
+- Classes should not share logger factories and each should have their own value
+
+```
+private val logger = LoggerFactory.getLogger("gameplay")
+```
