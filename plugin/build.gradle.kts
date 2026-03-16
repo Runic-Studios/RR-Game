@@ -8,20 +8,6 @@ tasks.build { dependsOn("shadowJar") }
 
 val generatedBuildInfoDir = layout.buildDirectory.dir("generated/resources/runic-build-info")
 
-fun git(vararg args: String): String? {
-    return try {
-        providers
-            .exec { commandLine("git", *args) }
-            .standardOutput
-            .asText
-            .get()
-            .trim()
-            .ifEmpty { null }
-    } catch (_: Exception) {
-        null
-    }
-}
-
 fun resolveBuildValue(
     propertyName: String,
     envName: String,
@@ -46,20 +32,10 @@ val generateRunicBuildInfo by
         outputs.file(outputFile)
 
         doLast {
-            val commitSha =
-                resolveBuildValue("runicBuildSha", "RUNIC_GIT_SHA") { git("rev-parse", "HEAD") }
-            val branch =
-                resolveBuildValue("runicBuildBranch", "RUNIC_GIT_BRANCH") {
-                    git("rev-parse", "--abbrev-ref", "HEAD")
-                }
-            val commitMessage =
-                resolveBuildValue("runicBuildMessage", "RUNIC_GIT_MESSAGE") {
-                    git("log", "-1", "--pretty=%s")
-                }
-            val buildId =
-                resolveBuildValue("runicBuildId", "RUNIC_BUILD_ID") {
-                    providers.environmentVariable("GITHUB_RUN_ID").orNull
-                }
+            val commitSha = resolveBuildValue("runicBuildSha", "RUNIC_GIT_SHA")
+            val branch = resolveBuildValue("runicBuildBranch", "RUNIC_GIT_BRANCH")
+            val commitMessage = resolveBuildValue("runicBuildMessage", "RUNIC_GIT_MESSAGE")
+            val buildId = resolveBuildValue("runicBuildId", "RUNIC_BUILD_ID")
             val buildSource =
                 if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true")
                     "github-actions"
