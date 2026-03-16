@@ -7,13 +7,13 @@ import com.runicrealms.game.common.WorldType
 import java.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.bson.codecs.pojo.annotations.BsonDiscriminator
+import org.bson.codecs.pojo.annotations.BsonId
 
 // Top-level player document: one document per player in MongoDB.
 // The `id` field maps to the MongoDB `_id` field via @BsonId.
 
 data class PlayerDocument(
-    val id: java.util.UUID,
+    @BsonId val id: java.util.UUID,
     var schemaVersion: Int = CURRENT_VERSION,
     var updatedAt: Instant = Instant.now(),
     /** True only on the very first ever insert for this player. */
@@ -157,11 +157,10 @@ data class ItemData(
  * Sealed hierarchy for item-type-specific data. A `_type` discriminator field in BSON distinguishes
  * the concrete subtype at runtime (see BsonCodecs for the codec setup).
  */
-@BsonDiscriminator(key = "_type") @Serializable sealed class ItemTypeData
+@Serializable sealed class ItemTypeData
 
 @Serializable
 @SerialName("armor")
-@BsonDiscriminator("armor")
 data class ArmorData(
     val stats: List<RolledStat>,
     val gemBonuses: List<GemBonus>,
@@ -170,18 +169,13 @@ data class ArmorData(
 
 @Serializable
 @SerialName("weapon")
-@BsonDiscriminator("weapon")
 data class WeaponData(val stats: List<RolledStat>, val perks: List<Perk>, val skinID: String?) :
     ItemTypeData()
 
-@Serializable
-@SerialName("gem")
-@BsonDiscriminator("gem")
-data class GemData(val bonus: GemBonus) : ItemTypeData()
+@Serializable @SerialName("gem") data class GemData(val bonus: GemBonus) : ItemTypeData()
 
 @Serializable
 @SerialName("offhand")
-@BsonDiscriminator("offhand")
 data class OffhandData(val stats: List<RolledStat>, val perks: List<Perk>) : ItemTypeData()
 
 @Serializable data class RolledStat(val type: StatType, val rollPercentage: Double)

@@ -89,8 +89,7 @@ class MongoModule(
         codecRegistry: CodecRegistry,
     ): PlayerRepository {
         val rawCollection = database.getCollection<BsonDocument>("players")
-        val typedCollection = database.getCollection<PlayerDocument>("players")
-        return PlayerRepository(rawCollection, typedCollection, migrationChain, codecRegistry)
+        return PlayerRepository(rawCollection, migrationChain, codecRegistry)
     }
 
     @Provides

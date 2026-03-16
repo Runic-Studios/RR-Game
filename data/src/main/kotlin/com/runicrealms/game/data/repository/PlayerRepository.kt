@@ -28,7 +28,9 @@ import java.util.UUID
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonDocumentReader
+import org.bson.BsonDocumentWriter
 import org.bson.codecs.DecoderContext
+import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.slf4j.LoggerFactory
 
@@ -49,7 +51,6 @@ import org.slf4j.LoggerFactory
  */
 class PlayerRepository(
     private val rawCollection: MongoCollection<BsonDocument>,
-    private val typedCollection: MongoCollection<PlayerDocument>,
     private val migrationChain: MigrationChain,
     private val codecRegistry: CodecRegistry,
 ) {
@@ -75,7 +76,7 @@ class PlayerRepository(
             if (raw == null) {
                 // First-ever login: create a default document
                 val newDoc = defaultDocument(playerId)
-                typedCollection.insertOne(newDoc)
+                rawCollection.insertOne(encodeDocument(newDoc))
                 logger.info("Created new player document for $playerId")
                 Result.success(newDoc)
             } else {
@@ -89,9 +90,9 @@ class PlayerRepository(
                         val upgraded = migrationChain.migrate(raw, storedVersion)
                         // Write-back the upgraded document immediately so future loads are fast
                         val upgradedDoc = decodeDocument(upgraded)
-                        typedCollection.replaceOne(
+                        rawCollection.replaceOne(
                             eq("_id", playerId),
-                            upgradedDoc,
+                            encodeDocument(upgradedDoc),
                             ReplaceOptions().upsert(false),
                         )
                         upgraded
@@ -130,9 +131,9 @@ class PlayerRepository(
                     // isNewPlayer is only meaningful on first insert; clear it on every save
                     isNewPlayer = false,
                 )
-            typedCollection.replaceOne(
+            rawCollection.replaceOne(
                 eq("_id", document.id),
-                toWrite,
+                encodeDocument(toWrite),
                 ReplaceOptions().upsert(true),
             )
             Result.success(Unit)
@@ -156,6 +157,22 @@ class PlayerRepository(
     private fun decodeDocument(raw: BsonDocument): PlayerDocument {
         val codec = codecRegistry.get(PlayerDocument::class.java)
         return codec.decode(BsonDocumentReader(raw), DecoderContext.builder().build())
+    }
+
+    /**
+     * Encodes a [PlayerDocument] into raw BSON using the shared [codecRegistry], ensuring writes
+     * always use the exact same codec path as decode/migration logic.
+     */
+    private fun encodeDocument(document: PlayerDocument): BsonDocument {
+        val codec = codecRegistry.get(PlayerDocument::class.java)
+        val bson = BsonDocument()
+        val writer = BsonDocumentWriter(bson)
+        codec.encode(
+            writer,
+            document,
+            EncoderContext.builder().isEncodingCollectibleDocument(true).build(),
+        )
+        return bson
     }
 
     /**
