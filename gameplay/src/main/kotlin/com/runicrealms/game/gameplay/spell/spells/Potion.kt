@@ -46,7 +46,9 @@ class Potion(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ANY, deps) {
         if (!potionDrinkers.contains(event.player.uniqueId)) return
         if (!event.item.template.tags.contains(GameItemTag.POTION)) return
         event.isCancelled = true
-        event.player.sendMessage(Component.text("Use of potions is on cooldown!", NamedTextColor.RED))
+        event.player.sendMessage(
+            Component.text("Use of potions is on cooldown!", NamedTextColor.RED)
+        )
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

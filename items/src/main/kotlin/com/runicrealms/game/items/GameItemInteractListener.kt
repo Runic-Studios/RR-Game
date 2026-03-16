@@ -19,10 +19,7 @@ import org.bukkit.plugin.Plugin
 @Singleton
 class GameItemInteractListener
 @Inject
-constructor(
-    plugin: Plugin,
-    private val itemStackConverter: ItemStackConverter,
-) : Listener {
+constructor(plugin: Plugin, private val itemStackConverter: ItemStackConverter) : Listener {
 
     init {
         Bukkit.getPluginManager().registerEvents(this, plugin)
@@ -32,9 +29,13 @@ constructor(
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.hand != EquipmentSlot.HAND) return
         val action = event.action
-        if (action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK &&
-            action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK
-        ) return
+        if (
+            action != Action.LEFT_CLICK_AIR &&
+                action != Action.LEFT_CLICK_BLOCK &&
+                action != Action.RIGHT_CLICK_AIR &&
+                action != Action.RIGHT_CLICK_BLOCK
+        )
+            return
         val itemStack = event.player.inventory.itemInMainHand
         if (itemStack.type == Material.AIR) return
         val gameItem = itemStackConverter.convertToGameItem(itemStack) as? GameItemGeneric ?: return
@@ -42,8 +43,9 @@ constructor(
             GameItemClickTrigger.Type.getFromInteractAction(action, event.player) ?: return
         val matchingTrigger =
             gameItem.genericTemplate.triggers.firstOrNull { it.type == triggerType } ?: return
-        Bukkit.getPluginManager().callEvent(
-            GameItemGenericTriggerEvent(event.player, gameItem, itemStack, matchingTrigger),
-        )
+        Bukkit.getPluginManager()
+            .callEvent(
+                GameItemGenericTriggerEvent(event.player, gameItem, itemStack, matchingTrigger)
+            )
     }
 }

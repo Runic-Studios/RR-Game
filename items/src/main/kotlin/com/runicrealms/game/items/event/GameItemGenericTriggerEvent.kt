@@ -28,7 +28,6 @@ class GameItemGenericTriggerEvent(
     companion object {
         private val handlerList = HandlerList()
 
-        @JvmStatic
-        fun getHandlerList(): HandlerList = handlerList
+        @JvmStatic fun getHandlerList(): HandlerList = handlerList
     }
 }
