@@ -147,7 +147,7 @@ constructor(
 
         // Acquire the data lock and mutate the character traits directly.
         gamePlayer.withDocument {
-            val characterData = characters[event.slot] ?: return@withDocument
+            val characterData = characters[event.slot.toString()] ?: return@withDocument
             characterData.traits.classType = classType
             characterData.traits.exp = 0L
             characterData.traits.level = 0

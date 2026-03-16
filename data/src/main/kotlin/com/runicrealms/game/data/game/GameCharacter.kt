@@ -52,7 +52,7 @@ class GameCharacter internal constructor(plugin: Plugin, gameSession: GameSessio
      * [GameSession.document].characters.
      */
     private fun resolveCharacterData(): CharacterData =
-        checkNotNull(gameSession.document.characters[slot]) {
+        checkNotNull(gameSession.document.characters[slot.toString()]) {
             "CharacterData for slot $slot not found in document for ${gameSession.playerId}. " +
                 "This is a bug: GameCharacter should never be constructed for a missing slot."
         }

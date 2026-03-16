@@ -3,7 +3,15 @@ name: Build and Push RR-Game
 on:
   push:
     branches:
-      - '**'
+      - main
+      - dev
+  workflow_dispatch:
+    inputs:
+      run_main_deploy:
+        description: 'Create promotion PR to Realm-Paper main'
+        required: false
+        default: false
+        type: boolean
 
 env:
   PROJECT_NAME: 'RR Game'
@@ -22,10 +30,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Determine Environment
-        id: env
-        uses: Runic-Studios/Realm-Actions/determine-env@main
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -67,7 +71,7 @@ jobs:
           commit_message: 'Update ${{ env.ARTIFACT_NAME }} tag to ${{ steps.vars.outputs.sha_short }}'
 
       - name: Create PR (Main Only)
-        if: steps.env.outputs.run_main_deploy == 'true'
+        if: github.ref == 'refs/heads/main' || inputs.run_main_deploy == true
         uses: Runic-Studios/Realm-Actions/create-pr@main
         with:
           repository: 'Realm-Paper'
