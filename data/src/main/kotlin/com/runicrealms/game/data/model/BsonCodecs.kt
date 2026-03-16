@@ -56,10 +56,12 @@ object BsonCodecs {
                 EnumCodec(ProfessionType::class.java),
                 EnumCodec(WorldType::class.java),
             ),
+            // Mongo defaults MUST come before the POJO provider so that primitive/built-in types
+            // like UUID and Instant are handled by their proper binary codecs rather than being
+            // serialised as plain POJO sub-documents (e.g. UUID -> {leastSignificantBits, ...}).
+            MongoClientSettings.getDefaultCodecRegistry(),
             // POJO-based mapping for all data classes
             CodecRegistries.fromProviders(pojoProvider),
-            // Mongo default codecs (UUID, Instant via JavaTime, primitives, etc.)
-            MongoClientSettings.getDefaultCodecRegistry(),
         )
     }
 
