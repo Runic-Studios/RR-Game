@@ -50,6 +50,7 @@ class ItemsModule : AbstractModule() {
         bind(GameItemPerkHandlerRegistry::class.java).to(GameItemPerkManager::class.java)
 
         bind(PlayerItemManager::class.java).asEagerSingleton()
+        bind(GameItemInteractListener::class.java).asEagerSingleton()
         bind(CharacterEquipmentCacheRegistry::class.java).to(PlayerItemManager::class.java)
 
         bind(LootHelper::class.java).asEagerSingleton()
