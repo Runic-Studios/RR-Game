@@ -7,11 +7,14 @@ import com.runicrealms.game.common.StatType
 import com.runicrealms.game.common.WorldType
 import org.bson.BsonReader
 import org.bson.BsonWriter
+import org.bson.UuidRepresentation
 import org.bson.codecs.Codec
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
+import org.bson.codecs.UuidCodec
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.configuration.CodecRegistry
+import org.bson.codecs.jsr310.InstantCodec
 import org.bson.codecs.pojo.PojoCodecProvider
 
 /**
@@ -46,22 +49,33 @@ object BsonCodecs {
                 // Register all packages that contain model classes
                 .register("com.runicrealms.game.data.model")
                 .register("com.runicrealms.game.common")
+                // Explicitly register sealed hierarchy so abstract base ItemTypeData can be
+                // resolved when encountered as a declared field type.
+                .register(
+                    ItemTypeData::class.java,
+                    ArmorData::class.java,
+                    WeaponData::class.java,
+                    GemData::class.java,
+                    OffhandData::class.java,
+                )
                 .build()
 
         return CodecRegistries.fromRegistries(
             // Custom codecs for types the POJO provider cannot handle automatically
             CodecRegistries.fromCodecs(
+                UuidCodec(UuidRepresentation.STANDARD),
+                InstantCodec(),
                 EnumCodec(ClassType::class.java),
                 EnumCodec(StatType::class.java),
                 EnumCodec(ProfessionType::class.java),
                 EnumCodec(WorldType::class.java),
             ),
-            // Mongo defaults MUST come before the POJO provider so that primitive/built-in types
-            // like UUID and Instant are handled by their proper binary codecs rather than being
-            // serialised as plain POJO sub-documents (e.g. UUID -> {leastSignificantBits, ...}).
-            MongoClientSettings.getDefaultCodecRegistry(),
-            // POJO-based mapping for all data classes
+            // POJO mapping must come before Mongo defaults so PlayerDocument and nested model
+            // classes consistently use discriminator-aware POJO codecs (needed for ItemTypeData).
+            // Built-in primitives (UUID, Instant, etc.) are still resolved from the default
+            // registry when the POJO codec resolves individual property codecs.
             CodecRegistries.fromProviders(pojoProvider),
+            MongoClientSettings.getDefaultCodecRegistry(),
         )
     }
 

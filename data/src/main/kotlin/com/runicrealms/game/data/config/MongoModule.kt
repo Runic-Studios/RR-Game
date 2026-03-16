@@ -10,6 +10,7 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import com.runicrealms.game.data.lock.PlayerLockRepository
 import com.runicrealms.game.data.migration.MigrationChain
 import com.runicrealms.game.data.model.BsonCodecs
+import com.runicrealms.game.data.model.ItemTypeData
 import com.runicrealms.game.data.model.PlayerDocument
 import com.runicrealms.game.data.repository.PlayerRepository
 import org.bson.BsonDocument
@@ -61,7 +62,15 @@ class MongoModule(
         return MongoClient.create(settings)
     }
 
-    @Provides @Singleton fun provideCodecRegistry(): CodecRegistry = BsonCodecs.buildRegistry()
+    @Provides
+    @Singleton
+    fun provideCodecRegistry(): CodecRegistry {
+        val registry = BsonCodecs.buildRegistry()
+        // Fail fast at startup if polymorphic item codecs are misconfigured.
+        registry.get(PlayerDocument::class.java)
+        registry.get(ItemTypeData::class.java)
+        return registry
+    }
 
     @Provides
     @Singleton
