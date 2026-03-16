@@ -43,11 +43,12 @@ jobs:
 
       - name: Build with Gradle
         env:
-          RUNIC_GIT_BRANCH: ${{ github.ref_name }}
-          RUNIC_GIT_SHA: ${{ github.sha }}
-          RUNIC_GIT_MESSAGE: ${{ github.event.head_commit.message }}
           RUNIC_BUILD_ID: ${{ github.run_id }}
-        run: ./gradlew :plugin:shadowJar --no-daemon
+        run: |
+          export RUNIC_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          export RUNIC_GIT_SHA=$(git rev-parse HEAD)
+          export RUNIC_GIT_MESSAGE=$(git log -1 --pretty=%s)
+          ./gradlew :plugin:shadowJar --no-daemon
 
       - name: Get Short SHA
         id: vars

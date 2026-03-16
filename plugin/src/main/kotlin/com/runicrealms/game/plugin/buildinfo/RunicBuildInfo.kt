@@ -1,6 +1,7 @@
-package com.runicrealms.game.plugin
+package com.runicrealms.game.plugin.buildinfo
 
 import com.google.inject.Inject
+import com.runicrealms.game.plugin.GamePlugin
 import java.util.Properties
 import org.slf4j.LoggerFactory
 

@@ -1,6 +1,8 @@
 package com.runicrealms.game.plugin
 
 import com.google.inject.AbstractModule
+import com.runicrealms.game.plugin.buildinfo.RunicBuildInfoProvider
+import com.runicrealms.game.plugin.buildinfo.RunicBuildInfoStartupLogger
 import com.runicrealms.game.plugin.command.RunicInfoCommand
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -12,6 +14,7 @@ class PluginModule(private val plugin: GamePlugin) : AbstractModule() {
         bind(JavaPlugin::class.java).toInstance(plugin)
         bind(GamePlugin::class.java).toInstance(plugin)
         bind(RunicBuildInfoProvider::class.java).asEagerSingleton()
+        bind(RunicBuildInfoStartupLogger::class.java).asEagerSingleton()
         bind(RunicInfoCommand::class.java).asEagerSingleton()
     }
 }
