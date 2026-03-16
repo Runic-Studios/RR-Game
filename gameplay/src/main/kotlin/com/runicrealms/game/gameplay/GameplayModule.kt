@@ -14,6 +14,26 @@ import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
+import com.runicrealms.game.gameplay.spell.SpellManager
+import com.runicrealms.game.gameplay.spell.SpellScalingListener
+import com.runicrealms.game.gameplay.spell.SpellStaffListener
+import com.runicrealms.game.gameplay.spell.SpellUseListener
+import com.runicrealms.game.gameplay.spell.api.SkillTreeAPI
+import com.runicrealms.game.gameplay.spell.api.SpellEffectAPI
+import com.runicrealms.game.gameplay.spell.api.StatusEffectAPI
+import com.runicrealms.game.gameplay.spell.combat.CombatManager
+import com.runicrealms.game.gameplay.spell.damage.DamageHandler
+import com.runicrealms.game.gameplay.spell.effect.SpellEffectManager
+import com.runicrealms.game.gameplay.spell.effect.StatusEffectManager
+import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.RuneListener
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.RuneMenu
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.SkillTreeMenu
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.SpellEditorMenu
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.SpellMenu
+import com.runicrealms.game.gameplay.spell.skilltrees.gui.SubClassMenu
+import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
+import com.runicrealms.game.gameplay.spell.spelltypes.StackTaskRegistry
 import com.runicrealms.game.gameplay.tips.TipsDataListener
 import kotlin.reflect.KClass
 
@@ -38,6 +58,34 @@ class GameplayModule : AbstractModule() {
         addFactory(CharacterSelectMenu::class, CharacterSelectMenu.Factory::class)
         addFactory(CharacterAddMenu::class, CharacterAddMenu.Factory::class)
         addFactory(CharacterDeleteMenu::class, CharacterDeleteMenu.Factory::class)
+
+        // --- Spell system ---
+
+        // Bind API interfaces to their singleton implementations
+        bind(SpellEffectAPI::class.java).to(SpellEffectManager::class.java).asEagerSingleton()
+        bind(StatusEffectAPI::class.java).to(StatusEffectManager::class.java).asEagerSingleton()
+        // SkillTreeManager implements SkillTreeAPI; binding to the interface ensures the same
+        // singleton is returned whether injected as SkillTreeAPI or SkillTreeManager.
+        bind(SkillTreeManager::class.java).asEagerSingleton()
+        bind(SkillTreeAPI::class.java).to(SkillTreeManager::class.java)
+
+        // Eager singletons that are self-wiring listeners/managers
+        bind(SpellDependencies::class.java).asEagerSingleton()
+        bind(StackTaskRegistry::class.java).asEagerSingleton()
+        bind(DamageHandler::class.java).asEagerSingleton()
+        bind(CombatManager::class.java).asEagerSingleton()
+        bind(SpellManager::class.java).asEagerSingleton()
+        bind(SpellUseListener::class.java).asEagerSingleton()
+        bind(SpellStaffListener::class.java).asEagerSingleton()
+        bind(SpellScalingListener::class.java).asEagerSingleton()
+        bind(RuneListener::class.java).asEagerSingleton()
+
+        // Skill tree GUI factories (OdalitaMenus @AssistedInject)
+        addFactory(RuneMenu::class, RuneMenu.Factory::class)
+        addFactory(SubClassMenu::class, SubClassMenu.Factory::class)
+        addFactory(SkillTreeMenu::class, SkillTreeMenu.Factory::class)
+        addFactory(SpellMenu::class, SpellMenu.Factory::class)
+        addFactory(SpellEditorMenu::class, SpellEditorMenu.Factory::class)
     }
 
     private fun <T : Any, U : Any> addFactory(objectType: KClass<T>, factoryType: KClass<U>) {

@@ -10,6 +10,7 @@ import com.runicrealms.game.data.game.GameCharacter
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
@@ -166,7 +167,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
          * @return the mana they should receive each tick
          */
         fun calculateManaRegen(level: Int): Int {
-            return Math.round(BASE_MANA_REGEN_AMT + (level.toDouble() / 12)).toInt()
+            return (BASE_MANA_REGEN_AMT + (level.toDouble() / 12)).roundToInt()
         }
     }
 }

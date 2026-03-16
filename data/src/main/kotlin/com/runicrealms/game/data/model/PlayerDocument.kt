@@ -3,6 +3,7 @@ package com.runicrealms.game.data.model
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.ProfessionType
 import com.runicrealms.game.common.StatType
+import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.common.WorldType
 import java.time.Instant
 import kotlinx.serialization.SerialName
@@ -101,6 +102,8 @@ data class CharacterTraits(
     var lastLogin: Instant,
     /** Stored as milliseconds in BSON (see BsonCodecs). */
     var playTimeMillis: Long,
+    /** The player's chosen subclass. Null until the player selects one via the skill tree. */
+    var subClassType: SubClassType? = null,
 )
 
 data class CharacterInventory(

@@ -6,6 +6,7 @@ import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.extension.getInfo
 import com.runicrealms.game.data.model.ItemData
 import com.runicrealms.game.data.model.OffhandData
+import com.runicrealms.game.data.model.RolledStat
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.config.item.GameItemOffhandTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplate
@@ -68,11 +69,7 @@ constructor(
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
         val statsData = offhandData.stats
 
-        val stats =
-            mutableMapOf<
-                StatType,
-                Pair<com.runicrealms.game.data.model.RolledStat, GameItemTemplate.StatRange>,
-            >()
+        val stats = mutableMapOf<StatType, Pair<RolledStat, GameItemTemplate.StatRange>>()
         for ((statType, statRange) in offhandTemplate.stats) {
             stats[statType] = Pair(statsData.firstOrNull { it.type == statType }!!, statRange)
         }
