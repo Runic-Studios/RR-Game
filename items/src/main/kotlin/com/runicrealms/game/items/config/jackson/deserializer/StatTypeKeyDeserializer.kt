@@ -2,7 +2,7 @@ package com.runicrealms.game.items.config.jackson.deserializer
 
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.KeyDeserializer
-import com.runicrealms.trove.generated.api.schema.v1.StatType
+import com.runicrealms.game.common.StatType
 
 /**
  * Jackson databind compatible key deserializer for turning keys of stats in item YAMLs into

@@ -1,8 +1,8 @@
 package com.runicrealms.game.items.util
 
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
-import io.netty.util.internal.ThreadLocalRandom
+import com.runicrealms.game.common.StatType
+import com.runicrealms.game.data.model.StaticStat
+import java.util.concurrent.ThreadLocalRandom
 
 object GemStatUtil {
     // Maps gem tier to a collection of options including the main stat value (pair key) and the sub
@@ -52,33 +52,23 @@ object GemStatUtil {
      *
      * @param tier Tier of the gem
      * @param mainStat Main stat of the gem
-     * @return Sorted map of the stats
+     * @return Sorted list of the stats
      */
-    fun generateGemBonuses(tier: Int, mainStat: StatType): List<ItemData.StaticStat> {
+    fun generateGemBonuses(tier: Int, mainStat: StatType): List<StaticStat> {
         require(!(tier < 0 || tier > GEM_STAT_OPTIONS.size)) {
             "Tier $tier does not exist for gem bonuses."
         }
-        val stats = mutableListOf<ItemData.StaticStat>()
+        val stats = mutableListOf<StaticStat>()
         val tierOptions = GEM_STAT_OPTIONS[tier]!!
         val index = ThreadLocalRandom.current().nextInt(tierOptions.size)
         val selectedOption = tierOptions[index]
-        val mainStaticStat =
-            ItemData.StaticStat.newBuilder()
-                .setType(mainStat)
-                .setAmount(selectedOption.first)
-                .build()
-        stats.add(mainStaticStat)
+        stats.add(StaticStat(type = mainStat, amount = selectedOption.first))
         val statsToChoose = ArrayList(StatType.entries)
         statsToChoose.remove(mainStat)
         for (subStatBonus in selectedOption.second) {
             val randomSubStatIndex = ThreadLocalRandom.current().nextInt(statsToChoose.size)
             val selectedSubStat = statsToChoose[randomSubStatIndex]
-            val staticStat =
-                ItemData.StaticStat.newBuilder()
-                    .setType(selectedSubStat)
-                    .setAmount(subStatBonus)
-                    .build()
-            stats.add(staticStat)
+            stats.add(StaticStat(type = selectedSubStat, amount = subStatBonus))
             statsToChoose.removeAt(randomSubStatIndex)
         }
         stats.sortBy { it.type.name }

@@ -1,7 +1,7 @@
 package com.runicrealms.game.items.config.item
 
+import com.runicrealms.game.data.model.ItemData
 import com.runicrealms.game.items.generator.GameItem
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
 
 interface GameItemTemplateRegistry {
 

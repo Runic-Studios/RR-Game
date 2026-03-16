@@ -5,11 +5,10 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 /**
- * Fires SYNCHRONOUSLY after:
- * - player selects a character
- * - we load character data (successfully)
+ * Fires SYNCHRONOUSLY after a player has chosen their character and we have fired
+ * [GameCharacterLoadEvent] successfully, which applies the data to the Bukkit player.
  *
- * This event can be "failed", which will kick the player and not fire the GameCharacterJoinEvent
+ * This event cannot be failed.
  */
 class GameCharacterLoadEvent(val character: GameCharacter) : Event(false) {
 

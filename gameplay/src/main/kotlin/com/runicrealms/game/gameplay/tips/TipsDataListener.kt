@@ -1,24 +1,25 @@
 package com.runicrealms.game.gameplay.tips
 
+import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
+import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GamePlayerPreLoadEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
-class TipsDataListener @Inject constructor(plugin: Plugin) : Listener {
+class TipsDataListener
+@Inject
+constructor(plugin: Plugin, private val userDataRegistry: UserDataRegistry) : Listener {
 
     init {
-        Bukkit.getPluginManager().registerEvents(this, plugin)
+        Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
     }
 
     @EventHandler
-    fun onGamePlayerCreate(event: GamePlayerPreLoadEvent) {
-        if (!event.playerData.empty) return
-        with(event.playerData) {
-            settings.data.setTips(true)
-            stageChanges(settings)
-        }
+    suspend fun onGamePlayerCreate(event: GamePlayerPreLoadEvent) {
+        if (!event.document.isNewPlayer) return
+        userDataRegistry.getPlayer(event.user)?.withPlayerData { settings.tips = true }
     }
 }

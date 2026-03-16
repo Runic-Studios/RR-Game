@@ -5,7 +5,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.trove.client.user.UserCharactersTraits
+import com.runicrealms.game.data.model.CharacterTraits
 import java.util.function.Supplier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -31,11 +31,11 @@ constructor(
     private val plugin: Plugin,
     private val odalitaMenus: OdalitaMenus,
     @Assisted private val slot: Int,
-    @Assisted private val userCharactersTraits: UserCharactersTraits,
+    @Assisted private val userCharactersTraits: Map<Int, CharacterTraits>,
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(slot: Int, userCharactersTraits: UserCharactersTraits): CharacterDeleteMenu
+        fun create(slot: Int, userCharactersTraits: Map<Int, CharacterTraits>): CharacterDeleteMenu
     }
 
     @Inject private lateinit var characterSelectMenuFactory: CharacterSelectMenu.Factory
@@ -43,7 +43,7 @@ constructor(
     @Volatile private var hasSelected = false
 
     private suspend fun deleteCharacter(player: Player) {
-        // TODO actually implement this with trove
+        // TODO actually implement character deletion via PlayerRepository
         withContext(plugin.asyncDispatcher) {
             player.sendMessage(
                 Component.text(

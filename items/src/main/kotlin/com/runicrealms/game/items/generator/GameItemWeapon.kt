@@ -2,7 +2,10 @@ package com.runicrealms.game.items.generator
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.extension.getInfo
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.WeaponData
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
@@ -10,8 +13,6 @@ import com.runicrealms.game.items.config.item.GameItemWeaponTemplate
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.util.ItemLoreBuilder
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.LinkedList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -36,43 +37,42 @@ constructor(
         fun create(data: ItemData): GameItemWeapon
     }
 
-    private var weaponData = data.weapon!!
+    private var weaponData = data.typeData as WeaponData
 
     override val addedStats: AddedStats by lazy {
-        // Store builder in case we need to update missing data (cross-check with template)
-        val weaponDataBuilder by lazy { weaponData.toBuilder() }
         var modified = false
 
-        // Correct and add stat bonuses
-        val correctedStats = correctStatRolls(weaponData.statsList, weaponTemplate.stats)
-        val correctedRolls = correctedStats.correctedRolls
+        val correctedStats = correctStatRolls(weaponData.stats, weaponTemplate.stats)
         if (correctedStats.modified) {
-            weaponDataBuilder.clearStats()
-            weaponDataBuilder.addAllStats(correctedRolls)
+            weaponData = weaponData.copy(stats = correctedStats.correctedRolls)
             modified = true
         }
 
-        // Correct and add item perks
-        val correctedPerks = correctPerks(weaponData.perksList, weaponTemplate.defaultPerks)
+        val correctedPerks = correctPerks(weaponData.perks, weaponTemplate.defaultPerks)
         if (correctedPerks.modified) {
-            weaponDataBuilder.clearPerks()
-            weaponDataBuilder.addAllPerks(correctedPerks.correctedPerks)
+            weaponData = weaponData.copy(perks = correctedPerks.correctedPerks)
             modified = true
         }
 
         if (modified) {
-            // Update data
-            weaponData = weaponDataBuilder.build()
-            data = data.toBuilder().setWeapon(weaponData).build()
+            data = data.copy(typeData = weaponData)
         }
 
-        addedStatsFactory.create(correctedStats.calculatedRolls, weaponData.perksList, 0)
+        addedStatsFactory.create(
+            correctedStats.calculatedRolls,
+            weaponData.perks.toMutableList(),
+            0,
+        )
     }
 
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
-        val statsData = weaponData.statsList
+        val statsData = weaponData.stats
 
-        val stats = mutableMapOf<StatType, Pair<ItemData.RolledStat, GameItemTemplate.StatRange>>()
+        val stats =
+            mutableMapOf<
+                StatType,
+                Pair<com.runicrealms.game.data.model.RolledStat, GameItemTemplate.StatRange>,
+            >()
         for ((statType, statRange) in weaponTemplate.stats) {
             stats[statType] = Pair(statsData.firstOrNull { it.type == statType }!!, statRange)
         }
@@ -101,7 +101,7 @@ constructor(
 
         val perkLore = LinkedList<TextComponent>()
         var atLeastOnePerk = false
-        for (perk in weaponData.perksList) {
+        for (perk in weaponData.perks) {
             val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
             val perkText =
