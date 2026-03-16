@@ -3,6 +3,7 @@ package com.runicrealms.game.gameplay.player.charselect
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.util.ALTERRA_NAME
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
@@ -11,9 +12,8 @@ import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.event.GamePlayerJoinEvent
 import com.runicrealms.game.data.event.GamePlayerQuitEvent
-import com.runicrealms.game.data.extension.toTrove
+import com.runicrealms.game.data.extension.toLocationData
 import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -130,20 +130,28 @@ constructor(
         creationCharacterTypes.remove(event.player.bukkitPlayer.uniqueId)
     }
 
-    // For players creating characters
+    /**
+     * For players creating a new character: apply the chosen [ClassType] and tutorial location.
+     *
+     * The [GameCharacterPreLoadEvent] fires when [setCharacter] encounters a slot with
+     * [CharacterData.isNewCharacter] == true. Here we intercept it and set the class type and
+     * starting location from the character creation menu selection.
+     */
     @EventHandler(priority = EventPriority.LOW) // Run early
-    fun onGameCharacterPreLoad(event: GameCharacterPreLoadEvent) {
-        with(event.characterData) {
-            if (!empty) return
-            val classType = creationCharacterTypes.remove(event.user) ?: return
+    suspend fun onGameCharacterPreLoad(event: GameCharacterPreLoadEvent) {
+        if (!event.characterData.isNewCharacter) return
+        val classType = creationCharacterTypes.remove(event.user) ?: return
 
-            // Set initial traits
-            traits.data.classType = classType
-            traits.data.exp = 0
-            traits.data.level = 0
-            traits.data.location = saveZoneRegistry.TUTORIAL.location.toTrove()
+        val gamePlayer = userDataRegistry.getPlayer(event.user) ?: return
+        val tutorialLocation = saveZoneRegistry.TUTORIAL.location.toLocationData()
 
-            stageChanges(traits)
+        // Acquire the data lock and mutate the character traits directly.
+        gamePlayer.withDocument {
+            val characterData = characters[event.slot.toString()] ?: return@withDocument
+            characterData.traits.classType = classType
+            characterData.traits.exp = 0L
+            characterData.traits.level = 0
+            characterData.traits.location = tutorialLocation
         }
     }
 

@@ -5,7 +5,9 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.game.GameCharacter
+import com.runicrealms.game.data.model.Perk
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.event.ActiveItemPerksChangeEvent
@@ -15,8 +17,6 @@ import com.runicrealms.game.items.generator.GameItemArmor
 import com.runicrealms.game.items.generator.GameItemOffhand
 import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.EnumMap
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.delay
@@ -191,14 +191,11 @@ constructor(
             val newPerks =
                 perks
                     .stream()
-                    .map { perk: ItemData.Perk ->
+                    .map { perk: Perk ->
                         val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID)!!
                         if (perk.stacks > perkTemplate.maxStacks) {
                             itemPerksExceedingMax[perkTemplate] = perk.stacks
-                            return@map ItemData.Perk.newBuilder()
-                                .setPerkID(perk.perkID)
-                                .setStacks(perkTemplate.maxStacks)
-                                .build()
+                            return@map perk.copy(stacks = perkTemplate.maxStacks)
                         }
                         perk
                     }
@@ -414,7 +411,7 @@ constructor(
 
     private fun canUseWeapon(weapon: GameItemWeapon): Boolean {
         // ONLY CALL SYNC
-        val type = character.withSyncCharacterData { traits.data.classType }
+        val type = character.withSyncCharacterData { traits.classType }
         return weapon.weaponTemplate.level <= character.bukkitPlayer.level &&
             type == weapon.weaponTemplate.classType
     }
@@ -428,7 +425,7 @@ constructor(
         OFFHAND,
     }
 
-    private class RecentWeapon(val templateID: String, val itemPerks: Collection<ItemData.Perk>?) {
+    private class RecentWeapon(val templateID: String, val itemPerks: Collection<Perk>?) {
         constructor(weapon: GameItemWeapon) : this(weapon.template.id, weapon.addedStats.perks)
 
         fun matchesItem(item: GameItem?): Boolean {
@@ -446,7 +443,7 @@ constructor(
         private const val WEAPON_PERKS_COOLDOWN_MILLIS = 5000L
 
         // Save for memory/performance reasons
-        private val EMPTY_MUTABLE_SET = mutableSetOf<ItemData.Perk>()
+        private val EMPTY_MUTABLE_SET = mutableSetOf<Perk>()
         private val EMPTY_MUTABLE_STAT_MAP = mutableMapOf<StatType, Int>()
     }
 }

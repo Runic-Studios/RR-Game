@@ -2,8 +2,12 @@ package com.runicrealms.game.items.generator
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.common.util.TextIcons
 import com.runicrealms.game.data.extension.getInfo
+import com.runicrealms.game.data.model.ArmorData
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.RolledStat
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.config.item.GameItemArmorTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplate
@@ -12,8 +16,6 @@ import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.util.GemStatUtil
 import com.runicrealms.game.items.util.ItemLoreBuilder
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.LinkedList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -39,64 +41,54 @@ constructor(
         fun create(data: ItemData): GameItemArmor
     }
 
-    private var armorData = data.armor!!
+    private var armorData = data.typeData as ArmorData
 
     override val addedStats: AddedStats by lazy {
-        // Store builder in case we need to update missing data (cross-check with template)
-        val armorDataBuilder by lazy { armorData.toBuilder() }
         var modified = false
 
-        // Correct and add stat bonuses
-        val correctedStats = correctStatRolls(armorData.statsList, armorTemplate.stats)
-        val correctedRolls = correctedStats.correctedRolls
+        val correctedStats = correctStatRolls(armorData.stats, armorTemplate.stats)
         val calculatedStats = correctedStats.calculatedRolls
         if (correctedStats.modified) {
-            armorDataBuilder.clearStats()
-            armorDataBuilder.addAllStats(correctedRolls)
+            armorData = armorData.copy(stats = correctedStats.correctedRolls)
             modified = true
         }
 
-        // Add gem bonuses
         var bonusHealth = armorTemplate.health
-        for (gemBonus in armorData.gemBonusesList) {
-            for (stat in gemBonus.statsList) {
+        for (gemBonus in armorData.gemBonuses) {
+            for (stat in gemBonus.stats) {
                 calculatedStats[stat.type] =
                     calculatedStats.getOrDefault(stat.type, 0) + stat.amount
             }
             bonusHealth += gemBonus.health
         }
 
-        // Correct and add item perks
-        val correctedPerks = correctPerks(armorData.perksList, armorTemplate.defaultPerks)
+        val correctedPerks = correctPerks(armorData.perks, armorTemplate.defaultPerks)
         if (correctedPerks.modified) {
-            armorDataBuilder.clearPerks()
-            armorDataBuilder.addAllPerks(correctedPerks.correctedPerks)
+            armorData = armorData.copy(perks = correctedPerks.correctedPerks)
             modified = true
         }
 
         if (modified) {
-            // Update data
-            armorData = armorDataBuilder.build()
-            data = data.toBuilder().setArmor(armorData).build()
+            data = data.copy(typeData = armorData)
         }
 
-        addedStatsFactory.create(calculatedStats, armorData.perksList, bonusHealth)
+        addedStatsFactory.create(calculatedStats, armorData.perks.toMutableList(), bonusHealth)
     }
 
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
         val builder = ItemLoreBuilder()
 
-        val statsData = armorData.statsList
+        val statsData = armorData.stats
 
-        val stats = mutableMapOf<StatType, Pair<ItemData.RolledStat, GameItemTemplate.StatRange>>()
+        val stats = mutableMapOf<StatType, Pair<RolledStat, GameItemTemplate.StatRange>>()
         for ((statType, statRange) in armorTemplate.stats) {
             stats[statType] = Pair(statsData.firstOrNull { it.type == statType }!!, statRange)
         }
 
         val gemOnlyStats = HashMap<StatType, Int>()
-        for (gemBonus in armorData.gemBonusesList) {
-            for (gemStat in gemBonus.statsList) {
-                if (stats.containsKey(gemStat.type)) continue // This is added later
+        for (gemBonus in armorData.gemBonuses) {
+            for (gemStat in gemBonus.stats) {
+                if (stats.containsKey(gemStat.type)) continue
                 gemOnlyStats[gemStat.type] =
                     gemOnlyStats.getOrDefault(gemStat.type, 0) + gemStat.amount
             }
@@ -104,7 +96,6 @@ constructor(
 
         val statLore = LinkedList<TextComponent>()
         for (statType in StatType.entries) {
-            if (statType == StatType.UNRECOGNIZED) continue
             val statRoll = stats[statType]
             val statInfo = statType.getInfo()
             if (menuDisplay && statRoll != null && statRoll.second.min != statRoll.second.max) {
@@ -117,9 +108,8 @@ constructor(
             } else if (statRoll != null) {
                 val value = statRoll.first.getRolledValue(statRoll.second)
                 var finalValue = value
-                for (gemBonus in armorData.gemBonusesList) {
-                    val gemMatch =
-                        gemBonus.statsList.firstOrNull { it.type == statType } ?: continue
+                for (gemBonus in armorData.gemBonuses) {
+                    val gemMatch = gemBonus.stats.firstOrNull { it.type == statType } ?: continue
                     finalValue += gemMatch.amount
                 }
                 if (finalValue == value) {
@@ -172,7 +162,7 @@ constructor(
 
         val health = armorTemplate.health
         var finalHealth = health
-        for (gemBonus in armorData.gemBonusesList) {
+        for (gemBonus in armorData.gemBonuses) {
             finalHealth += gemBonus.health
         }
         val healthText =
@@ -204,7 +194,7 @@ constructor(
                 .append(Component.text("Gem Slots: ", Style.style(NamedTextColor.GRAY)))
                 .append(Component.text("[ ", Style.style(NamedTextColor.WHITE)))
         var counter = 0
-        for (gemBonus in armorData.gemBonusesList) {
+        for (gemBonus in armorData.gemBonuses) {
             for (i in 0..<GemStatUtil.getGemSlots(gemBonus.tier)) {
                 val gemInfo = gemBonus.mainStat.getInfo()
                 gemTextBuilder.append(
@@ -230,7 +220,7 @@ constructor(
 
         val perkLore = LinkedList<TextComponent>()
         var atLeastOnePerk = false
-        for (perk in armorData.perksList) {
+        for (perk in armorData.perks) {
             val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
             val perkText =

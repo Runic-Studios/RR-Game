@@ -1,6 +1,6 @@
 package com.runicrealms.game.data.extension
 
-import com.runicrealms.trove.generated.api.schema.v1.StatType
+import com.runicrealms.game.common.StatType
 import net.kyori.adventure.text.format.NamedTextColor
 
 data class StatTypeInfo(

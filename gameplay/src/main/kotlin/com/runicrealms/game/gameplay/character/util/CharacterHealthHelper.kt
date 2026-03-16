@@ -26,26 +26,18 @@ constructor(private val characterEquipmentCacheRegistry: CharacterEquipmentCache
     /** Sets a character's max health MUST BE CALLED SYNC */
     fun setCharacterMaxHealth(character: GameCharacter) {
         // Grab the player's new info
-        val classType = character.withSyncCharacterData { traits.data.classType }
+        val classType = character.withSyncCharacterData { traits.classType }
         val player = character.bukkitPlayer
 
-        // For new players
-        if (classType == null) {
-            player.getAttribute(Attribute.MAX_HEALTH)!!.baseValue = BASE_HEALTH.toDouble()
-            return
-        }
-
-        // grab player's level
-        val classLevel = player.level
-
-        // save player hp
+        // For new players (ANY means no class selected yet)
+        val characterLevel = player.level
         val hpPerLevel = characterLevelHelper.determineHealthLvByClass(classType)
         val coefficient = CharacterLevelHelper.HEALTH_LEVEL_COEFFICIENT
 
         val total =
             (BASE_HEALTH +
-                    (coefficient * classLevel.toDouble().pow(2.0)) +
-                    (hpPerLevel * classLevel) +
+                    (coefficient * characterLevel.toDouble().pow(2.0)) +
+                    (hpPerLevel * characterLevel) +
                     (characterEquipmentCacheRegistry.getAddedCharacterStats(character)?.health
                         ?: 0))
                 .toInt()

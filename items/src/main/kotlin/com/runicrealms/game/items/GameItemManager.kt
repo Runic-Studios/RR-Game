@@ -2,6 +2,11 @@ package com.runicrealms.game.items
 
 import com.google.inject.Inject
 import com.runicrealms.game.common.config.GameYamlLoader
+import com.runicrealms.game.data.model.ArmorData
+import com.runicrealms.game.data.model.GemData
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.OffhandData
+import com.runicrealms.game.data.model.WeaponData
 import com.runicrealms.game.items.config.item.GameItemTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplate
@@ -13,9 +18,11 @@ import com.runicrealms.game.items.generator.GameItemGeneric
 import com.runicrealms.game.items.generator.GameItemOffhand
 import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
 import de.tr7zw.nbtapi.NBT
 import java.io.File
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.decodeFromByteArray
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
@@ -25,6 +32,7 @@ import org.bukkit.plugin.Plugin
  *
  * Also responsible for mapping between different item data types.
  */
+@OptIn(ExperimentalSerializationApi::class)
 class GameItemManager
 @Inject
 constructor(
@@ -68,12 +76,11 @@ constructor(
     }
 
     override fun generateGameItem(itemData: ItemData): GameItem {
-        return when (itemData.typeDataCase) {
-            ItemData.TypeDataCase.ARMOR -> gameItemArmorFactory.create(itemData)
-            ItemData.TypeDataCase.GEM -> gameItemGemFactory.create(itemData)
-            ItemData.TypeDataCase.OFFHAND -> gameItemOffhandFactory.create(itemData)
-            ItemData.TypeDataCase.WEAPON -> gameItemWeaponFactory.create(itemData)
-            ItemData.TypeDataCase.TYPEDATA_NOT_SET -> gameItemGenericFactory.create(itemData)
+        return when (itemData.typeData) {
+            is ArmorData -> gameItemArmorFactory.create(itemData)
+            is GemData -> gameItemGemFactory.create(itemData)
+            is OffhandData -> gameItemOffhandFactory.create(itemData)
+            is WeaponData -> gameItemWeaponFactory.create(itemData)
             null -> gameItemGenericFactory.create(itemData)
         }
     }
@@ -94,13 +101,12 @@ constructor(
         if (itemStack.type == Material.AIR) return null
         if (!NBT.readNbt(itemStack).hasTag("data")) return null
         val byteData = NBT.readNbt(itemStack).getByteArray("data") ?: return null
-        try {
-            val itemData = ItemData.parseFrom(byteData)
-            if (itemData.templateID.isNullOrEmpty()) return null
-            return itemData
+        return try {
+            val itemData = Cbor.decodeFromByteArray<ItemData>(byteData)
+            if (itemData.templateID.isEmpty()) null else itemData
         } catch (exception: Exception) {
             exception.printStackTrace()
-            return null
+            null
         }
     }
 }

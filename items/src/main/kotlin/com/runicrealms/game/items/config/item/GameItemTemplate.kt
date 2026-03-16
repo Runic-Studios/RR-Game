@@ -2,9 +2,11 @@ package com.runicrealms.game.items.config.item
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
-import io.netty.util.internal.ThreadLocalRandom
+import com.runicrealms.game.common.StatType
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.Perk
+import com.runicrealms.game.data.model.RolledStat
+import java.util.concurrent.ThreadLocalRandom
 import net.kyori.adventure.text.TextComponent
 
 @JsonTypeInfo(
@@ -31,39 +33,24 @@ sealed class GameItemTemplate(
 
     val triggers = triggers.toTriggers()
 
-    protected open fun buildItemData(): ItemData.Builder {
-        val builder = ItemData.newBuilder().setTemplateID(id)
-        return builder
+    protected open fun buildItemData(): ItemData {
+        return ItemData(templateID = id, customData = emptyMap(), typeData = null)
     }
 
-    fun generateItemData() = buildItemData().build()
+    fun generateItemData() = buildItemData()
 
     data class StatRange(val min: Int, val max: Int)
 
     data class DamageRange(val min: Int, val max: Int)
 
-    protected fun LinkedHashMap<StatType, StatRange>.toRolledStats(): List<ItemData.RolledStat> {
-        val stats = mutableListOf<ItemData.RolledStat>()
-        for ((statType, _) in this) {
-            val stat =
-                ItemData.RolledStat.newBuilder()
-                    .setType(statType)
-                    .setRollPercentage(
-                        ThreadLocalRandom.current().nextDouble()
-                    ) // Roll random value
-                    .build()
-            stats.add(stat)
+    protected fun LinkedHashMap<StatType, StatRange>.toRolledStats(): List<RolledStat> {
+        return map { (statType, _) ->
+            RolledStat(type = statType, rollPercentage = ThreadLocalRandom.current().nextDouble())
         }
-        return stats
     }
 
-    protected fun LinkedHashMap<String, Int>.toPerks(): List<ItemData.Perk> {
-        val perks = mutableListOf<ItemData.Perk>()
-        for ((perkID, stacks) in this) {
-            val perk = ItemData.Perk.newBuilder().setPerkID(perkID).setStacks(stacks).build()
-            perks.add(perk)
-        }
-        return perks
+    protected fun LinkedHashMap<String, Int>.toPerks(): List<Perk> {
+        return map { (perkID, stacks) -> Perk(perkID = perkID, stacks = stacks) }
     }
 
     protected fun LinkedHashMap<GameItemClickTrigger.Type, String>.toTriggers():

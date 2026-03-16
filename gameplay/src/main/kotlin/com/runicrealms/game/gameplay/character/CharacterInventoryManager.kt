@@ -4,9 +4,9 @@ import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
+import com.runicrealms.game.data.model.ItemDataStack
 import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.trove.generated.api.schema.v1.ItemDataStack
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -30,11 +30,11 @@ constructor(
     @EventHandler
     fun onCharacterJoin(event: GameCharacterLoadEvent) {
         try {
-            val items = event.character.withSyncCharacterData { inventory.data.itemsMap }
+            val items = event.character.withSyncCharacterData { inventory.items }
             for ((slot, itemDataStack) in items) {
                 val item = templateRegistry.generateGameItem(itemDataStack.data)
                 event.character.bukkitPlayer.inventory.setItem(
-                    slot,
+                    slot.toInt(),
                     item.generateItemStack(itemDataStack.count),
                 )
             }
@@ -50,21 +50,19 @@ constructor(
 
     @EventHandler
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        val items = HashMap<Int, ItemDataStack>()
+        // Serialise the current Bukkit inventory contents back into the in-memory document.
+        // The periodic save loop (or final save on logout) will persist this to MongoDB.
+        val items = HashMap<String, ItemDataStack>()
         var i = 0
         for (item in event.character.bukkitPlayer.inventory.contents) {
             if (item != null) {
                 val itemData = itemStackConverter.generateItemData(item)
                 if (itemData != null) {
-                    items[i++] =
-                        ItemDataStack.newBuilder().setData(itemData).setCount(item.amount).build()
+                    items[i++.toString()] = ItemDataStack(data = itemData, count = item.amount)
                 }
             }
         }
-        event.character.withSyncCharacterData {
-            inventory.data.clearItems()
-            inventory.data.putAllItems(items)
-            stageChanges(inventory)
-        }
+
+        event.character.withSyncCharacterData { inventory.items = items }
     }
 }

@@ -2,7 +2,10 @@ package com.runicrealms.game.items.generator
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.extension.getInfo
+import com.runicrealms.game.data.model.ItemData
+import com.runicrealms.game.data.model.OffhandData
 import com.runicrealms.game.items.character.AddedStats
 import com.runicrealms.game.items.config.item.GameItemOffhandTemplate
 import com.runicrealms.game.items.config.item.GameItemTemplate
@@ -10,8 +13,6 @@ import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.util.ItemLoreBuilder
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
 import java.util.LinkedList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -36,43 +37,42 @@ constructor(
         fun create(data: ItemData): GameItemOffhand
     }
 
-    private var offhandData = data.offhand!!
+    private var offhandData = data.typeData as OffhandData
 
     override val addedStats: AddedStats by lazy {
-        // Store builder in case we need to update missing data (cross-check with template)
-        val offhandDataBuilder by lazy { offhandData.toBuilder() }
         var modified = false
 
-        // Correct and add stat bonuses
-        val correctedStats = correctStatRolls(offhandData.statsList, offhandTemplate.stats)
-        val correctedRolls = correctedStats.correctedRolls
+        val correctedStats = correctStatRolls(offhandData.stats, offhandTemplate.stats)
         if (correctedStats.modified) {
-            offhandDataBuilder.clearStats()
-            offhandDataBuilder.addAllStats(correctedRolls)
+            offhandData = offhandData.copy(stats = correctedStats.correctedRolls)
             modified = true
         }
 
-        // Correct and add item perks
-        val correctedPerks = correctPerks(offhandData.perksList, offhandTemplate.defaultPerks)
+        val correctedPerks = correctPerks(offhandData.perks, offhandTemplate.defaultPerks)
         if (correctedPerks.modified) {
-            offhandDataBuilder.clearPerks()
-            offhandDataBuilder.addAllPerks(correctedPerks.correctedPerks)
+            offhandData = offhandData.copy(perks = correctedPerks.correctedPerks)
             modified = true
         }
 
         if (modified) {
-            // Update data
-            offhandData = offhandDataBuilder.build()
-            data = data.toBuilder().setOffhand(offhandData).build()
+            data = data.copy(typeData = offhandData)
         }
 
-        addedStatsFactory.create(correctedStats.calculatedRolls, offhandData.perksList, 0)
+        addedStatsFactory.create(
+            correctedStats.calculatedRolls,
+            offhandData.perks.toMutableList(),
+            0,
+        )
     }
 
     override fun generateLore(menuDisplay: Boolean): MutableList<TextComponent> {
-        val statsData = offhandData.statsList
+        val statsData = offhandData.stats
 
-        val stats = mutableMapOf<StatType, Pair<ItemData.RolledStat, GameItemTemplate.StatRange>>()
+        val stats =
+            mutableMapOf<
+                StatType,
+                Pair<com.runicrealms.game.data.model.RolledStat, GameItemTemplate.StatRange>,
+            >()
         for ((statType, statRange) in offhandTemplate.stats) {
             stats[statType] = Pair(statsData.firstOrNull { it.type == statType }!!, statRange)
         }
@@ -101,7 +101,7 @@ constructor(
 
         val perkLore = LinkedList<TextComponent>()
         var atLeastOnePerk = false
-        for (perk in offhandData.perksList) {
+        for (perk in offhandData.perks) {
             val perkTemplate = perkTemplateRegistry.getPerkTemplate(perk.perkID) ?: continue
             val handler = perkHandlerRegistry.getGameItemPerkHandler(perkTemplate) ?: continue
             val perkText =

@@ -1,6 +1,7 @@
 package com.runicrealms.game.items.command
 
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.items.config.item.ClassTypeRequirementHolder
 import com.runicrealms.game.items.config.item.GameItemArmorTemplate
 import com.runicrealms.game.items.config.item.GameItemRarityType
@@ -9,7 +10,6 @@ import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.item.GameItemWeaponTemplate
 import com.runicrealms.game.items.config.item.LevelRequirementHolder
 import com.runicrealms.game.items.config.item.RarityTypeHolder
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.EnumMap
 import java.util.LinkedList
 import java.util.Locale

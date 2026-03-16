@@ -2,15 +2,15 @@ package com.runicrealms.game.items.character
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.trove.generated.api.schema.v1.ItemData
-import com.runicrealms.trove.generated.api.schema.v1.StatType
+import com.runicrealms.game.common.StatType
+import com.runicrealms.game.data.model.Perk
 import javax.annotation.Nullable
 
 class FlatStatsModifier
 @AssistedInject
 constructor(
     @Assisted stats: MutableMap<StatType, Int>,
-    @Nullable @Assisted itemPerks: MutableCollection<ItemData.Perk>?,
+    @Nullable @Assisted itemPerks: MutableCollection<Perk>?,
     @Assisted health: Int,
     addStatsFactory: AddedStats.Factory,
 ) : StatsModifier {
@@ -18,7 +18,7 @@ constructor(
     interface Factory {
         fun create(
             stats: MutableMap<StatType, Int>,
-            itemPerks: MutableCollection<ItemData.Perk>?,
+            itemPerks: MutableCollection<Perk>?,
             health: Int,
         ): FlatStatsModifier
     }

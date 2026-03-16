@@ -1,5 +1,6 @@
+package com.runicrealms.game.common
+
 import com.runicrealms.game.common.util.getHead
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 
 enum class SubClassType(
     val text: String,
@@ -147,7 +148,6 @@ enum class SubClassType(
             for (subClass in entries) {
                 when (subClass.classType) {
                     ClassType.ANY -> {}
-                    ClassType.UNRECOGNIZED -> {}
                     ClassType.ARCHER -> ARCHER_SUBCLASSES.add(subClass)
                     ClassType.CLERIC -> CLERIC_SUBCLASSES.add(subClass)
                     ClassType.MAGE -> MAGE_SUBCLASSES.add(subClass)

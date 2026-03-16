@@ -4,9 +4,9 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.data.UserDataRegistry
-import com.runicrealms.trove.client.user.UserCharactersTraits
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
+import com.runicrealms.game.data.model.CharacterTraits
 import java.util.function.Supplier
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
@@ -27,11 +27,11 @@ constructor(
     private val plugin: Plugin,
     private val userDataRegistry: UserDataRegistry,
     @Assisted private val slot: Int,
-    @Assisted private val userCharactersTraits: UserCharactersTraits,
+    @Assisted private val userCharactersTraits: Map<Int, CharacterTraits>,
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(slot: Int, userCharactersTraits: UserCharactersTraits): CharacterAddMenu
+        fun create(slot: Int, userCharactersTraits: Map<Int, CharacterTraits>): CharacterAddMenu
     }
 
     @Inject private lateinit var characterSelectMenuFactory: CharacterSelectMenu.Factory

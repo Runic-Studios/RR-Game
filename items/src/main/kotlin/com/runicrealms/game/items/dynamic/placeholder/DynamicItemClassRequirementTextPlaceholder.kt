@@ -1,6 +1,7 @@
 package com.runicrealms.game.items.dynamic.placeholder
 
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.util.TextIcons
 import com.runicrealms.game.data.event.GameCharacterPreLoadEvent
 import com.runicrealms.game.data.game.GameCharacter
@@ -8,7 +9,6 @@ import com.runicrealms.game.items.config.item.ClassTypeRequirementHolder
 import com.runicrealms.game.items.dynamic.DynamicItemRegistry
 import com.runicrealms.game.items.dynamic.DynamicItemTextPlaceholder
 import com.runicrealms.game.items.generator.GameItem
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -39,7 +39,7 @@ constructor(plugin: Plugin, dynamicItemRegistry: DynamicItemRegistry) :
     fun onCharacterSelect(
         event: GameCharacterPreLoadEvent
     ) { // Run on character pre-load so that we are prepared to modify items on character load
-        cachedClasses[event.user] = event.characterData.traits.data.classType
+        cachedClasses[event.user] = event.characterData.traits.classType
     }
 
     @EventHandler

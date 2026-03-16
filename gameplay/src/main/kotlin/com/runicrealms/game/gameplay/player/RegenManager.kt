@@ -4,9 +4,9 @@ import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.game.GameCharacter
-import com.runicrealms.trove.generated.api.schema.v1.ClassType
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
@@ -66,7 +66,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
     fun getManaPerLv(character: GameCharacter): Double {
         // Sync context
         return character.withSyncCharacterData {
-            when (traits.data.classType) {
+            when (traits.classType) {
                 ClassType.ARCHER -> ARCHER_MANA_LV
                 ClassType.CLERIC -> CLERIC_MANA_LV
                 ClassType.MAGE -> MAGE_MANA_LV
