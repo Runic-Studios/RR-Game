@@ -393,14 +393,14 @@ constructor(
         }
 
         // Resolve or create the CharacterData for this slot
-        val existingData = session.document.characters[slot]
+        val existingData = session.document.characters[slot.toString()]
         val characterData: CharacterData =
             if (existingData != null) {
                 existingData
             } else {
                 // New character: create a default and insert it directly into the document map.
                 val newData = playerRepository.defaultCharacterData(slot)
-                session.document.characters = session.document.characters + (slot to newData)
+                session.document.characters += (slot.toString() to newData)
                 newData
             }
 
@@ -455,6 +455,8 @@ constructor(
      */
     override fun loadUserCharactersTraits(user: UUID): Map<Int, CharacterTraits>? {
         val session = sessions[user] ?: return null
-        return session.document.characters.mapValues { (_, charData) -> charData.traits }
+        return session.document.characters
+            .mapValues { (_, charData) -> charData.traits }
+            .mapKeys { (key, _) -> key.toInt() }
     }
 }

@@ -19,7 +19,7 @@ data class PlayerDocument(
     var isNewPlayer: Boolean = false,
     var player: PlayerData,
     /** All of the player's characters, keyed by slot index (0-based). */
-    var characters: Map<Int, CharacterData>,
+    var characters: Map<String, CharacterData>,
 ) {
     companion object {
         const val CURRENT_VERSION = 1
@@ -47,9 +47,9 @@ data class PlayerAchievements(var achievements: Map<String, AchievementStatus>)
 
 data class AchievementStatus(var progress: Long, var unlocked: Boolean)
 
-data class PlayerBank(var pages: Map<Int, BankPage>, var maxPageIndex: Int)
+data class PlayerBank(var pages: Map<String, BankPage>, var maxPageIndex: Int)
 
-data class BankPage(var items: Map<Int, ItemDataStack>)
+data class BankPage(var items: Map<String, ItemDataStack>)
 
 data class PlayerGathering(
     var cookingExp: Long,
@@ -104,7 +104,7 @@ data class CharacterTraits(
 
 data class CharacterInventory(
     /** Minecraft inventory slot index -> item stack. */
-    var items: Map<Int, ItemDataStack>
+    var items: Map<String, ItemDataStack>
 )
 
 data class CharacterProfession(var profession: ProfessionType, var level: Int, var exp: Long)

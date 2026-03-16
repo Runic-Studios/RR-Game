@@ -34,7 +34,7 @@ constructor(
             for ((slot, itemDataStack) in items) {
                 val item = templateRegistry.generateGameItem(itemDataStack.data)
                 event.character.bukkitPlayer.inventory.setItem(
-                    slot,
+                    slot.toInt(),
                     item.generateItemStack(itemDataStack.count),
                 )
             }
@@ -52,13 +52,13 @@ constructor(
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
         // Serialise the current Bukkit inventory contents back into the in-memory document.
         // The periodic save loop (or final save on logout) will persist this to MongoDB.
-        val items = HashMap<Int, ItemDataStack>()
+        val items = HashMap<String, ItemDataStack>()
         var i = 0
         for (item in event.character.bukkitPlayer.inventory.contents) {
             if (item != null) {
                 val itemData = itemStackConverter.generateItemData(item)
                 if (itemData != null) {
-                    items[i++] = ItemDataStack(data = itemData, count = item.amount)
+                    items[i++.toString()] = ItemDataStack(data = itemData, count = item.amount)
                 }
             }
         }
