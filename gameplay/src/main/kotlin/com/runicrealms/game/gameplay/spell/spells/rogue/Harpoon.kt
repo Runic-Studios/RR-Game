@@ -1,6 +1,5 @@
 package com.runicrealms.game.gameplay.spell.spells.rogue
 
-import com.destroystokyo.paper.event.entity.ProjectileCollideEvent
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.gameplay.spell.effect.RunicStatusEffect
 import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
@@ -21,6 +20,7 @@ import org.bukkit.entity.Trident
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
+import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.util.Vector
 
 /**
@@ -79,7 +79,7 @@ class Harpoon(deps: SpellDependencies) :
     }
 
     @EventHandler
-    fun onTridentCollide(event: ProjectileCollideEvent) {
+    fun onTridentCollide(event: ProjectileHitEvent) {
         if (tridentMap.isEmpty()) return
         val shooter = event.entity.shooter as? Player ?: return
         if (!tridentMap.containsKey(shooter.uniqueId)) return
@@ -90,7 +90,7 @@ class Harpoon(deps: SpellDependencies) :
         trident.remove()
         tridentMap.remove(shooter.uniqueId)
 
-        val victim = event.collidedWith as? LivingEntity ?: return
+        val victim = event.hitEntity as? LivingEntity ?: return
 
         if (isValidAlly(shooter, victim)) {
             shooter.teleport(victim.eyeLocation)

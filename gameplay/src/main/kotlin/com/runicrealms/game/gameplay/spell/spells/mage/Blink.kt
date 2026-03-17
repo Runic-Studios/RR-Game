@@ -33,7 +33,7 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
 
         for (i in 1..distance.toInt()) {
             val check = origin.clone().add(dir.clone().multiply(i))
-            if (!check.block.type.isAir && !check.block.type.isTransparent) break
+            if (!check.block.type.isAir && check.block.type.isCollidable) break
             teleportLoc = check
         }
 

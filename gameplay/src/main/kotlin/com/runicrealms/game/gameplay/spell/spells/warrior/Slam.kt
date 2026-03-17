@@ -88,7 +88,9 @@ class Slam(deps: SpellDependencies) :
             deps.plugin.server.scheduler.runTaskTimer(
                 deps.plugin,
                 Runnable {
-                    if (!(player.isOnGround || player.fallDistance == 1.0f)) return@Runnable
+                    val below = player.location.clone().add(0.0, -1.0, 0.0).block
+                    val isOnGround = below.isCollidable
+                    if (!(isOnGround || player.fallDistance == 1.0f)) return@Runnable
 
                     task.cancel()
                     val slamLandEvent = SlamLandEvent(player)

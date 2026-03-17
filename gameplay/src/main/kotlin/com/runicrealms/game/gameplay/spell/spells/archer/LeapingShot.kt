@@ -75,7 +75,6 @@ class LeapingShot(deps: SpellDependencies) :
         arrow.shooter = player
         arrow.isCustomNameVisible = false
         leapArrows[arrow.uniqueId] = last
-        arrow.setBounce(false)
         player.world.playSound(
             player.location,
             Sound.ENTITY_ARROW_HIT,
