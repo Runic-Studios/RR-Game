@@ -3,7 +3,9 @@ package com.runicrealms.game.common.util
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.util.ChatPaginator
 
@@ -29,6 +31,22 @@ object TextIcons {
 
 fun String.breakLines(lineLength: Int = LINE_LENGTH): List<String> {
     return listOf(*ChatPaginator.wordWrap(this, lineLength))
+}
+
+/**
+ * Converts &-format colour codes to § first, word-wraps at [lineLength] (so ChatPaginator carries
+ * the last colour code onto each continuation line), then returns Adventure [Component]s with
+ * [TextDecoration.ITALIC] explicitly disabled.
+ *
+ * Use this for all item lore. Without it, wrapped continuation lines lose their colour prefix and
+ * Minecraft renders them with the default item-lore style (purple italic).
+ */
+fun String.toLoreComponents(lineLength: Int = LINE_LENGTH): List<Component> {
+    val sectionStr = ChatColor.translateAlternateColorCodes('&', this)
+    return ChatPaginator.wordWrap(sectionStr, lineLength).map { line ->
+        LegacyComponentSerializer.legacySection().deserialize(line)
+            .decoration(TextDecoration.ITALIC, false)
+    }
 }
 
 fun sendCenteredMessage(player: Player, message: String) {

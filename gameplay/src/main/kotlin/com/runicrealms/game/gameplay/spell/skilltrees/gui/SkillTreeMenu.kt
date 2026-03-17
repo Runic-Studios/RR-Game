@@ -4,8 +4,7 @@ import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.StatType
 import com.runicrealms.game.common.SubClassType
-import com.runicrealms.game.common.util.breakLines
-import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeData
@@ -16,6 +15,7 @@ import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkBaseStat
 import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkSpell
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import nl.odalitadevelopments.menus.OdalitaMenus
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
@@ -104,7 +104,7 @@ constructor(
                     Component.text("${subClassType.text} Tree Info", NamedTextColor.GREEN)
                 )
                 val lore = "&7Remaining Skill Points: &a$availablePoints"
-                meta.lore(lore.breakLines().map { it.colorFormat() })
+                meta.lore(lore.toLoreComponents())
             }
         }
 
@@ -134,18 +134,19 @@ constructor(
                     )
                 )
                 val spellType = if (spell.isPassive) "PASSIVE SPELL " else "ACTIVE SPELL "
-                // Lore: "\n<GOLD+BOLD>SPELL TYPE<GRAY> description" wrapped
                 val loreText = "\n&6&l$spellType&7${spell.description}"
-                val lore = loreText.breakLines().map { it.colorFormat() }.toMutableList()
+                val lore = loreText.toLoreComponents().toMutableList()
                 if (!spell.isPassive) {
                     lore += Component.empty()
                     lore += Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
-                    lore +=
-                        Component.text("Cooldown ", NamedTextColor.RED)
+                            .decoration(TextDecoration.ITALIC, false)
+                    lore += Component.text("Cooldown ", NamedTextColor.RED)
                             .append(Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW))
+                            .decoration(TextDecoration.ITALIC, false)
                 }
                 lore += Component.empty()
                 lore += Component.text("» Click to purchase", NamedTextColor.AQUA)
+                        .decoration(TextDecoration.ITALIC, false)
                 meta.lore(lore)
             }
         }
@@ -164,7 +165,7 @@ constructor(
                 )
                 val loreText =
                     "\n&7Bonus per point: &a+${perk.bonusAmount}\n\n&eCharacter Stat &7$statDesc"
-                meta.lore(loreText.breakLines().map { it.colorFormat() })
+                meta.lore(loreText.toLoreComponents())
             }
         }
     }
@@ -197,7 +198,7 @@ constructor(
         ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Return", NamedTextColor.RED))
-                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
+                meta.lore("&7Return to the previous menu".toLoreComponents())
             }
         }
 

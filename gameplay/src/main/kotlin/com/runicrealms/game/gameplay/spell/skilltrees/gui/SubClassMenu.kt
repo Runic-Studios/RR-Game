@@ -4,8 +4,7 @@ import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.SubClassType
-import com.runicrealms.game.common.util.breakLines
-import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreePosition
@@ -101,7 +100,7 @@ constructor(
         ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Return", NamedTextColor.RED))
-                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
+                meta.lore("&7Return to the previous menu".toLoreComponents())
             }
         }
 
@@ -114,9 +113,9 @@ constructor(
                 meta.lore(
                     buildList {
                         add(Component.empty())
-                        addAll(title.breakLines().map { it.colorFormat() })
+                        addAll(title.toLoreComponents())
                         add(Component.empty())
-                        addAll(desc.breakLines().map { it.colorFormat() })
+                        addAll(desc.toLoreComponents())
                     }
                 )
             }

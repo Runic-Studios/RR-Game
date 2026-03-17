@@ -3,8 +3,7 @@ package com.runicrealms.game.gameplay.spell.skilltrees.gui
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.effect.RunicStatusEffect
-import com.runicrealms.game.common.util.breakLines
-import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -84,7 +83,7 @@ constructor(
         return ItemStack(Material.PAPER).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Open Skill Trees", NamedTextColor.GREEN))
-                meta.lore(lore.breakLines().map { it.colorFormat() })
+                meta.lore(lore.toLoreComponents())
             }
         }
     }
@@ -97,7 +96,7 @@ constructor(
                 meta.displayName(
                     Component.text("Open Spell Editor", NamedTextColor.LIGHT_PURPLE)
                 )
-                meta.lore(lore.breakLines().map { it.colorFormat() })
+                meta.lore(lore.toLoreComponents())
             }
         }
     }
@@ -106,7 +105,7 @@ constructor(
         ItemStack(Material.BARRIER).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Close", NamedTextColor.RED))
-                meta.lore(listOf(Component.text("Close the menu", NamedTextColor.GRAY)))
+                meta.lore("&7Close the menu".toLoreComponents())
             }
         }
 
@@ -128,14 +127,10 @@ constructor(
                                     "${statusEffect.displayName} -",
                                     NamedTextColor.DARK_AQUA,
                                     TextDecoration.BOLD,
-                                )
+                                ).decoration(TextDecoration.ITALIC, false)
                             )
                             // Description word-wrapped at 28 chars, matching ChatUtils.formattedText
-                            addAll(
-                                statusEffect.description.breakLines().map {
-                                    Component.text(it, NamedTextColor.GRAY)
-                                }
-                            )
+                            addAll("&7${statusEffect.description}".toLoreComponents())
                         }
                     }
                 )

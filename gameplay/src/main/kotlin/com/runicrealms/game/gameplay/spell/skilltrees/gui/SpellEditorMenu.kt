@@ -8,8 +8,8 @@ import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SpellData
 import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkSpell
-import com.runicrealms.game.common.util.breakLines
 import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import nl.odalitadevelopments.menus.OdalitaMenus
@@ -146,7 +146,7 @@ constructor(
         ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Return", NamedTextColor.RED))
-                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
+                meta.lore("&7Return to the previous menu".toLoreComponents())
             }
         }
 
@@ -155,18 +155,18 @@ constructor(
             editMeta { meta ->
                 meta.displayName(Component.text("Your Spell Setup:", NamedTextColor.LIGHT_PURPLE))
                 val lore = buildList<Component> {
-                    add("&d[1] &7Spell Slot One: &f${spellData.spellHotbarOne}".colorFormat())
-                    add("&d[L] &7Spell Left-click: &f${spellData.spellLeftClick}".colorFormat())
-                    add("&d[R] &7Spell Right-click: &f${spellData.spellRightClick}".colorFormat())
-                    add("&d[F] &7Spell Slot Four: &f${spellData.spellSwapHands}".colorFormat())
+                    addAll("&d[1] &7Spell Slot One: &f${spellData.spellHotbarOne}".toLoreComponents())
+                    addAll("&d[L] &7Spell Left-click: &f${spellData.spellLeftClick}".toLoreComponents())
+                    addAll("&d[R] &7Spell Right-click: &f${spellData.spellRightClick}".toLoreComponents())
+                    addAll("&d[F] &7Spell Slot Four: &f${spellData.spellSwapHands}".toLoreComponents())
                     add(Component.empty())
-                    add(Component.text("Your Passives:", NamedTextColor.LIGHT_PURPLE))
+                    addAll("&dYour Passives:".toLoreComponents())
                     val passives = getPassiveNames(uuid)
                     if (passives.isEmpty()) {
-                        add(Component.text("None", NamedTextColor.GRAY))
+                        addAll("&7None".toLoreComponents())
                     } else {
                         for (passive in passives) {
-                            add(Component.text("- $passive", NamedTextColor.WHITE))
+                            addAll("&f- $passive".toLoreComponents())
                         }
                     }
                 }
@@ -197,7 +197,7 @@ constructor(
                 meta.lore(
                     buildList {
                         add(Component.empty())
-                        addAll(lore.breakLines().map { it.colorFormat() })
+                        addAll(lore.toLoreComponents())
                     }
                 )
             }
@@ -215,18 +215,16 @@ constructor(
             ItemStack(Material.PAPER).apply {
                 editMeta { meta ->
                     meta.displayName("&d[$letter] Spell $name".colorFormat())
-                    val lore =
-                        "&7Configure your active spell for &f$nameShort"
-                    meta.lore(lore.breakLines().map { it.colorFormat() })
+                    val lore = "&7Configure your active spell for &f$nameShort"
+                    meta.lore(lore.toLoreComponents())
                 }
             }
         } else {
             ItemStack(Material.BARRIER).apply {
                 editMeta { meta ->
                     meta.displayName(Component.text("Spell Slot Locked", NamedTextColor.RED))
-                    val lore =
-                        "&7Reach level [${requiredLevel(slotIndex)}] to unlock this slot!"
-                    meta.lore(lore.breakLines().map { it.colorFormat() })
+                    val lore = "&7Reach level [${requiredLevel(slotIndex)}] to unlock this slot!"
+                    meta.lore(lore.toLoreComponents())
                 }
             }
         }

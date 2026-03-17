@@ -2,8 +2,7 @@ package com.runicrealms.game.gameplay.spell.skilltrees.gui
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
-import com.runicrealms.game.common.util.breakLines
-import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
@@ -11,6 +10,7 @@ import com.runicrealms.game.gameplay.spell.skilltrees.SpellData
 import com.runicrealms.game.gameplay.spell.spelltypes.Spell
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import nl.odalitadevelopments.menus.OdalitaMenus
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
@@ -125,7 +125,7 @@ constructor(
         ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Return", NamedTextColor.RED))
-                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
+                meta.lore("&7Return to the previous menu".toLoreComponents())
             }
         }
 
@@ -137,25 +137,20 @@ constructor(
         ItemStack(Material.NETHER_WART).apply {
             editMeta { meta ->
                 meta.displayName(Component.text(spell.name, NamedTextColor.GREEN))
+                val spellType = if (spell.isPassive) "PASSIVE SPELL " else "ACTIVE SPELL "
                 val lore = buildList<Component> {
-                    val spellType = if (spell.isPassive) "PASSIVE SPELL " else "ACTIVE SPELL "
-                    addAll(
-                        "\n&6&l$spellType&7${spell.description}"
-                            .breakLines()
-                            .map { line -> line.colorFormat() }
-                    )
+                    addAll("\n&6&l$spellType&7${spell.description}".toLoreComponents())
                     if (!spell.isPassive) {
                         add(Component.empty())
-                        add(Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA))
-                        add(
-                            Component.text("Cooldown ", NamedTextColor.RED)
-                                .append(
-                                    Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW)
-                                )
-                        )
+                        add(Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
+                            .decoration(TextDecoration.ITALIC, false))
+                        add(Component.text("Cooldown ", NamedTextColor.RED)
+                            .append(Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW))
+                            .decoration(TextDecoration.ITALIC, false))
                     }
                     add(Component.empty())
-                    add(Component.text("» Click to activate", NamedTextColor.LIGHT_PURPLE))
+                    add(Component.text("» Click to activate", NamedTextColor.LIGHT_PURPLE)
+                        .decoration(TextDecoration.ITALIC, false))
                 }
                 meta.lore(lore)
             }
