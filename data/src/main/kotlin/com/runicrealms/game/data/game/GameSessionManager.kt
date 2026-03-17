@@ -190,9 +190,30 @@ constructor(
      * document load fails.
      */
     private suspend fun createSession(bukkitPlayer: Player): Result<GameSession> {
-        // Acquire the distributed lock
-        // This prevents two servers from simultaneously writing the same player.
-        val lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+        // Acquire the distributed lock, retrying if another server still holds it.
+        // Players switching servers quickly may arrive here before the previous server has released
+        // the lock, so we wait up to 5 seconds for it to be freed.
+        var lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+        if (lockResult.isFailure) {
+            logger.warn(
+                "Lock is held for player ${bukkitPlayer.name} (${bukkitPlayer.uniqueId}) by " +
+                    "another server - retrying up to 5 times"
+            )
+            for (attempt in 1..5) {
+                // Async dispatcher - delay suspends the coroutine without blocking the MC thread
+                delay(1_000L)
+                lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+                if (lockResult.isSuccess) {
+                    logger.info(
+                        "Lock acquired for ${bukkitPlayer.name} after $attempt attempt(s)"
+                    )
+                    break
+                }
+                logger.warn(
+                    "Lock still held for player ${bukkitPlayer.name} after attempt $attempt/5"
+                )
+            }
+        }
         if (lockResult.isFailure) {
             return Result.failure(
                 IllegalStateException(
