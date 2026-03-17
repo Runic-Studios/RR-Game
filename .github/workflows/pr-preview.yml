@@ -1,0 +1,91 @@
+name: PR Preview Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+      - dev
+
+env:
+  ARTIFACT_NAME: 'rr-game'
+  REGISTRY: 'registry.runicrealms.com'
+  REGISTRY_PROJECT: 'library'
+
+jobs:
+  build-preview:
+    if: github.event.action != 'closed'
+    runs-on: rr-runner
+    container:
+      image: registry.runicrealms.com/agents/agent-java-21:latest
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-read-only: false
+          gradle-home-cache-includes: |
+            caches
+            wrapper
+            notifications
+            jdks
+
+      - name: Build with Gradle
+        env:
+          RUNIC_GIT_BRANCH: ${{ github.head_ref }}
+          RUNIC_GIT_SHA: ${{ github.sha }}
+          RUNIC_GIT_MESSAGE: ${{ github.event.pull_request.title }}
+          RUNIC_BUILD_ID: ${{ github.run_id }}
+        run: ./gradlew :plugin:shadowJar --no-daemon
+
+      - name: Push Artifact to ORAS
+        uses: Runic-Studios/Realm-Actions/oras-push@main
+        with:
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+          tag: pr-${{ github.event.number }}
+          file_path: 'plugin/build/libs/game-plugin-all.jar'
+          registry: ${{ env.REGISTRY }}
+          registry_project: ${{ env.REGISTRY_PROJECT }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Dispatch PR Preview Build to Realm-Paper
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_PAT }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: 'Runic-Studios',
+              repo: 'Realm-Paper',
+              event_type: 'build-pr-preview',
+              client_payload: {
+                pr_number: '${{ github.event.number }}',
+                rr_game_tag: 'pr-${{ github.event.number }}'
+              }
+            });
+
+  cleanup-preview:
+    if: github.event.action == 'closed'
+    runs-on: rr-runner
+    container:
+      image: registry.runicrealms.com/agents/agent-base:latest
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+    steps:
+      - name: Delete realm-paper PR image from Harbor
+        run: |
+          curl -X DELETE \
+            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
+            "https://registry.runicrealms.com/api/v2.0/projects/build/repositories/realm-paper/artifacts/pr-${{ github.event.number }}"
+
+      - name: Delete rr-game PR artifact from Harbor
+        run: |
+          curl -X DELETE \
+            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
+            "https://registry.runicrealms.com/api/v2.0/projects/library/repositories/rr-game/artifacts/pr-${{ github.event.number }}"
