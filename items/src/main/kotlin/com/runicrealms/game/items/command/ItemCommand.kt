@@ -10,6 +10,7 @@ import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.inject.Inject
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.toLegacy
@@ -315,6 +316,28 @@ constructor(
         player.inventory.addItem(item)
         // TODO check works
         //        RunicItemsAPI.addItem(player.inventory, item)
+    }
+
+    @Subcommand("get-data")
+    @Conditions("is-op")
+    fun onCommandGetData(player: Player) {
+        val heldItem = player.inventory.itemInMainHand
+        if (heldItem.type == Material.AIR) {
+            player.sendMessage("$PREFIX&dYou are not holding an item!".colorFormat())
+            return
+        }
+        val itemData = itemStackConverter.generateItemData(heldItem)
+        if (itemData == null) {
+            player.sendMessage(
+                "$PREFIX&dThe item you are holding has no game item data.".colorFormat()
+            )
+            return
+        }
+        val json = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(itemData)
+        player.sendMessage("$PREFIX&dItem Data:".colorFormat())
+        for (line in json.lines()) {
+            player.sendMessage(line)
+        }
     }
 
     @Subcommand("get-range")
