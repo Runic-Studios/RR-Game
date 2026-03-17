@@ -27,7 +27,7 @@ constructor(
         sender.sendMessage("&5[Runic] &6>> &dServer Build Info".colorFormat())
         sender.sendMessage("&7Version: &f${info.pluginVersion}".colorFormat())
         sender.sendMessage("&7Branch: &f${info.branch}".colorFormat())
-        sender.sendMessage("&7Commit: &f${info.commitShortSha})".colorFormat())
+        sender.sendMessage("&7Commit: &f${info.commitShortSha}".colorFormat())
         sender.sendMessage("&7Message: &f${info.commitMessage}".colorFormat())
         sender.sendMessage("&7Built: &f${info.builtAtUtc}".colorFormat())
         sender.sendMessage(
