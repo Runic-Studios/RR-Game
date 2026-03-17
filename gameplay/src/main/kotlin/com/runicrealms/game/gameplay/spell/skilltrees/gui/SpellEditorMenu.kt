@@ -38,16 +38,38 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val skillTreeManager: SkillTreeManager,
     private val spellManager: SpellManager,
+    private val runeMenuFactory: RuneMenu.Factory,
+    private val spellMenuFactory: SpellMenu.Factory,
+    private val spellEditorMenuFactory: Factory,
     @Assisted val selectedSpellName: String?,
+    @Assisted val selectedSlotIndex: Int?,
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(selectedSpellName: String?): SpellEditorMenu
+        fun create(selectedSpellName: String?, selectedSlotIndex: Int?): SpellEditorMenu
     }
 
     override fun onLoad(player: Player, menuContents: MenuContents) {
         val uuid = player.uniqueId
         val spellData = skillTreeManager.getSpellData(uuid) ?: return
+        val playerLevel =
+            userDataRegistry.getCharacter(uuid)?.withSyncCharacterData { traits.level } ?: 0
+
+        if (selectedSpellName != null && selectedSlotIndex != null) {
+            if (isSlotUnlocked(selectedSlotIndex, playerLevel)) {
+                assignSpell(player, spellData, selectedSlotIndex, selectedSpellName)
+            } else {
+                player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 0.5f, 0.8f)
+                player.sendMessage(
+                    Component.text(
+                        "That slot unlocks at level ${requiredLevel(selectedSlotIndex)}.",
+                        NamedTextColor.RED,
+                    )
+                )
+            }
+            odalitaMenus.openMenu(spellEditorMenuFactory.create(null, null), player)
+            return
+        }
 
         fillBackground(menuContents)
 
@@ -62,14 +84,16 @@ constructor(
         for ((info, slotIndex) in slotMetas) {
             val (row, col, label) = info
             val currentSpellName = spellData.getSpellForSlotIndex(slotIndex) ?: "None"
+            val unlocked = isSlotUnlocked(slotIndex, playerLevel)
             menuContents.set(
                 row,
                 col,
-                ClickableItem.of(buildSlotItem(label, currentSpellName)) {
-                    if (selectedSpellName != null) {
-                        assignSpell(player, spellData, slotIndex, selectedSpellName)
-                        odalitaMenus.openMenu(this, player) // refresh
+                ClickableItem.of(buildSlotItem(label, currentSpellName, slotIndex, playerLevel)) {
+                    if (!unlocked) {
+                        player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 0.5f, 0.8f)
+                        return@of
                     }
+                    odalitaMenus.openMenu(spellMenuFactory.create(slotIndex), player)
                 },
             )
         }
@@ -94,31 +118,49 @@ constructor(
         menuContents.set(
             5,
             0,
-            DisplayItem.of(
+            ClickableItem.of(
                 ItemStack(Material.ARROW).apply {
-                    editMeta { it.displayName(Component.text("← Back", NamedTextColor.GRAY)) }
+                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
                 }
-            ),
+            ) {
+                odalitaMenus.openMenu(runeMenuFactory.create(), player)
+            },
         )
     }
 
-    private fun buildSlotItem(label: String, currentSpellName: String): ItemStack =
-        ItemStack(Material.PAPER).apply {
+    private fun buildSlotItem(
+        label: String,
+        currentSpellName: String,
+        slotIndex: Int,
+        playerLevel: Int,
+    ): ItemStack {
+        val unlocked = isSlotUnlocked(slotIndex, playerLevel)
+        val material = if (unlocked) Material.PAPER else Material.BARRIER
+        return ItemStack(material).apply {
             editMeta { meta ->
-                meta.displayName(Component.text(label, NamedTextColor.YELLOW))
+                meta.displayName(
+                    if (unlocked) {
+                        Component.text(label, NamedTextColor.YELLOW)
+                    } else {
+                        Component.text("$label (Locked)", NamedTextColor.RED)
+                    }
+                )
                 meta.lore(
                     listOf(
                         Component.text("Current: $currentSpellName", NamedTextColor.GRAY),
-                        if (selectedSpellName != null)
+                        if (unlocked) {
+                            Component.text("Click to choose a spell.", NamedTextColor.GREEN)
+                        } else {
                             Component.text(
-                                "Click to assign: $selectedSpellName",
-                                NamedTextColor.GREEN,
+                                "Requires level ${requiredLevel(slotIndex)}.",
+                                NamedTextColor.DARK_RED,
                             )
-                        else Component.text("Open Spell Menu to assign.", NamedTextColor.DARK_GRAY),
+                        },
                     )
                 )
             }
         }
+    }
 
     private fun assignSpell(
         player: Player,
@@ -174,4 +216,16 @@ constructor(
             }
         }
     }
+
+    private fun isSlotUnlocked(slotIndex: Int, playerLevel: Int): Boolean =
+        playerLevel >= requiredLevel(slotIndex)
+
+    private fun requiredLevel(slotIndex: Int): Int =
+        when (slotIndex) {
+            0 -> 0
+            1 -> 10
+            2 -> 15
+            3 -> 20
+            else -> Int.MAX_VALUE
+        }
 }

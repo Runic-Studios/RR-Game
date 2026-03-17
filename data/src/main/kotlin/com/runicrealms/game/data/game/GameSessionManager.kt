@@ -204,9 +204,7 @@ constructor(
                 delay(1_000L)
                 lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
                 if (lockResult.isSuccess) {
-                    logger.info(
-                        "Lock acquired for ${bukkitPlayer.name} after $attempt attempt(s)"
-                    )
+                    logger.info("Lock acquired for ${bukkitPlayer.name} after $attempt attempt(s)")
                     break
                 }
                 logger.warn(

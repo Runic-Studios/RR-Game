@@ -6,6 +6,7 @@ import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
+import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreePosition
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import nl.odalitadevelopments.menus.OdalitaMenus
@@ -34,6 +35,8 @@ constructor(
     private val odalitaMenus: OdalitaMenus,
     private val userDataRegistry: UserDataRegistry,
     private val skillTreeManager: SkillTreeManager,
+    private val skillTreeMenuFactory: SkillTreeMenu.Factory,
+    private val runeMenuFactory: RuneMenu.Factory,
     @Assisted private val playerClass: ClassType,
 ) : PlayerMenuProvider {
 
@@ -78,6 +81,19 @@ constructor(
                 )
             }
         }
+
+        menuContents.set(
+            0,
+            0,
+            ClickableItem.of(
+                ItemStack(Material.ARROW).apply {
+                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
+                }
+            ) {
+                odalitaMenus.openMenu(runeMenuFactory.create(), player)
+            },
+        )
+
         for ((index, subClass) in subClassList.withIndex()) {
             val (row, col) = slots.getOrNull(index) ?: continue
             menuContents.set(
@@ -101,12 +117,18 @@ constructor(
     private fun selectSubClass(player: Player, subClass: SubClassType) {
         val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
         character.withSyncCharacterData { traits.subClassType = subClass }
+        skillTreeManager.getSkillTreeDataMap(player.uniqueId)?.forEach { (_, tree) ->
+            tree.loadPerksFromSubClass(subClass)
+        }
         player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f)
         player.sendMessage(
             Component.text("You have chosen the ")
                 .append(Component.text(subClass.text, NamedTextColor.GOLD))
                 .append(Component.text(" path!"))
         )
-        player.closeInventory()
+        odalitaMenus.openMenu(
+            skillTreeMenuFactory.create(subClass, SkillTreePosition.FIRST),
+            player,
+        )
     }
 }

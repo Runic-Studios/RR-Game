@@ -3,6 +3,7 @@ package com.runicrealms.game.gameplay.spell.skilltrees.gui
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.SubClassType
+import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeData
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreePosition
@@ -34,7 +35,9 @@ class SkillTreeMenu
 @AssistedInject
 constructor(
     private val odalitaMenus: OdalitaMenus,
+    private val userDataRegistry: UserDataRegistry,
     private val skillTreeManager: SkillTreeManager,
+    private val subClassMenuFactory: SubClassMenu.Factory,
     @Assisted private val subClassType: SubClassType,
     @Assisted private val position: SkillTreePosition,
 ) : PlayerMenuProvider {
@@ -50,6 +53,7 @@ constructor(
 
         fillBackground(menuContents)
         placeArrows(menuContents)
+        placeBackButton(player, menuContents)
 
         val perks = tree.perks
         for ((index, perk) in perks.withIndex()) {
@@ -132,6 +136,24 @@ constructor(
                 menuContents.set(row, col, DisplayItem.of(glass.clone()))
             }
         }
+    }
+
+    private fun placeBackButton(player: Player, menuContents: MenuContents) {
+        menuContents.set(
+            5,
+            0,
+            ClickableItem.of(
+                ItemStack(Material.ARROW).apply {
+                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
+                }
+            ) {
+                val classType =
+                    userDataRegistry.getCharacter(player.uniqueId)?.withSyncCharacterData {
+                        traits.classType
+                    } ?: subClassType.classType
+                odalitaMenus.openMenu(subClassMenuFactory.create(classType), player)
+            },
+        )
     }
 
     private fun placeArrows(menuContents: MenuContents) {

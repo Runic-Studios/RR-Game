@@ -1,5 +1,6 @@
 package com.runicrealms.game.gameplay.spell.skilltrees.gui
 
+import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
@@ -10,7 +11,6 @@ import nl.odalitadevelopments.menus.OdalitaMenus
 import nl.odalitadevelopments.menus.annotations.Menu
 import nl.odalitadevelopments.menus.contents.MenuContents
 import nl.odalitadevelopments.menus.items.ClickableItem
-import nl.odalitadevelopments.menus.items.DisplayItem
 import nl.odalitadevelopments.menus.menu.providers.PlayerMenuProvider
 import nl.odalitadevelopments.menus.menu.type.MenuType
 import org.bukkit.Material
@@ -31,10 +31,11 @@ constructor(
     private val skillTreeManager: SkillTreeManager,
     private val spellManager: SpellManager,
     private val spellEditorMenuFactory: SpellEditorMenu.Factory,
+    @Assisted private val slotIndex: Int,
 ) : PlayerMenuProvider {
 
     interface Factory {
-        fun create(): SpellMenu
+        fun create(slotIndex: Int): SpellMenu
     }
 
     override fun onLoad(player: Player, menuContents: MenuContents) {
@@ -57,8 +58,10 @@ constructor(
                 row,
                 col,
                 ClickableItem.of(buildSpellItem(spell)) {
-                    // Navigate to SpellEditorMenu for slot assignment
-                    odalitaMenus.openMenu(spellEditorMenuFactory.create(spell.name), player)
+                    odalitaMenus.openMenu(
+                        spellEditorMenuFactory.create(spell.name, slotIndex),
+                        player,
+                    )
                 },
             )
         }
@@ -67,11 +70,13 @@ constructor(
         menuContents.set(
             5,
             0,
-            DisplayItem.of(
+            ClickableItem.of(
                 ItemStack(Material.ARROW).apply {
-                    editMeta { it.displayName(Component.text("← Back", NamedTextColor.GRAY)) }
+                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
                 }
-            ),
+            ) {
+                odalitaMenus.openMenu(spellEditorMenuFactory.create(null, null), player)
+            },
         )
     }
 

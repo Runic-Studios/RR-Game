@@ -68,7 +68,7 @@ constructor(
                         )
                     }
                 },
-                spellEditorMenuFactory.create(null),
+                spellEditorMenuFactory.create(null, null),
             ),
         )
 
