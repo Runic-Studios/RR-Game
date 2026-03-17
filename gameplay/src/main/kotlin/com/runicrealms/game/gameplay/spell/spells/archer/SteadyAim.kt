@@ -81,7 +81,6 @@ class SteadyAim(deps: SpellDependencies) :
         val payload = stacks[event.caster.uniqueId] ?: return
         if (payload.stacks <= 0) return
 
-        // TODO: StatAPI pending (SPELL_MIGRATION.md #3)
         val amount = attributeBaseValue.toInt()
         event.amount += amount * payload.stacks
         payload.stacks = 0

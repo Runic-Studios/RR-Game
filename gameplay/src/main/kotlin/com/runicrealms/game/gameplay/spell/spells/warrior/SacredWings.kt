@@ -169,7 +169,6 @@ class SacredWings(deps: SpellDependencies) :
             }) {
             if (entity.uniqueId == player.uniqueId) continue
             val ally = entity as? Player ?: continue
-            // TODO: StatAPI pending (SPELL_MIGRATION.md #3) — using allyShield base value only
             shieldPlayer(player, ally, allyShield, this)
         }
     }

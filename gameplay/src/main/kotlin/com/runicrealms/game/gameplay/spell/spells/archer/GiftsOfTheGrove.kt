@@ -66,7 +66,6 @@ class GiftsOfTheGrove(deps: SpellDependencies) :
         if (event.caster.location.distanceSquared(groveLocation) > sacredRadius * sacredRadius)
             return
 
-        // TODO: StatAPI pending (SPELL_MIGRATION.md #3)
         val bonus = attributeBaseValue / 100.0
         event.amount = (event.amount + (event.amount * bonus)).toInt()
     }

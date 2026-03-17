@@ -26,7 +26,6 @@ import org.bukkit.event.EventPriority
  * stack, up to [maxStacks] stacks. Stacks expire after [stackDuration]s and are cleared on leaving
  * combat.
  *
- * TODO: Replace StatAPI multiplier calculation with StatAPI once migrated.
  */
 class Shatter(deps: SpellDependencies) :
     Spell(SPELL_NAME, ClassType.MAGE, deps), AttributeSpell, MagicDamageSpell, ShieldingSpell {
@@ -58,7 +57,6 @@ class Shatter(deps: SpellDependencies) :
         // Reduce damage taken by victim if they have IceBarrier stacks
         val victimBarrier = getSpellEffect(victimId, victimId, SpellEffectType.ICE_BARRIER)
         if (victimBarrier.isPresent) {
-            // TODO: Use StatAPI to get statValue when migrated. Currently using baseValue only.
             val damageToReduce = (attributeBaseValue / 100.0) * event.amount
             event.amount = (event.amount - damageToReduce).toInt().coerceAtLeast(0)
         }

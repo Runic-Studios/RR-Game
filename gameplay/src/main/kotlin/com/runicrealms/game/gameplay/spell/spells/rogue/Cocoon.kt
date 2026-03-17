@@ -92,7 +92,6 @@ class Cocoon(deps: SpellDependencies) :
     fun onPhysicalDamage(event: PhysicalDamageEvent) {
         if (!hasSpellEffect(event.victim.uniqueId, SpellEffectType.SUNDERED)) return
         val highestStacks = determineHighestStacks(event.victim.uniqueId, SpellEffectType.SUNDERED)
-        // TODO: StatAPI pending (SPELL_MIGRATION.md #3)
         val percentAttribute = attributeBaseValue
         val bonusDamage = event.amount * (percentAttribute * highestStacks)
         event.amount = (event.amount + bonusDamage.toInt())

@@ -5,8 +5,11 @@ import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.runicrealms.game.common.ClassType
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.game.GameCharacter
+import com.runicrealms.game.gameplay.player.stat.StatManager
+import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
@@ -25,7 +28,12 @@ import org.bukkit.plugin.Plugin
  */
 class RegenManager
 @Inject
-constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRegistry) {
+constructor(
+    private val plugin: Plugin,
+    private val userDataRegistry: UserDataRegistry,
+    private val statManager: StatManager,
+    private val combatManager: CombatManager,
+) {
 
     private val currentManaList = ConcurrentHashMap<UUID, Int>()
 
@@ -84,13 +92,11 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
         val player = character.bukkitPlayer
         val regenAmount =
             (HEALTH_REGEN_BASE_VALUE + (HEALTH_REGEN_LEVEL_MULTIPLIER * player.level)).toInt()
-        if (true) { // TODO !RunicCore.getCombatAPI().isInCombat(player.uniqueId)) {
-            val event = HealthRegenEvent(player, regenAmount * OOC_MULTIPLIER)
-            Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
-        } else {
-            val event = HealthRegenEvent(player, regenAmount)
-            Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
-        }
+        val regenAmountFinal =
+            if (!combatManager.isInCombat(player.uniqueId)) regenAmount * OOC_MULTIPLIER
+            else regenAmount
+        val event = HealthRegenEvent(player, regenAmountFinal)
+        Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
     }
 
     /** Periodic task to regenerate mana for all online players */
@@ -106,9 +112,7 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
 
         var regenAmt = calculateManaRegen(player.level)
 
-        // Add multiplier for players out of combat
-        // TODO if (!RunicCore.getCombatAPI().isInCombat(player.uniqueId)) regenAmt *=
-        // OOC_MULTIPLIER
+        if (!combatManager.isInCombat(player.uniqueId)) regenAmt *= OOC_MULTIPLIER
 
         val event = ManaRegenEvent(player, regenAmt)
         Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
@@ -128,11 +132,8 @@ constructor(private val plugin: Plugin, private val userDataRegistry: UserDataRe
         // recalculate max mana based on player level
         val player = character.bukkitPlayer
         val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)) as Int
-        // grab extra mana from wisdom
-        val wisdomBoost: Double =
-            newMaxMana *
-                (STAT_MAX_MANA_MULT *
-                    0) // TODO RunicCore.getStatAPI().getPlayerWisdom(player.uniqueId))
+        val wisdom = statManager.getStat(player.uniqueId, StatType.WISDOM)
+        val wisdomBoost: Double = newMaxMana * (STAT_MAX_MANA_MULT * wisdom)
         maxMana = (newMaxMana + wisdomBoost).toInt()
 
         // fix current mana if it is now too high

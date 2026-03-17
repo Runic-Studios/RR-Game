@@ -121,8 +121,6 @@ class Battlecry(deps: SpellDependencies) :
     }
 
     private fun percentAttribute(player: Player): Double {
-        // TODO: include StatAPI scaling (attributeMultiplier * playerStat) when StatAPI is
-        // migrated.
         return (attributeBaseValue / 100.0).coerceAtLeast(0.0)
     }
 

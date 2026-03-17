@@ -58,7 +58,6 @@ class Bloodbath(deps: SpellDependencies) :
 
         if (event.spell is Cleave && !eventMap.containsKey(event.caster.uniqueId)) {
             eventMap[event.caster.uniqueId] = System.currentTimeMillis()
-            // TODO: StatAPI pending (SPELL_MIGRATION.md #3) — using attributeBaseValue only
             val scaledHeal = attributeBaseValue
             healPlayer(event.caster, event.caster, scaledHeal, this)
         }

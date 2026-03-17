@@ -2,13 +2,16 @@ package com.runicrealms.game.gameplay.spell.skilltrees
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
+import com.google.inject.Provider
 import com.google.inject.Singleton
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
+import com.runicrealms.game.gameplay.player.stat.StatManager
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.api.SkillTreeAPI
 import com.runicrealms.game.gameplay.spell.skilltrees.perks.Perk
+import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkBaseStat
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import org.bukkit.Bukkit
@@ -36,6 +39,7 @@ constructor(
     private val plugin: Plugin,
     private val spellManager: SpellManager,
     private val userDataRegistry: UserDataRegistry,
+    private val statManagerProvider: Provider<StatManager>,
 ) : SkillTreeAPI, Listener {
 
     /** UUID -> (slot -> Map<SkillTreePosition, SkillTreeData>) */
@@ -168,6 +172,13 @@ constructor(
         if (getAvailableSkillPoints(uuid, position.value) < perk.cost) return false
         if (!perk.allocate()) return false
         tree.totalAllocatedPoints += perk.cost
+
+        // Apply base stat bonus if this perk grants stats
+        if (perk is PerkBaseStat) {
+            val amount = perk.bonusAmount * perk.currentlyAllocatedPoints
+            statManagerProvider.get().addBaseStatBonus(uuid, perk.stat, amount)
+        }
+
         // Rebuild passives
         val player = Bukkit.getPlayer(uuid) ?: return true
         val passives: MutableSet<String> = mutableSetOf()

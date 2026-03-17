@@ -24,7 +24,6 @@ import org.bukkit.event.EventPriority
  *
  * Weapon damage is read from the held weapon template when available.
  *
- * TODO: STR-based physical damage multiplier requires StatAPI migration.
  */
 class SpectralBlade(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps) {
 
@@ -90,8 +89,6 @@ class SpectralBlade(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE,
                 entity != player && isValidEnemy(player, entity)
             }
 
-        // TODO: Scale off STR via StatAPI: finalDamage = weaponDamage + ceil(weaponDamage *
-        // strPercent)
         val finalDamage = weaponDamage.toDouble()
 
         for (target in targets) {

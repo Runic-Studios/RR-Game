@@ -53,7 +53,6 @@ class Backstab(deps: SpellDependencies) :
 
         // Apply bonus damage if target is already Betrayed
         if (spellEffectOpt.isPresent) {
-            // TODO: StatAPI pending (SPELL_MIGRATION.md #3)
             val bonusDamage = event.amount * attributeBaseValue
             event.amount = (event.amount + bonusDamage).toInt()
             player.world.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.25f, 0.25f)
