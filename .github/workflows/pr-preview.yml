@@ -2,7 +2,7 @@ name: PR Preview Build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     branches:
       - main
       - dev
@@ -14,7 +14,6 @@ env:
 
 jobs:
   build-preview:
-    if: github.event.action != 'closed'
     runs-on: rr-runner
     container:
       image: registry.runicrealms.com/agents/agent-java-21:latest
@@ -24,6 +23,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "sha7=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -47,7 +50,7 @@ jobs:
         uses: Runic-Studios/Realm-Actions/oras-push@main
         with:
           artifact_name: ${{ env.ARTIFACT_NAME }}
-          tag: pr-${{ github.event.number }}
+          tag: pr-${{ github.event.number }}-${{ steps.sha.outputs.sha7 }}
           file_path: 'plugin/build/libs/game-plugin-all.jar'
           registry: ${{ env.REGISTRY }}
           registry_project: ${{ env.REGISTRY_PROJECT }}
@@ -65,27 +68,7 @@ jobs:
               event_type: 'build-pr-preview',
               client_payload: {
                 pr_number: '${{ github.event.number }}',
-                rr_game_tag: 'pr-${{ github.event.number }}'
+                sha7: '${{ steps.sha.outputs.sha7 }}',
+                rr_game_tag: 'pr-${{ github.event.number }}-${{ steps.sha.outputs.sha7 }}'
               }
             });
-
-  cleanup-preview:
-    if: github.event.action == 'closed'
-    runs-on: rr-runner
-    container:
-      image: registry.runicrealms.com/agents/agent-base:latest
-      credentials:
-        username: ${{ secrets.HARBOR_USERNAME }}
-        password: ${{ secrets.HARBOR_PASSWORD }}
-    steps:
-      - name: Delete realm-paper PR image from Harbor
-        run: |
-          curl -X DELETE \
-            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
-            "https://registry.runicrealms.com/api/v2.0/projects/build/repositories/realm-paper/artifacts/pr-${{ github.event.number }}"
-
-      - name: Delete rr-game PR artifact from Harbor
-        run: |
-          curl -X DELETE \
-            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
-            "https://registry.runicrealms.com/api/v2.0/projects/library/repositories/rr-game/artifacts/pr-${{ github.event.number }}"
