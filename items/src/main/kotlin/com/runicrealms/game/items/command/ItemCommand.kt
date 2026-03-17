@@ -333,7 +333,8 @@ constructor(
             )
             return
         }
-        val json = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(itemData)
+        val json =
+            jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(itemData)
         player.sendMessage("$PREFIX&dItem Data:".colorFormat())
         for (line in json.lines()) {
             player.sendMessage(line)

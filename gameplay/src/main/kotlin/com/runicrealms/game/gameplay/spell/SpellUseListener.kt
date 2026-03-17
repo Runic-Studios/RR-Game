@@ -111,10 +111,12 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         event.isCancelled = true
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         if (event.hand != EquipmentSlot.HAND) return
+        // Slot 0 is the rune slot; right-clicking it opens the RuneMenu, not a spell cast window.
+        if (player.inventory.heldItemSlot == RUNE_SLOT) return
 
         // TODO: Add weapon-type check (DamageListener.matchClass) once migrated.
         // For now, allow any click with item in hand.
@@ -169,5 +171,8 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
 
     companion object {
         private const val SPELL_TIMEOUT = 5
+
+        /** Slot 0 is the Ancient Runestone. Spell triggers are suppressed on this slot. */
+        private const val RUNE_SLOT = 0
     }
 }
