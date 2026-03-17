@@ -75,7 +75,13 @@ constructor(
                     editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
                 }
             ) {
-                odalitaMenus.openMenu(spellEditorMenuFactory.create(null, null), player)
+                odalitaMenus.openMenu(
+                    spellEditorMenuFactory.create(
+                        SpellEditorMenu.NO_SPELL,
+                        SpellEditorMenu.NO_SLOT,
+                    ),
+                    player,
+                )
             },
         )
     }

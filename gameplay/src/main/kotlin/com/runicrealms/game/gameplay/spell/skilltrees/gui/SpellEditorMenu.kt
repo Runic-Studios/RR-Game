@@ -26,8 +26,8 @@ import org.bukkit.plugin.Plugin
  * Spell slot assignment editor. Shows 4 spell slot buttons (HOT_BAR_ONE, LEFT_CLICK, RIGHT_CLICK,
  * SWAP_HANDS) and allows the player to assign a spell to each.
  *
- * The [selectedSpellName] is the spell being bound. If null, shows current bindings. A reset button
- * wipes all slots back to class defaults.
+ * Use [NO_SPELL] and [NO_SLOT] to open in "browse" mode (no spell/slot selected). Guice does not
+ * allow null for [@Assisted] parameters, so we use these sentinels instead.
  */
 @Menu(title = "Spell Editor", type = MenuType.CHEST_6_ROW)
 class SpellEditorMenu
@@ -41,12 +41,15 @@ constructor(
     private val runeMenuFactory: RuneMenu.Factory,
     private val spellMenuFactory: SpellMenu.Factory,
     private val spellEditorMenuFactory: Factory,
-    @Assisted val selectedSpellName: String?,
-    @Assisted val selectedSlotIndex: Int?,
+    @Assisted val selectedSpellName: String,
+    @Assisted val selectedSlotIndex: Int,
 ) : PlayerMenuProvider {
 
+    private val hasSelection: Boolean
+        get() = selectedSpellName.isNotEmpty() && selectedSlotIndex >= 0
+
     interface Factory {
-        fun create(selectedSpellName: String?, selectedSlotIndex: Int?): SpellEditorMenu
+        fun create(selectedSpellName: String, selectedSlotIndex: Int): SpellEditorMenu
     }
 
     override fun onLoad(player: Player, menuContents: MenuContents) {
@@ -55,7 +58,7 @@ constructor(
         val playerLevel =
             userDataRegistry.getCharacter(uuid)?.withSyncCharacterData { traits.level } ?: 0
 
-        if (selectedSpellName != null && selectedSlotIndex != null) {
+        if (hasSelection) {
             if (isSlotUnlocked(selectedSlotIndex, playerLevel)) {
                 assignSpell(player, spellData, selectedSlotIndex, selectedSpellName)
             } else {
@@ -67,7 +70,10 @@ constructor(
                     )
                 )
             }
-            odalitaMenus.openMenu(spellEditorMenuFactory.create(null, null), player)
+            odalitaMenus.openMenu(
+                spellEditorMenuFactory.create(NO_SPELL, NO_SLOT),
+                player,
+            )
             return
         }
 
@@ -228,4 +234,12 @@ constructor(
             3 -> 20
             else -> Int.MAX_VALUE
         }
+
+    companion object {
+        /** Sentinel for "no spell selected". Used so Guice never receives null. */
+        const val NO_SPELL = ""
+
+        /** Sentinel for "no slot selected". Slot indices are 0..3. */
+        const val NO_SLOT = -1
+    }
 }

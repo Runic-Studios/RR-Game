@@ -68,7 +68,10 @@ constructor(
                         )
                     }
                 },
-                spellEditorMenuFactory.create(null, null),
+                spellEditorMenuFactory.create(
+                    SpellEditorMenu.NO_SPELL,
+                    SpellEditorMenu.NO_SLOT,
+                ),
             ),
         )
 
