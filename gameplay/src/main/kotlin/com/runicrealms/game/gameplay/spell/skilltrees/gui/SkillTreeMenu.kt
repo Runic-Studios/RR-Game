@@ -2,8 +2,12 @@ package com.runicrealms.game.gameplay.spell.skilltrees.gui
 
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.common.SubClassType
+import com.runicrealms.game.common.util.breakLines
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
+import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeData
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreePosition
@@ -27,8 +31,18 @@ import org.bukkit.inventory.ItemStack
 /**
  * Skill tree perk selection menu. Shows all 12 perks for a specific [SkillTreePosition].
  *
- * Perk slots mirror the old SkillTreeGUI.java: [PERK_SLOTS] at fixed indices in the 6-row chest.
- * Arrow indicators are placed at fixed slots to show tree progression flow.
+ * Layout matches old SkillTreeGUI.java (54-slot / 6-row chest):
+ *   Row 0 (slots 0-8): border fill (BLACK_STAINED_GLASS_PANE)
+ *   slot 0  (row 0, col 0) — Back button (LIGHT_GRAY_STAINED_GLASS_PANE)
+ *   slot 4  (row 0, col 4) — Info item (subclass icon + remaining skill points)
+ *   [PERK_SLOTS]: 10, 28, 46, 48, 30, 12, 14, 32, 50, 52, 34, 16 — perk icons
+ *   Down arrows (RED glass):   slots 19, 23, 37, 41
+ *   Up arrows   (GREEN glass): slots 21, 25, 39, 43
+ *   Right arrows (BROWN glass): slots 13, 47, 51
+ *
+ * NOTE: The menu title is static ("Skill Tree") because OdalitaMenus requires a compile-time
+ * constant for @Menu(title). The subclass name is shown in the info item at slot 4 instead.
+ * See SPELL_MIGRATION.md for details.
  */
 @Menu(title = "Skill Tree", type = MenuType.CHEST_6_ROW)
 class SkillTreeMenu
@@ -37,6 +51,7 @@ constructor(
     private val odalitaMenus: OdalitaMenus,
     private val userDataRegistry: UserDataRegistry,
     private val skillTreeManager: SkillTreeManager,
+    private val spellManager: SpellManager,
     private val subClassMenuFactory: SubClassMenu.Factory,
     @Assisted private val subClassType: SubClassType,
     @Assisted private val position: SkillTreePosition,
@@ -50,10 +65,12 @@ constructor(
         val uuid = player.uniqueId
         val treesMap = skillTreeManager.getSkillTreeDataMap(uuid) ?: return
         val tree = treesMap[position] ?: return
+        val availablePoints = skillTreeManager.getAvailableSkillPoints(uuid, position.value)
 
-        fillBackground(menuContents)
+        fillTopRowBorder(menuContents)
         placeArrows(menuContents)
         placeBackButton(player, menuContents)
+        menuContents.set(0, 4, DisplayItem.of(buildInfoItem(availablePoints)))
 
         val perks = tree.perks
         for ((index, perk) in perks.withIndex()) {
@@ -63,18 +80,8 @@ constructor(
             menuContents.set(
                 row,
                 col,
-                ClickableItem.of(
-                    buildPerkItem(
-                        perk,
-                        tree,
-                        skillTreeManager.getAvailableSkillPoints(uuid, position.value),
-                    )
-                ) { event ->
-                    if (
-                        !perk.isMaxed() &&
-                            skillTreeManager.getAvailableSkillPoints(uuid, position.value) >=
-                                perk.cost
-                    ) {
+                ClickableItem.of(buildPerkItem(perk, tree, availablePoints)) { _ ->
+                    if (!perk.isMaxed() && availablePoints >= perk.cost) {
                         if (skillTreeManager.attemptToPurchasePerk(uuid, position, perk)) {
                             player.playSound(
                                 player.location,
@@ -90,63 +97,93 @@ constructor(
         }
     }
 
-    private fun buildPerkItem(perk: Perk, tree: SkillTreeData, availablePoints: Int): ItemStack {
-        val material =
-            when {
-                perk.isMaxed() -> Material.EMERALD
-                availablePoints >= perk.cost -> Material.GOLD_NUGGET
-                else -> Material.COAL
-            }
-        return ItemStack(material).apply {
+    private fun buildInfoItem(availablePoints: Int): ItemStack =
+        subClassType.item.clone().apply {
             editMeta { meta ->
                 meta.displayName(
-                    when (perk) {
-                        is PerkSpell -> Component.text(perk.spellName, NamedTextColor.GREEN)
-                        is PerkBaseStat ->
-                            Component.text(
-                                "+${perk.bonusAmount} ${perk.stat.name.lowercase().replaceFirstChar { it.uppercase() }}",
-                                NamedTextColor.AQUA,
-                            )
-                        else -> Component.text("Perk", NamedTextColor.WHITE)
-                    }
+                    Component.text("${subClassType.text} Tree Info", NamedTextColor.GREEN)
                 )
-                val lore = mutableListOf<Component>()
-                lore += Component.text("Cost: ${perk.cost} point(s)", NamedTextColor.YELLOW)
-                lore +=
+                val lore = "&7Remaining Skill Points: &a$availablePoints"
+                meta.lore(lore.breakLines().map { it.colorFormat() })
+            }
+        }
+
+    private fun buildPerkItem(perk: Perk, tree: SkillTreeData, availablePoints: Int): ItemStack {
+        return when (perk) {
+            is PerkSpell -> buildPerkSpellItem(perk)
+            is PerkBaseStat -> buildPerkBaseStatItem(perk)
+            else -> ItemStack(Material.STONE)
+        }
+    }
+
+    private fun buildPerkSpellItem(perk: PerkSpell): ItemStack {
+        val spell = spellManager.getSpell(perk.spellName)
+        if (spell == null) {
+            return ItemStack(Material.BARRIER).apply {
+                editMeta { it.displayName(Component.text("Error: spell not found", NamedTextColor.RED)) }
+            }
+        }
+        val material = if (spell.isPassive) Material.PAPER else Material.NETHER_WART
+        return ItemStack(material).apply {
+            editMeta { meta ->
+                // Display: "SpellName [current/max]" in GREEN, matching old displayPoints=true
+                meta.displayName(
                     Component.text(
-                        "Allocated: ${perk.currentlyAllocatedPoints}/${perk.maxAllocatedPoints}",
-                        if (perk.isMaxed()) NamedTextColor.GREEN else NamedTextColor.GRAY,
+                        "${spell.name} [${perk.currentlyAllocatedPoints}/${perk.maxAllocatedPoints}]",
+                        NamedTextColor.GREEN,
                     )
-                if (perk is PerkBaseStat) {
-                    lore += Component.text("", NamedTextColor.GRAY)
-                    lore += Component.text("(Stat bonus: coming soon)", NamedTextColor.DARK_GRAY)
+                )
+                val spellType = if (spell.isPassive) "PASSIVE SPELL " else "ACTIVE SPELL "
+                // Lore: "\n<GOLD+BOLD>SPELL TYPE<GRAY> description" wrapped
+                val loreText = "\n&6&l$spellType&7${spell.description}"
+                val lore = loreText.breakLines().map { it.colorFormat() }.toMutableList()
+                if (!spell.isPassive) {
+                    lore += Component.empty()
+                    lore += Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
+                    lore +=
+                        Component.text("Cooldown ", NamedTextColor.RED)
+                            .append(Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW))
                 }
+                lore += Component.empty()
+                lore += Component.text("» Click to purchase", NamedTextColor.AQUA)
                 meta.lore(lore)
             }
         }
     }
 
-    private fun fillBackground(menuContents: MenuContents) {
+    private fun buildPerkBaseStatItem(perk: PerkBaseStat): ItemStack {
+        val (statName, statIcon, statDesc) = statInfo(perk.stat)
+        return ItemStack(statMaterial(perk.stat)).apply {
+            editMeta { meta ->
+                // Display: "StatName<icon> [current/max]" in GREEN
+                meta.displayName(
+                    Component.text(
+                        "$statName$statIcon [${perk.currentlyAllocatedPoints}/${perk.maxAllocatedPoints}]",
+                        NamedTextColor.GREEN,
+                    )
+                )
+                val loreText =
+                    "\n&7Bonus per point: &a+${perk.bonusAmount}\n\n&eCharacter Stat &7$statDesc"
+                meta.lore(loreText.breakLines().map { it.colorFormat() })
+            }
+        }
+    }
+
+    private fun fillTopRowBorder(menuContents: MenuContents) {
         val glass =
             ItemStack(Material.BLACK_STAINED_GLASS_PANE).apply {
                 editMeta { it.displayName(Component.empty()) }
             }
-        for (row in 0 until 6) {
-            for (col in 0 until 9) {
-                menuContents.set(row, col, DisplayItem.of(glass.clone()))
-            }
+        for (col in 0 until 9) {
+            menuContents.set(0, col, DisplayItem.of(glass.clone()))
         }
     }
 
     private fun placeBackButton(player: Player, menuContents: MenuContents) {
         menuContents.set(
-            5,
             0,
-            ClickableItem.of(
-                ItemStack(Material.ARROW).apply {
-                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
-                }
-            ) {
+            0,
+            ClickableItem.of(buildBackButton()) {
                 val classType =
                     userDataRegistry.getCharacter(player.uniqueId)?.withSyncCharacterData {
                         traits.classType
@@ -156,20 +193,82 @@ constructor(
         )
     }
 
-    private fun placeArrows(menuContents: MenuContents) {
-        // Arrow items at fixed indicator slots (mirrors old SkillTreeGUI layout)
-        val arrowSlots = listOf(11, 13, 15, 29, 31, 33)
-        val arrow =
-            ItemStack(Material.ARROW).apply {
-                editMeta { it.displayName(Component.text("→", NamedTextColor.YELLOW)) }
+    private fun buildBackButton(): ItemStack =
+        ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
+            editMeta { meta ->
+                meta.displayName(Component.text("Return", NamedTextColor.RED))
+                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
             }
-        for (slot in arrowSlots) {
-            menuContents.set(slot / 9, slot % 9, DisplayItem.of(arrow.clone()))
+        }
+
+    private fun placeArrows(menuContents: MenuContents) {
+        val emptyName = Component.empty()
+
+        // Down arrows — RED_STAINED_GLASS_PANE at slots 19, 23, 37, 41
+        val downArrow =
+            ItemStack(Material.RED_STAINED_GLASS_PANE).apply {
+                editMeta { it.displayName(emptyName) }
+            }
+        for (slot in intArrayOf(19, 23, 37, 41)) {
+            menuContents.set(slot / 9, slot % 9, DisplayItem.of(downArrow.clone()))
+        }
+
+        // Up arrows — GREEN_STAINED_GLASS_PANE at slots 21, 25, 39, 43
+        val upArrow =
+            ItemStack(Material.GREEN_STAINED_GLASS_PANE).apply {
+                editMeta { it.displayName(emptyName) }
+            }
+        for (slot in intArrayOf(21, 25, 39, 43)) {
+            menuContents.set(slot / 9, slot % 9, DisplayItem.of(upArrow.clone()))
+        }
+
+        // Right arrows — BROWN_STAINED_GLASS_PANE at slots 13, 47, 51
+        val rightArrow =
+            ItemStack(Material.BROWN_STAINED_GLASS_PANE).apply {
+                editMeta { it.displayName(emptyName) }
+            }
+        for (slot in intArrayOf(13, 47, 51)) {
+            menuContents.set(slot / 9, slot % 9, DisplayItem.of(rightArrow.clone()))
         }
     }
 
     companion object {
         /** Perk item slots in the 6-row chest (mirrors old SkillTreeGUI.PERK_SLOTS). */
         val PERK_SLOTS = intArrayOf(10, 28, 46, 48, 30, 12, 14, 32, 50, 52, 34, 16)
+
+        /** Material for a given stat, matching old StatsGUI.getStatMaterial(). */
+        fun statMaterial(stat: StatType): Material =
+            when (stat) {
+                StatType.DEXTERITY -> Material.QUARTZ
+                StatType.INTELLIGENCE -> Material.LAPIS_LAZULI
+                StatType.STRENGTH -> Material.REDSTONE
+                StatType.VITALITY -> Material.DIAMOND
+                StatType.WISDOM -> Material.EMERALD
+            }
+
+        /**
+         * Returns (name, icon, description) for a stat, matching old Stat enum fields.
+         * Used to build [PerkBaseStat] lore without referencing the old Items module Stat enum.
+         */
+        fun statInfo(stat: StatType): Triple<String, String, String> =
+            when (stat) {
+                StatType.DEXTERITY ->
+                    Triple("Dexterity", "✦", "Gain spell haste, reducing your spell cooldowns!")
+                StatType.INTELLIGENCE ->
+                    Triple(
+                        "Intelligence",
+                        "ʔ",
+                        "Deal more magic damage and gain more mana regen!",
+                    )
+                StatType.STRENGTH -> Triple("Strength", "⚔", "Deal more physical damage!")
+                StatType.VITALITY ->
+                    Triple("Vitality", "■", "Gain damage reduction and health regen!")
+                StatType.WISDOM ->
+                    Triple(
+                        "Wisdom",
+                        "✸",
+                        "Gain more spell healing, shielding, max mana and experience!",
+                    )
+            }
     }
 }

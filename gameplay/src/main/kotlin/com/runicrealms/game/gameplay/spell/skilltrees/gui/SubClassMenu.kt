@@ -4,6 +4,8 @@ import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.SubClassType
+import com.runicrealms.game.common.util.breakLines
+import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreePosition
@@ -23,9 +25,15 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 /**
- * Sub-class selection menu. Shows 3 subclass options for the player's current class. Selecting a
- * subclass persists [SubClassType] to [CharacterTraits.subClassType] and reconstructs the
- * [SkillTreeData] perk lists.
+ * Sub-class selection menu. Shows 3 subclass options for the player's current class.
+ *
+ * Layout matches old SubClassGUI.java (27-slot / 3-row chest):
+ *   slot 0  (row 0, col 0): Back button
+ *   slot 11 (row 1, col 2): First subclass
+ *   slot 13 (row 1, col 4): Second subclass
+ *   slot 15 (row 1, col 6): Third subclass
+ *
+ * Empty slots are filled with black stained glass panes.
  */
 @Menu(title = "Choose Your Path", type = MenuType.CHEST_3_ROW)
 class SubClassMenu
@@ -55,45 +63,30 @@ constructor(
                 ClassType.ANY -> emptySet()
             }
 
-        val subClassList = subClasses.toList()
-        val slots = listOf(2 to 2, 2 to 4, 2 to 6)
+        val glass =
+            ItemStack(Material.BLACK_STAINED_GLASS_PANE).apply {
+                editMeta { it.displayName(Component.empty()) }
+            }
 
-        for ((index, subClass) in subClassList.withIndex()) {
-            val (row, col) = slots.getOrNull(index) ?: continue
-            menuContents.set(
-                row,
-                col,
-                ClickableItem.of(buildSubClassItem(subClass)) { selectSubClass(player, subClass) },
-            )
-        }
-
-        // Fill empty slots with glass
+        // Fill all slots with glass first, then place items on top
         for (row in 0 until 3) {
             for (col in 0 until 9) {
-                menuContents.set(
-                    row,
-                    col,
-                    DisplayItem.of(
-                        ItemStack(Material.BLACK_STAINED_GLASS_PANE).apply {
-                            editMeta { it.displayName(Component.empty()) }
-                        }
-                    ),
-                )
+                menuContents.set(row, col, DisplayItem.of(glass.clone()))
             }
         }
 
+        // Back button at slot 0 (row 0, col 0): matches old GUIUtil.BACK_BUTTON style
         menuContents.set(
             0,
             0,
-            ClickableItem.of(
-                ItemStack(Material.ARROW).apply {
-                    editMeta { it.displayName(Component.text("Back", NamedTextColor.GRAY)) }
-                }
-            ) {
+            ClickableItem.of(buildBackButton()) {
                 odalitaMenus.openMenu(runeMenuFactory.create(), player)
             },
         )
 
+        // Subclass items at slots 11, 13, 15 (row 1, cols 2/4/6)
+        val subClassList = subClasses.toList()
+        val slots = listOf(1 to 2, 1 to 4, 1 to 6)
         for ((index, subClass) in subClassList.withIndex()) {
             val (row, col) = slots.getOrNull(index) ?: continue
             menuContents.set(
@@ -104,12 +97,27 @@ constructor(
         }
     }
 
+    private fun buildBackButton(): ItemStack =
+        ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).apply {
+            editMeta { meta ->
+                meta.displayName(Component.text("Return", NamedTextColor.RED))
+                meta.lore(listOf(Component.text("Return to the previous menu", NamedTextColor.GRAY)))
+            }
+        }
+
     private fun buildSubClassItem(subClass: SubClassType): ItemStack =
         subClass.item.clone().apply {
             editMeta { meta ->
-                meta.displayName(Component.text(subClass.text, NamedTextColor.GOLD))
+                meta.displayName(Component.text(subClass.text, NamedTextColor.GREEN))
+                val title = "&7Open the skill tree for the &a${subClass.text}&7 class!"
+                val desc = "&7${subClass.description}"
                 meta.lore(
-                    subClass.description.split("\n").map { Component.text(it, NamedTextColor.GRAY) }
+                    buildList {
+                        add(Component.empty())
+                        addAll(title.breakLines().map { it.colorFormat() })
+                        add(Component.empty())
+                        addAll(desc.breakLines().map { it.colorFormat() })
+                    }
                 )
             }
         }
