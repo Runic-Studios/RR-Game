@@ -8,6 +8,7 @@ import com.runicrealms.game.gameplay.character.util.CharacterHealthHelper
 import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
 import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.game.gameplay.command.CharacterCommand
+import com.runicrealms.game.gameplay.command.SetLevelCommand
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.RegenManager
 import com.runicrealms.game.gameplay.player.stat.StatListener
@@ -28,6 +29,7 @@ import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import com.runicrealms.game.gameplay.spell.damage.DamageHandler
 import com.runicrealms.game.gameplay.spell.effect.SpellEffectManager
 import com.runicrealms.game.gameplay.spell.effect.StatusEffectManager
+import com.runicrealms.game.gameplay.spell.skilltrees.SkillPointsListener
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.gui.RuneListener
 import com.runicrealms.game.gameplay.spell.skilltrees.gui.RuneMenu
@@ -52,6 +54,7 @@ class GameplayModule : AbstractModule() {
         bind(StatListener::class.java).asEagerSingleton()
 
         bind(CharacterCommand::class.java).asEagerSingleton()
+        bind(SetLevelCommand::class.java).asEagerSingleton()
 
         bind(CharacterHealthHelper::class.java).asEagerSingleton()
         bind(CharacterLevelHelper::class.java).asEagerSingleton()
@@ -86,6 +89,7 @@ class GameplayModule : AbstractModule() {
         bind(SpellStaffListener::class.java).asEagerSingleton()
         bind(SpellScalingListener::class.java).asEagerSingleton()
         bind(RuneListener::class.java).asEagerSingleton()
+        bind(SkillPointsListener::class.java).asEagerSingleton()
 
         // Skill tree GUI factories (OdalitaMenus @AssistedInject)
         addFactory(RuneMenu::class, RuneMenu.Factory::class)

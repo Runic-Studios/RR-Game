@@ -145,10 +145,8 @@ constructor(
 
     override fun getPassives(uuid: UUID): Set<String> = passiveMap[uuid] ?: emptySet()
 
-    override fun getSpentPoints(uuid: UUID, slot: Int): Int {
-        val pos = SkillTreePosition.fromValue(slot)
-        return skillTreeMap[uuid]?.get(pos)?.totalAllocatedPoints ?: 0
-    }
+    override fun getSpentPoints(uuid: UUID, slot: Int): Int =
+        skillTreeMap[uuid]?.values?.sumOf { it.totalAllocatedPoints } ?: 0
 
     override fun hasPassiveFromSkillTree(uuid: UUID, passive: String): Boolean =
         passiveMap[uuid]?.contains(passive.lowercase()) == true
