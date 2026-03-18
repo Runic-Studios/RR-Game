@@ -1,6 +1,5 @@
 package com.runicrealms.game.gameplay.player
 
-import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
@@ -18,7 +17,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -46,15 +44,14 @@ constructor(
 
     init {
         Bukkit.getPluginManager().registerEvents(this, plugin)
-        // Regen runs async; delay first so players have time to load before the first tick
+        // Runs on the MCCoroutine main dispatcher (like the old BukkitRunnable), so sync events
+        // can be fired safely. delay() suspends without blocking the main thread.
         plugin.launch {
-            withContext(plugin.asyncDispatcher) {
-                while (true) {
-                    delay(REGEN_PERIOD * 1000L)
-                    for (character in userDataRegistry.getAllCharacters()) {
-                        regenHealth(character)
-                        regenMana(character)
-                    }
+            while (true) {
+                delay(REGEN_PERIOD * 1000L)
+                for (character in userDataRegistry.getAllCharacters()) {
+                    regenHealth(character)
+                    regenMana(character)
                 }
             }
         }
