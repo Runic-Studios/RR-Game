@@ -22,11 +22,13 @@ import com.runicrealms.game.data.model.CharacterTraits
 import com.runicrealms.game.data.repository.PlayerRepository
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -477,5 +479,55 @@ constructor(
         return session.document.characters
             .mapValues { (_, charData) -> charData.traits }
             .mapKeys { (key, _) -> key.toInt() }
+    }
+
+    /**
+     * Synchronously saves all remaining sessions and releases all distributed locks.
+     *
+     * Called from [com.runicrealms.game.plugin.GamePlugin.onDisable] to ensure a clean shutdown.
+     * During normal play, [onPlayerQuit] handles teardown per-player via a coroutine. However, when
+     * the server stops, Bukkit fires [PlayerQuitEvent] for every online player but MCCoroutine
+     * cancels the plugin's coroutine scope before those async handlers finish, leaving locks
+     * unreleased. This method runs synchronously (via [runBlocking]) so all saves and releases are
+     * guaranteed to complete before [onDisable] returns.
+     *
+     * Game events are not fired here: other plugins may already be disabled by this point.
+     *
+     * Sessions already removed by an in-flight [endSession] coroutine are skipped via the atomic
+     * [sessions].remove call, so there is no double-processing.
+     */
+    fun shutdown() {
+        val sessionIds = sessions.keys.toList()
+        if (sessionIds.isEmpty()) return
+        logger.info("Shutdown: saving ${sessionIds.size} active session(s)...")
+        runBlocking {
+            for (userId in sessionIds) {
+                val session = sessions.remove(userId) ?: continue
+                players.remove(userId)
+                // Cancel the periodic save loop and wait for any in-flight NonCancellable save
+                // to finish before we take our own snapshot.
+                session.saveJob.cancelAndJoin()
+                // Use Dispatchers.IO directly: plugin.asyncDispatcher may be unavailable once
+                // MCCoroutine starts tearing down the plugin's coroutine session.
+                withContext(Dispatchers.IO) {
+                    val snapshot = session.dataLock.withLock { session.document.copy() }
+                    val saveResult = playerRepository.save(snapshot)
+                    if (saveResult.isFailure) {
+                        logger.error(
+                            "FATAL: shutdown save failed for player $userId",
+                            saveResult.exceptionOrNull()!!,
+                        )
+                    }
+                    val releaseResult = lockRepository.release(userId, serverId)
+                    if (releaseResult.isFailure) {
+                        logger.error(
+                            "FATAL: shutdown lock release failed for player $userId",
+                            releaseResult.exceptionOrNull()!!,
+                        )
+                    }
+                }
+            }
+        }
+        logger.info("Shutdown: all sessions saved and locks released")
     }
 }

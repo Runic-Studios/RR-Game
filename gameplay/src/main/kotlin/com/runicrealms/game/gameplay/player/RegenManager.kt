@@ -26,9 +26,9 @@ import org.bukkit.plugin.Plugin
  * Manages player health and mana regeneration.
  *
  * [SpellManager] is the single source of truth for current mana — spells deduct from it via
- * [SpellManager.getMana]/[SpellManager.setMana], and this class regens into it every
- * [REGEN_PERIOD] seconds. This avoids the two-map split that existed when [RegenManager] kept its
- * own `currentManaList` separate from [SpellManager.manaMap].
+ * [SpellManager.getMana]/[SpellManager.setMana], and this class regens into it every [REGEN_PERIOD]
+ * seconds. This avoids the two-map split that existed when [RegenManager] kept its own
+ * `currentManaList` separate from [SpellManager.manaMap].
  *
  * @author Skyfallin
  */

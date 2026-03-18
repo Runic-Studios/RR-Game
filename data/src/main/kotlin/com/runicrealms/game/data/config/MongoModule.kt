@@ -14,6 +14,7 @@ import com.runicrealms.game.data.model.BsonCodecs
 import com.runicrealms.game.data.model.ItemTypeData
 import com.runicrealms.game.data.model.PlayerDocument
 import com.runicrealms.game.data.repository.PlayerRepository
+import kotlinx.coroutines.runBlocking
 import org.bson.BsonDocument
 import org.bson.Document
 import org.bson.UuidRepresentation
@@ -96,6 +97,8 @@ class MongoModule(
     @Singleton
     fun providePlayerLockRepository(database: MongoDatabase): PlayerLockRepository {
         val collection = database.getCollection<Document>("locks")
-        return PlayerLockRepository(collection)
+        val repository = PlayerLockRepository(collection)
+        runBlocking { repository.ensureTtlIndex() }
+        return repository
     }
 }

@@ -4,6 +4,7 @@ import com.google.inject.Guice
 import com.runicrealms.game.common.CommonModule
 import com.runicrealms.game.data.DataModule
 import com.runicrealms.game.data.config.MongoModule
+import com.runicrealms.game.data.game.GameSessionManager
 import com.runicrealms.game.gameplay.GameplayModule
 import com.runicrealms.game.items.ItemsModule
 import java.io.File
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 class GamePlugin : JavaPlugin() {
 
     private val logger = LoggerFactory.getLogger("plugin")
+    private var sessionManager: GameSessionManager? = null
 
     override fun onEnable() {
         val startTime = System.currentTimeMillis()
@@ -46,16 +48,27 @@ class GamePlugin : JavaPlugin() {
         val gameplayModule = GameplayModule()
         val itemsModule = ItemsModule()
 
-        Guice.createInjector(
-            mongoModule,
-            commonModule,
-            pluginModule,
-            dataModule,
-            gameplayModule,
-            itemsModule,
-        )
+        val injector =
+            Guice.createInjector(
+                mongoModule,
+                commonModule,
+                pluginModule,
+                dataModule,
+                gameplayModule,
+                itemsModule,
+            )
+
+        sessionManager = injector.getInstance(GameSessionManager::class.java)
 
         val time = System.currentTimeMillis() - startTime
         logger.info("Finished loading and injecting Game in $time millis")
+    }
+
+    override fun onDisable() {
+        // MCCoroutine cancels plugin-scoped coroutines when the plugin is disabled, which can
+        // interrupt in-flight onPlayerQuit handlers before they release distributed locks.
+        // Calling shutdown() here blocks the main thread until all remaining sessions are saved
+        // and all locks are released, guaranteeing a clean shutdown.
+        sessionManager?.shutdown()
     }
 }
