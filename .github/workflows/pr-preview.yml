@@ -40,7 +40,7 @@ jobs:
 
       - name: Build with Gradle
         env:
-          RUNIC_GIT_BRANCH: ${{ github.head_ref }}
+          RUNIC_GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
           RUNIC_GIT_SHA: ${{ github.event.pull_request.head.sha }}
           RUNIC_GIT_MESSAGE: ${{ github.event.pull_request.title }}
           RUNIC_BUILD_ID: ${{ github.run_id }}
