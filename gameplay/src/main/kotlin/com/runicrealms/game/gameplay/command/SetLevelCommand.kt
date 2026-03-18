@@ -13,7 +13,6 @@ import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
 @CommandAlias("runic|r")
@@ -34,7 +33,21 @@ constructor(
     @Subcommand("setlevel|sl")
     @Syntax("<player> <level>")
     @CommandCompletion("@players @nothing")
-    fun onSetLevel(sender: CommandSender, target: Player, level: Int) {
+    fun onSetLevel(sender: CommandSender, args: Array<String>) {
+        if (args.size < 2) {
+            sender.sendMessage("&cUsage: /runic setlevel <player> <level>".colorFormat())
+            return
+        }
+        val target = Bukkit.getPlayer(args[0])
+        if (target == null) {
+            sender.sendMessage("&cPlayer '${args[0]}' is not online.".colorFormat())
+            return
+        }
+        val level = args[1].toIntOrNull()
+        if (level == null) {
+            sender.sendMessage("&c'${args[1]}' is not a valid number.".colorFormat())
+            return
+        }
         val clamped = level.coerceIn(0, CharacterLevelHelper.MAX_LEVEL)
         val character = userDataRegistry.getCharacter(target.uniqueId)
         if (character == null) {
