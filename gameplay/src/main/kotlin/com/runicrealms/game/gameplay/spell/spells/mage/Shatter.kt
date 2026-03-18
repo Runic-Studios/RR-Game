@@ -25,7 +25,6 @@ import org.bukkit.event.EventPriority
  * IceBarrier reduces physical and mob damage taken by (baseValue + multiplier * statValue)% per
  * stack, up to [maxStacks] stacks. Stacks expire after [stackDuration]s and are cleared on leaving
  * combat.
- *
  */
 class Shatter(deps: SpellDependencies) :
     Spell(SPELL_NAME, ClassType.MAGE, deps), AttributeSpell, MagicDamageSpell, ShieldingSpell {

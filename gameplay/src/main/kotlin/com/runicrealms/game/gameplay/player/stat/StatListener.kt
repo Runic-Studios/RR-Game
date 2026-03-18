@@ -113,8 +113,7 @@ constructor(
     fun onSpellHeal(event: SpellHealEvent) {
         if (event.spell == null) return
         val uuid = event.caster.uniqueId
-        val bonus =
-            ceil(event.amount * SPELL_HEALING_MULT * getStat(uuid, StatType.WISDOM)).toInt()
+        val bonus = ceil(event.amount * SPELL_HEALING_MULT * getStat(uuid, StatType.WISDOM)).toInt()
         event.amount += bonus
     }
 
@@ -136,7 +135,9 @@ constructor(
         regenManager.calculateMaxMana(event.character)
     }
 
-    /** Clamps [amount] down by vitality-based damage reduction (capped at [DAMAGE_REDUCTION_CAP]). */
+    /**
+     * Clamps [amount] down by vitality-based damage reduction (capped at [DAMAGE_REDUCTION_CAP]).
+     */
     private fun applyDamageReduction(amount: Int, victimUuid: UUID): Int {
         val vitality = getStat(victimUuid, StatType.VITALITY)
         val reductionPercent = min(DAMAGE_REDUCTION_MULT * vitality, DAMAGE_REDUCTION_CAP)

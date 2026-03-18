@@ -26,12 +26,6 @@ import org.bukkit.plugin.Plugin
 /**
  * Sub-class selection menu. Shows 3 subclass options for the player's current class.
  *
- * Layout matches old SubClassGUI.java (27-slot / 3-row chest):
- *   slot 0  (row 0, col 0): Back button
- *   slot 11 (row 1, col 2): First subclass
- *   slot 13 (row 1, col 4): Second subclass
- *   slot 15 (row 1, col 6): Third subclass
- *
  * Empty slots are filled with black stained-glass panes.
  */
 @Menu(title = "Choose Your Path", type = MenuType.CHEST_3_ROW)
@@ -133,9 +127,6 @@ constructor(
                 .append(Component.text(subClass.text, NamedTextColor.GOLD))
                 .append(Component.text(" path!"))
         )
-        odalitaMenus.openMenu(
-            skillTreeMenuFactory.create(subClass, position),
-            player,
-        )
+        odalitaMenus.openMenu(skillTreeMenuFactory.create(subClass, position), player)
     }
 }

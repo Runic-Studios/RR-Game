@@ -26,11 +26,6 @@ import org.bukkit.plugin.Plugin
 /**
  * Shows all unlocked active spells for the player to select and assign to a spell slot.
  *
- * Layout matches old SpellGUI.java (54-slot / 6-row chest with border fill):
- *   Border slots filled with BLACK_STAINED_GLASS_PANE
- *   slot 0  (row 0, col 0) — Back button (LIGHT_GRAY_STAINED_GLASS_PANE)
- *   Interior slots starting at slot 10 — default class spell first, then unlocked active spells
- *
  * Spell items use [SkillTreeGUI.buildPerkItem]-style formatting (spell name + description +
  * mana/cooldown + "» Click to activate").
  */
@@ -63,7 +58,10 @@ constructor(
             0,
             ClickableItem.of(buildBackButton()) {
                 odalitaMenus.openMenu(
-                    spellEditorMenuFactory.create(SpellEditorMenu.NO_SPELL, SpellEditorMenu.NO_SLOT),
+                    spellEditorMenuFactory.create(
+                        SpellEditorMenu.NO_SPELL,
+                        SpellEditorMenu.NO_SLOT,
+                    ),
                     player,
                 )
             },
@@ -96,12 +94,32 @@ constructor(
         //               36/44 (row 4), 45-53 (row 5)
         val borderSlots =
             setOf(
-                0, 1, 2, 3, 4, 5, 6, 7, 8,
-                9, 17,
-                18, 26,
-                27, 35,
-                36, 44,
-                45, 46, 47, 48, 49, 50, 51, 52, 53,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                17,
+                18,
+                26,
+                27,
+                35,
+                36,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
             )
 
         var spellIndex = 0
@@ -138,20 +156,32 @@ constructor(
             editMeta { meta ->
                 meta.displayName(Component.text(spell.name, NamedTextColor.GREEN))
                 val spellType = if (spell.isPassive) "PASSIVE SPELL " else "ACTIVE SPELL "
-                val lore = buildList<Component> {
-                    addAll("\n&6&l$spellType&7${spell.description}".toLoreComponents())
-                    if (!spell.isPassive) {
+                val lore =
+                    buildList<Component> {
+                        addAll("\n&6&l$spellType&7${spell.description}".toLoreComponents())
+                        if (!spell.isPassive) {
+                            add(Component.empty())
+                            add(
+                                Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
+                                    .decoration(TextDecoration.ITALIC, false)
+                            )
+                            add(
+                                Component.text("Cooldown ", NamedTextColor.RED)
+                                    .append(
+                                        Component.text(
+                                            "${spell.cooldown.toInt()}s",
+                                            NamedTextColor.YELLOW,
+                                        )
+                                    )
+                                    .decoration(TextDecoration.ITALIC, false)
+                            )
+                        }
                         add(Component.empty())
-                        add(Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
-                            .decoration(TextDecoration.ITALIC, false))
-                        add(Component.text("Cooldown ", NamedTextColor.RED)
-                            .append(Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW))
-                            .decoration(TextDecoration.ITALIC, false))
+                        add(
+                            Component.text("» Click to activate", NamedTextColor.LIGHT_PURPLE)
+                                .decoration(TextDecoration.ITALIC, false)
+                        )
                     }
-                    add(Component.empty())
-                    add(Component.text("» Click to activate", NamedTextColor.LIGHT_PURPLE)
-                        .decoration(TextDecoration.ITALIC, false))
-                }
                 meta.lore(lore)
             }
         }
@@ -166,12 +196,32 @@ constructor(
             }
         val borderSlots =
             intArrayOf(
-                0, 1, 2, 3, 4, 5, 6, 7, 8,
-                9, 17,
-                18, 26,
-                27, 35,
-                36, 44,
-                45, 46, 47, 48, 49, 50, 51, 52, 53,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                17,
+                18,
+                26,
+                27,
+                35,
+                36,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
             )
         for (slot in borderSlots) {
             menuContents.set(slot / 9, slot % 9, DisplayItem.of(glass.clone()))

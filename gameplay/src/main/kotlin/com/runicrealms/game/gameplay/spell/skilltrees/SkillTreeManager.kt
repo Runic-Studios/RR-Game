@@ -84,8 +84,10 @@ constructor(
                             ),
                     )
 
-                // Reconstruct each tree with its own fixed subclass (position 1->FIRST, 2->SECOND, 3->THIRD).
-                // Each tree always corresponds to the same subclass for the player's class regardless
+                // Reconstruct each tree with its own fixed subclass (position 1->FIRST, 2->SECOND,
+                // 3->THIRD).
+                // Each tree always corresponds to the same subclass for the player's class
+                // regardless
                 // of which subclass is currently selected: trees are fully independent.
                 for ((position, tree) in trees) {
                     val positionSubClass =

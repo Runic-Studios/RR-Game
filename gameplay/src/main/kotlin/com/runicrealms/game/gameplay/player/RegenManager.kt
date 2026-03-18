@@ -50,6 +50,9 @@ constructor(
         }
     }
 
+    /** Returns the player's current mana, or 0 if not yet initialised. */
+    fun getCurrentMana(uuid: UUID): Int = currentManaList[uuid] ?: 0
+
     /**
      * Adds mana to the current pool for the given player. Cannot add above max mana pool
      *

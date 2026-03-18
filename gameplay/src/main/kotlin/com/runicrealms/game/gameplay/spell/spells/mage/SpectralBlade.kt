@@ -23,7 +23,6 @@ import org.bukkit.event.EventPriority
  * passed through to INT scaling via [MagicDamageEvent].
  *
  * Weapon damage is read from the held weapon template when available.
- *
  */
 class SpectralBlade(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps) {
 

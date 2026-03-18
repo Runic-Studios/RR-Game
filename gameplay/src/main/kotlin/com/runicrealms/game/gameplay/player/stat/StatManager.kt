@@ -28,8 +28,9 @@ private val logger = LoggerFactory.getLogger("gameplay")
  * Stat multipliers are applied to game events by [StatListener].
  *
  * Base stats are loaded asynchronously on [GameCharacterLoadEvent] by reconstructing perk lists
- * directly from [SkillTreeData] (independent of [com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager]'s
- * own async load, avoiding ordering and circular-dependency issues).
+ * directly from [SkillTreeData] (independent of
+ * [com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager]'s own async load, avoiding
+ * ordering and circular-dependency issues).
  */
 @Singleton
 class StatManager
@@ -49,8 +50,8 @@ constructor(
     }
 
     /**
-     * Returns the total stat value for the given player: skill tree base + item bonus. Returns 0
-     * if the player is not currently loaded.
+     * Returns the total stat value for the given player: skill tree base + item bonus. Returns 0 if
+     * the player is not currently loaded.
      */
     fun getStat(uuid: UUID, stat: StatType): Int {
         val base = baseStatMap[uuid]?.get(stat) ?: 0

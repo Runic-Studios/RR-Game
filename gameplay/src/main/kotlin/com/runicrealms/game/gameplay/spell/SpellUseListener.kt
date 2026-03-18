@@ -111,7 +111,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         event.isCancelled = true
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         if (event.hand != EquipmentSlot.HAND) return

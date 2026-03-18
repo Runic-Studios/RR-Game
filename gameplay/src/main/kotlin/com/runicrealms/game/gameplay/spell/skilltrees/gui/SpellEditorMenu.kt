@@ -3,13 +3,13 @@ package com.runicrealms.game.gameplay.spell.skilltrees.gui
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.util.colorFormat
+import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SpellData
 import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkSpell
-import com.runicrealms.game.common.util.colorFormat
-import com.runicrealms.game.common.util.toLoreComponents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import nl.odalitadevelopments.menus.OdalitaMenus
@@ -29,22 +29,11 @@ import org.bukkit.plugin.Plugin
 /**
  * Spell slot assignment editor. Shows 4 spell slot buttons and a spell-setup summary item.
  *
- * Layout matches old SpellEditorGUI.java (54-slot / 6-row chest with border fill):
- *   Border slots filled with BLACK_STAINED_GLASS_PANE
- *   slot 0  (row 0, col 0) — Back button (LIGHT_GRAY_STAINED_GLASS_PANE)
- *   slot 4  (row 0, col 4) — "Your Spell Setup" summary (POPPED_CHORUS_FRUIT)
- *   slot 5  (row 0, col 5) — Reset button (MILK_BUCKET)
- *   slot 10 (row 1, col 1) — Slot 1: Hotbar 1
- *   slot 16 (row 1, col 7) — Slot 2: Left-click
- *   slot 37 (row 4, col 1) — Slot 3: Right-click
- *   slot 43 (row 4, col 7) — Slot 4: Swap-hands
- *
  * Use [NO_SPELL] and [NO_SLOT] to open in "browse" mode (no spell/slot pre-selected). Guice does
  * not allow null for [@Assisted] parameters, so we use these sentinels instead.
  *
  * TODO: Key binding letters (slot 1 = "1", slot 4 = "F") are hardcoded. They should come from a
  *   player settings system once one is implemented. See SPELL_MIGRATION.md.
- *
  * TODO: Reset button cost calculation is not implemented; cost shows a placeholder. See
  *   SPELL_MIGRATION.md.
  */
@@ -92,9 +81,16 @@ constructor(
             // Delay opening the browse-mode editor by one tick so this onLoad exits cleanly
             // before OdalitaMenus processes the new menu open. Calling openMenu directly from
             // within onLoad causes the current inventory to appear blank.
-            Bukkit.getScheduler().runTask(plugin, Runnable {
-                odalitaMenus.openMenu(spellEditorMenuFactory.create(NO_SPELL, NO_SLOT), player)
-            })
+            Bukkit.getScheduler()
+                .runTask(
+                    plugin,
+                    Runnable {
+                        odalitaMenus.openMenu(
+                            spellEditorMenuFactory.create(NO_SPELL, NO_SLOT),
+                            player,
+                        )
+                    },
+                )
             return
         }
 
@@ -123,7 +119,13 @@ constructor(
         )
 
         // Spell slot buttons at slots 10, 16, 37, 43
-        data class SlotMeta(val slot: Int, val index: Int, val letter: String, val name: String, val nameShort: String)
+        data class SlotMeta(
+            val slot: Int,
+            val index: Int,
+            val letter: String,
+            val name: String,
+            val nameShort: String,
+        )
         val slotMetas =
             listOf(
                 SlotMeta(10, 0, "1", "Slot One (Hotbar 1)", "Slot One"),
@@ -137,7 +139,15 @@ constructor(
             menuContents.set(
                 meta.slot / 9,
                 meta.slot % 9,
-                ClickableItem.of(buildSpellSlotButton(meta.letter, meta.name, meta.nameShort, meta.index, playerLevel)) {
+                ClickableItem.of(
+                    buildSpellSlotButton(
+                        meta.letter,
+                        meta.name,
+                        meta.nameShort,
+                        meta.index,
+                        playerLevel,
+                    )
+                ) {
                     if (!unlocked) {
                         player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 0.5f, 0.8f)
                         return@of
@@ -160,22 +170,35 @@ constructor(
         ItemStack(Material.POPPED_CHORUS_FRUIT).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Your Spell Setup:", NamedTextColor.LIGHT_PURPLE))
-                val lore = buildList<Component> {
-                    addAll("&d[1] &7Spell Slot One: &f${spellData.spellHotbarOne}".toLoreComponents())
-                    addAll("&d[L] &7Spell Left-click: &f${spellData.spellLeftClick}".toLoreComponents())
-                    addAll("&d[R] &7Spell Right-click: &f${spellData.spellRightClick}".toLoreComponents())
-                    addAll("&d[F] &7Spell Slot Four: &f${spellData.spellSwapHands}".toLoreComponents())
-                    add(Component.empty())
-                    addAll("&dYour Passives:".toLoreComponents())
-                    val passives = getPassiveNames(uuid)
-                    if (passives.isEmpty()) {
-                        addAll("&7None".toLoreComponents())
-                    } else {
-                        for (passive in passives) {
-                            addAll("&f- $passive".toLoreComponents())
+                val lore =
+                    buildList<Component> {
+                        addAll(
+                            "&d[1] &7Spell Slot One: &f${spellData.spellHotbarOne}"
+                                .toLoreComponents()
+                        )
+                        addAll(
+                            "&d[L] &7Spell Left-click: &f${spellData.spellLeftClick}"
+                                .toLoreComponents()
+                        )
+                        addAll(
+                            "&d[R] &7Spell Right-click: &f${spellData.spellRightClick}"
+                                .toLoreComponents()
+                        )
+                        addAll(
+                            "&d[F] &7Spell Slot Four: &f${spellData.spellSwapHands}"
+                                .toLoreComponents()
+                        )
+                        add(Component.empty())
+                        addAll("&dYour Passives:".toLoreComponents())
+                        val passives = getPassiveNames(uuid)
+                        if (passives.isEmpty()) {
+                            addAll("&7None".toLoreComponents())
+                        } else {
+                            for (passive in passives) {
+                                addAll("&f- $passive".toLoreComponents())
+                            }
                         }
                     }
-                }
                 meta.lore(lore)
             }
         }
@@ -198,8 +221,7 @@ constructor(
                 meta.displayName(Component.text("Reset Skill Trees", NamedTextColor.LIGHT_PURPLE))
                 // TODO: Calculate actual reset cost from player level (see SPELL_MIGRATION.md)
                 val lore =
-                    "\n&6&lCLICK &7to reset and refund your skill points! " +
-                        "Current cost: &aTODO"
+                    "\n&6&lCLICK &7to reset and refund your skill points! " + "Current cost: &aTODO"
                 meta.lore(
                     buildList {
                         add(Component.empty())
@@ -290,12 +312,32 @@ constructor(
             }
         val borderSlots =
             intArrayOf(
-                0, 1, 2, 3, 4, 5, 6, 7, 8,        // row 0
-                9, 17,                              // row 1 edges
-                18, 26,                             // row 2 edges
-                27, 35,                             // row 3 edges
-                36, 44,                             // row 4 edges
-                45, 46, 47, 48, 49, 50, 51, 52, 53, // row 5
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8, // row 0
+                9,
+                17, // row 1 edges
+                18,
+                26, // row 2 edges
+                27,
+                35, // row 3 edges
+                36,
+                44, // row 4 edges
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53, // row 5
             )
         for (slot in borderSlots) {
             menuContents.set(slot / 9, slot % 9, DisplayItem.of(glass.clone()))

@@ -1,9 +1,9 @@
 package com.runicrealms.game.gameplay.spell.skilltrees.gui
 
 import com.google.inject.assistedinject.AssistedInject
+import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.effect.RunicStatusEffect
-import com.runicrealms.game.common.util.toLoreComponents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -18,15 +18,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-/**
- * The Ancient Runestone inventory: entry point for the skill tree and spell editor system.
- *
- * Layout matches the old RuneGUI.java (45-slot / 5-row chest):
- *   slot 11 (row 1, col 2): Open Skill Trees
- *   slot 13 (row 1, col 4): Open Spell Editor
- *   slot 15 (row 1, col 6): Close
- *   slot 31 (row 3, col 4): Status Effect Key tooltip
- */
+/** The Ancient Runestone inventory: entry point for the skill tree and spell editor system. */
 @Menu(title = "Ancient Runestone", type = MenuType.CHEST_5_ROW)
 class RuneMenu
 @AssistedInject
@@ -48,7 +40,9 @@ constructor(
             1,
             2,
             OpenMenuItem.of(
-                buildSkillTreeButton(playerClass.name.lowercase().replaceFirstChar { it.uppercase() }),
+                buildSkillTreeButton(
+                    playerClass.name.lowercase().replaceFirstChar { it.uppercase() }
+                ),
                 subClassMenuFactory.create(playerClass),
             ),
         )
@@ -93,9 +87,7 @@ constructor(
             "&7Configure your active spells! Set spells to be executed by different key combos!"
         return ItemStack(Material.NETHER_WART).apply {
             editMeta { meta ->
-                meta.displayName(
-                    Component.text("Open Spell Editor", NamedTextColor.LIGHT_PURPLE)
-                )
+                meta.displayName(Component.text("Open Spell Editor", NamedTextColor.LIGHT_PURPLE))
                 meta.lore(lore.toLoreComponents())
             }
         }
@@ -121,15 +113,18 @@ constructor(
                     buildList {
                         add(Component.empty())
                         for (statusEffect in RunicStatusEffect.entries) {
-                            // DARK_AQUA + BOLD for effect name, matching old ChatColor.DARK_AQUA + BOLD
+                            // DARK_AQUA + BOLD for effect name, matching old ChatColor.DARK_AQUA +
+                            // BOLD
                             add(
                                 Component.text(
-                                    "${statusEffect.displayName} -",
-                                    NamedTextColor.DARK_AQUA,
-                                    TextDecoration.BOLD,
-                                ).decoration(TextDecoration.ITALIC, false)
+                                        "${statusEffect.displayName} -",
+                                        NamedTextColor.DARK_AQUA,
+                                        TextDecoration.BOLD,
+                                    )
+                                    .decoration(TextDecoration.ITALIC, false)
                             )
-                            // Description word-wrapped at 28 chars, matching ChatUtils.formattedText
+                            // Description word-wrapped at 28 chars, matching
+                            // ChatUtils.formattedText
                             addAll("&7${statusEffect.description}".toLoreComponents())
                         }
                     }

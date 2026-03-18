@@ -14,7 +14,7 @@ import org.bukkit.plugin.Plugin
 
 private const val SKILL_TREE_UNLOCK_LEVEL = SkillTreeData.FIRST_POINT_LEVEL
 private const val REMINDER_INTERVAL_TICKS = 300 * 20L // 5 minutes
-private const val REMINDER_DELAY_TICKS = 60 * 20L    // start after 1 minute
+private const val REMINDER_DELAY_TICKS = 60 * 20L // start after 1 minute
 
 /**
  * Notifies players of skill point availability:
@@ -35,18 +35,19 @@ constructor(
 
     init {
         Bukkit.getPluginManager().registerEvents(this, plugin)
-        Bukkit.getScheduler().runTaskTimerAsynchronously(
-            plugin,
-            Runnable {
-                for (character in userDataRegistry.getAllCharacters()) {
-                    val uuid = character.bukkitPlayer.uniqueId
-                    val points = skillTreeAPI.getAvailableSkillPoints(uuid, 1)
-                    if (points > 0) sendReminderMessage(character.bukkitPlayer, points)
-                }
-            },
-            REMINDER_DELAY_TICKS,
-            REMINDER_INTERVAL_TICKS,
-        )
+        Bukkit.getScheduler()
+            .runTaskTimerAsynchronously(
+                plugin,
+                Runnable {
+                    for (character in userDataRegistry.getAllCharacters()) {
+                        val uuid = character.bukkitPlayer.uniqueId
+                        val points = skillTreeAPI.getAvailableSkillPoints(uuid, 1)
+                        if (points > 0) sendReminderMessage(character.bukkitPlayer, points)
+                    }
+                },
+                REMINDER_DELAY_TICKS,
+                REMINDER_INTERVAL_TICKS,
+            )
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

@@ -51,7 +51,9 @@ constructor(
         val clamped = level.coerceIn(0, CharacterLevelHelper.MAX_LEVEL)
         val character = userDataRegistry.getCharacter(target.uniqueId)
         if (character == null) {
-            sender.sendMessage("&c${target.name} does not have an active character loaded.".colorFormat())
+            sender.sendMessage(
+                "&c${target.name} does not have an active character loaded.".colorFormat()
+            )
             return
         }
         val newExp = characterLevelHelper.calculateTotalExp(clamped).toLong().coerceAtLeast(0L)
@@ -62,7 +64,9 @@ constructor(
         Bukkit.getScheduler().runTask(plugin, Runnable { target.level = clamped })
         sender.sendMessage("&aSet ${target.name}'s level to &f$clamped&a.".colorFormat())
         if (sender != target) {
-            target.sendMessage("&aYour level has been set to &f$clamped&a by an admin.".colorFormat())
+            target.sendMessage(
+                "&aYour level has been set to &f$clamped&a by an admin.".colorFormat()
+            )
         }
     }
 }

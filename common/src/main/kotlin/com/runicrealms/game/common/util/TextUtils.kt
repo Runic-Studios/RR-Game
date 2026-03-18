@@ -44,7 +44,8 @@ fun String.breakLines(lineLength: Int = LINE_LENGTH): List<String> {
 fun String.toLoreComponents(lineLength: Int = LINE_LENGTH): List<Component> {
     val sectionStr = ChatColor.translateAlternateColorCodes('&', this)
     return ChatPaginator.wordWrap(sectionStr, lineLength).map { line ->
-        LegacyComponentSerializer.legacySection().deserialize(line)
+        LegacyComponentSerializer.legacySection()
+            .deserialize(line)
             .decoration(TextDecoration.ITALIC, false)
     }
 }

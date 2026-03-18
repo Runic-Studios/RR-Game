@@ -11,13 +11,14 @@ import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.command.SetLevelCommand
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.RegenManager
-import com.runicrealms.game.gameplay.player.stat.StatListener
-import com.runicrealms.game.gameplay.player.stat.StatManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterAddMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
+import com.runicrealms.game.gameplay.player.stat.StatListener
+import com.runicrealms.game.gameplay.player.stat.StatManager
+import com.runicrealms.game.gameplay.scoreboard.ScoreboardManager
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.SpellScalingListener
 import com.runicrealms.game.gameplay.spell.SpellStaffListener
@@ -48,6 +49,7 @@ class GameplayModule : AbstractModule() {
         bind(TipsDataListener::class.java).asEagerSingleton()
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
+        bind(ScoreboardManager::class.java).asEagerSingleton()
 
         bind(RegenManager::class.java).asEagerSingleton()
         bind(StatManager::class.java).asEagerSingleton()

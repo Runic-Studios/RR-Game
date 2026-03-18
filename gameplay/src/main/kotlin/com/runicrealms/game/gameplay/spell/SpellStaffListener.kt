@@ -23,7 +23,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         Bukkit.getPluginManager().registerEvents(this, plugin)
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL)
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.hand != EquipmentSlot.HAND) return
         if (event.action != Action.LEFT_CLICK_AIR && event.action != Action.LEFT_CLICK_BLOCK) return

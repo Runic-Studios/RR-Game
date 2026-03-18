@@ -31,18 +31,9 @@ import org.bukkit.inventory.ItemStack
 /**
  * Skill tree perk selection menu. Shows all 12 perks for a specific [SkillTreePosition].
  *
- * Layout matches old SkillTreeGUI.java (54-slot / 6-row chest):
- *   Row 0 (slots 0-8): border fill (BLACK_STAINED_GLASS_PANE)
- *   slot 0  (row 0, col 0) — Back button (LIGHT_GRAY_STAINED_GLASS_PANE)
- *   slot 4  (row 0, col 4) — Info item (subclass icon + remaining skill points)
- *   [PERK_SLOTS]: 10, 28, 46, 48, 30, 12, 14, 32, 50, 52, 34, 16 — perk icons
- *   Down arrows (RED glass):   slots 19, 23, 37, 41
- *   Up arrows   (GREEN glass): slots 21, 25, 39, 43
- *   Right arrows (BROWN glass): slots 13, 47, 51
- *
  * NOTE: The menu title is static ("Skill Tree") because OdalitaMenus requires a compile-time
- * constant for @Menu(title). The subclass name is shown in the info item at slot 4 instead.
- * See SPELL_MIGRATION.md for details.
+ * constant for @Menu(title). The subclass name is shown in the info item at slot 4 instead. See
+ * SPELL_MIGRATION.md for details.
  */
 @Menu(title = "Skill Tree", type = MenuType.CHEST_6_ROW)
 class SkillTreeMenu
@@ -134,7 +125,9 @@ constructor(
         val spell = spellManager.getSpell(perk.spellName)
         if (spell == null) {
             return ItemStack(Material.BARRIER).apply {
-                editMeta { it.displayName(Component.text("Error: spell not found", NamedTextColor.RED)) }
+                editMeta {
+                    it.displayName(Component.text("Error: spell not found", NamedTextColor.RED))
+                }
             }
         }
         val material = if (spell.isPassive) Material.PAPER else Material.NETHER_WART
@@ -152,14 +145,19 @@ constructor(
                 val lore = loreText.toLoreComponents().toMutableList()
                 if (!spell.isPassive) {
                     lore += Component.empty()
-                    lore += Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
+                    lore +=
+                        Component.text("Costs ${spell.manaCost}✸", NamedTextColor.DARK_AQUA)
                             .decoration(TextDecoration.ITALIC, false)
-                    lore += Component.text("Cooldown ", NamedTextColor.RED)
-                            .append(Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW))
+                    lore +=
+                        Component.text("Cooldown ", NamedTextColor.RED)
+                            .append(
+                                Component.text("${spell.cooldown.toInt()}s", NamedTextColor.YELLOW)
+                            )
                             .decoration(TextDecoration.ITALIC, false)
                 }
                 lore += Component.empty()
-                lore += Component.text("» Click to purchase", NamedTextColor.AQUA)
+                lore +=
+                    Component.text("» Click to purchase", NamedTextColor.AQUA)
                         .decoration(TextDecoration.ITALIC, false)
                 meta.lore(lore)
             }
@@ -262,19 +260,15 @@ constructor(
             }
 
         /**
-         * Returns (name, icon, description) for a stat, matching old Stat enum fields.
-         * Used to build [PerkBaseStat] lore without referencing the old Items module Stat enum.
+         * Returns (name, icon, description) for a stat, matching old Stat enum fields. Used to
+         * build [PerkBaseStat] lore without referencing the old Items module Stat enum.
          */
         fun statInfo(stat: StatType): Triple<String, String, String> =
             when (stat) {
                 StatType.DEXTERITY ->
                     Triple("Dexterity", "✦", "Gain spell haste, reducing your spell cooldowns!")
                 StatType.INTELLIGENCE ->
-                    Triple(
-                        "Intelligence",
-                        "ʔ",
-                        "Deal more magic damage and gain more mana regen!",
-                    )
+                    Triple("Intelligence", "ʔ", "Deal more magic damage and gain more mana regen!")
                 StatType.STRENGTH -> Triple("Strength", "⚔", "Deal more physical damage!")
                 StatType.VITALITY ->
                     Triple("Vitality", "■", "Gain damage reduction and health regen!")
