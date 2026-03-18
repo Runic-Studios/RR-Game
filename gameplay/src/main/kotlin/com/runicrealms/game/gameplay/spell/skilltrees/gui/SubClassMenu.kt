@@ -32,7 +32,7 @@ import org.bukkit.plugin.Plugin
  *   slot 13 (row 1, col 4): Second subclass
  *   slot 15 (row 1, col 6): Third subclass
  *
- * Empty slots are filled with black stained glass panes.
+ * Empty slots are filled with black stained-glass panes.
  */
 @Menu(title = "Choose Your Path", type = MenuType.CHEST_3_ROW)
 class SubClassMenu
@@ -124,9 +124,9 @@ constructor(
     private fun selectSubClass(player: Player, subClass: SubClassType) {
         val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
         character.withSyncCharacterData { traits.subClassType = subClass }
-        skillTreeManager.getSkillTreeDataMap(player.uniqueId)?.forEach { (_, tree) ->
-            tree.loadPerksFromSubClass(subClass)
-        }
+        // Trees are already loaded with their own fixed subclasses on character load: do not
+        // reload them here. Just record the active subclass and open the tree for its position.
+        val position = SkillTreePosition.fromValue(subClass.position)
         player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f)
         player.sendMessage(
             Component.text("You have chosen the ")
@@ -134,7 +134,7 @@ constructor(
                 .append(Component.text(" path!"))
         )
         odalitaMenus.openMenu(
-            skillTreeMenuFactory.create(subClass, SkillTreePosition.FIRST),
+            skillTreeMenuFactory.create(subClass, position),
             player,
         )
     }

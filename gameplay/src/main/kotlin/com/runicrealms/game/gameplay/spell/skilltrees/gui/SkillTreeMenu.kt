@@ -77,11 +77,25 @@ constructor(
             val slot = PERK_SLOTS[index]
             val row = slot / 9
             val col = slot % 9
+            val prerequisiteMet = index == 0 || perks[index - 1].isMaxed()
             menuContents.set(
                 row,
                 col,
                 ClickableItem.of(buildPerkItem(perk, tree, availablePoints)) { _ ->
-                    if (!perk.isMaxed() && availablePoints >= perk.cost) {
+                    if (!prerequisiteMet) {
+                        player.playSound(
+                            player.location,
+                            Sound.ENTITY_GENERIC_EXTINGUISH_FIRE,
+                            0.5f,
+                            1.0f,
+                        )
+                        player.sendMessage(
+                            Component.text(
+                                "You must purchase all previous perks first!",
+                                NamedTextColor.RED,
+                            )
+                        )
+                    } else if (!perk.isMaxed() && availablePoints >= perk.cost) {
                         if (skillTreeManager.attemptToPurchasePerk(uuid, position, perk)) {
                             player.playSound(
                                 player.location,

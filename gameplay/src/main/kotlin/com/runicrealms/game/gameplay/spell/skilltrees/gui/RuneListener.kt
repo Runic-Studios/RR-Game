@@ -63,8 +63,8 @@ constructor(
             return
 
         val player = event.player
-        val itemInHand = event.item ?: return
         if (player.inventory.heldItemSlot != RUNE_SLOT) return
+        val itemInHand = player.inventory.getItem(RUNE_SLOT) ?: return
         if (!isRuneItem(itemInHand)) return
 
         event.isCancelled = true

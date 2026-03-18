@@ -19,6 +19,7 @@ import nl.odalitadevelopments.menus.items.ClickableItem
 import nl.odalitadevelopments.menus.items.DisplayItem
 import nl.odalitadevelopments.menus.menu.providers.PlayerMenuProvider
 import nl.odalitadevelopments.menus.menu.type.MenuType
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -88,7 +89,12 @@ constructor(
                     )
                 )
             }
-            odalitaMenus.openMenu(spellEditorMenuFactory.create(NO_SPELL, NO_SLOT), player)
+            // Delay opening the browse-mode editor by one tick so this onLoad exits cleanly
+            // before OdalitaMenus processes the new menu open. Calling openMenu directly from
+            // within onLoad causes the current inventory to appear blank.
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                odalitaMenus.openMenu(spellEditorMenuFactory.create(NO_SPELL, NO_SLOT), player)
+            })
             return
         }
 

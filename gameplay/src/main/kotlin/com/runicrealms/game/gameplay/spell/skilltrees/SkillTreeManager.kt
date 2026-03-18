@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.Provider
 import com.google.inject.Singleton
+import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
@@ -64,8 +65,8 @@ constructor(
         val uuid = character.bukkitPlayer.uniqueId
         plugin.launch {
             try {
-                val (charSkills, charSpells, subClassType) =
-                    character.withCharacterData { Triple(skills, spells, traits.subClassType) }
+                val (charSkills, charSpells, charClassType) =
+                    character.withCharacterData { Triple(skills, spells, traits.classType) }
 
                 val trees =
                     mapOf(
@@ -83,10 +84,14 @@ constructor(
                             ),
                     )
 
-                // Reconstruct perk lists if subclass is known
-                if (subClassType != null) {
-                    for ((_, tree) in trees) {
-                        tree.loadPerksFromSubClass(subClassType)
+                // Reconstruct each tree with its own fixed subclass (position 1->FIRST, 2->SECOND, 3->THIRD).
+                // Each tree always corresponds to the same subclass for the player's class regardless
+                // of which subclass is currently selected: trees are fully independent.
+                for ((position, tree) in trees) {
+                    val positionSubClass =
+                        SubClassType.forClassAndPosition(charClassType, position.value)
+                    if (positionSubClass != null) {
+                        tree.loadPerksFromSubClass(positionSubClass)
                     }
                 }
 
@@ -168,6 +173,9 @@ constructor(
         val trees = skillTreeMap[uuid] ?: return false
         val tree = trees[position] ?: return false
         if (getAvailableSkillPoints(uuid, position.value) < perk.cost) return false
+        // Enforce sequential purchase order: previous perk must be fully purchased first.
+        val perkIndex = tree.perks.indexOf(perk)
+        if (perkIndex > 0 && !tree.perks[perkIndex - 1].isMaxed()) return false
         if (!perk.allocate()) return false
         tree.totalAllocatedPoints += perk.cost
 
@@ -178,7 +186,6 @@ constructor(
         }
 
         // Rebuild passives
-        val player = Bukkit.getPlayer(uuid) ?: return true
         val passives: MutableSet<String> = mutableSetOf()
         for ((_, t) in trees) {
             t.addPassivesToMap(passives, spellManager)
