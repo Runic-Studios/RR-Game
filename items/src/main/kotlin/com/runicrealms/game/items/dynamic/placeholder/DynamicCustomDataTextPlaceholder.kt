@@ -27,12 +27,15 @@ class DynamicCustomDataTextPlaceholder
 @AssistedInject
 constructor(
     dynamicItemRegistry: DynamicItemRegistry,
-    @Assisted identifier: String,
-    @Assisted private val key: String,
+    @Assisted("identifier") identifier: String,
+    @Assisted("key") private val key: String,
 ) : DynamicItemTextPlaceholder(identifier) {
 
     interface Factory {
-        fun create(identifier: String, key: String): DynamicCustomDataTextPlaceholder
+        fun create(
+            @Assisted("identifier") identifier: String,
+            @Assisted("key") key: String,
+        ): DynamicCustomDataTextPlaceholder
     }
 
     init {
