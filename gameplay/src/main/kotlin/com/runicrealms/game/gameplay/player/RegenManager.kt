@@ -11,9 +11,9 @@ import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.gameplay.player.stat.StatManager
+import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
@@ -25,8 +25,12 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
 /**
- * Class to manage player health and mana. Stores max mana in the player data file, and creates a
- * HashMap to store all current player mana values.
+ * Manages player health and mana regeneration.
+ *
+ * [SpellManager] is the single source of truth for current mana — spells deduct from it via
+ * [SpellManager.getMana]/[SpellManager.setMana], and this class regens into it every
+ * [REGEN_PERIOD] seconds. This avoids the two-map split that existed when [RegenManager] kept its
+ * own `currentManaList` separate from [SpellManager.manaMap].
  *
  * @author Skyfallin
  */
@@ -37,64 +41,62 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val statManager: StatManager,
     private val combatManager: CombatManager,
+    private val spellManager: SpellManager,
 ) : Listener {
-
-    private val currentManaList = ConcurrentHashMap<UUID, Int>()
 
     init {
         Bukkit.getPluginManager().registerEvents(this, plugin)
-        // regen async to speed up
+        // Regen runs async; delay first so players have time to load before the first tick
         plugin.launch {
             withContext(plugin.asyncDispatcher) {
-                for (character in userDataRegistry.getAllCharacters()) {
-                    regenHealth(character)
-                    regenMana(character)
+                while (true) {
+                    delay(REGEN_PERIOD * 1000L)
+                    for (character in userDataRegistry.getAllCharacters()) {
+                        regenHealth(character)
+                        regenMana(character)
+                    }
                 }
-                delay(REGEN_PERIOD * 1000L)
             }
         }
     }
 
-    /** Initialises the player's mana to their max mana. Mirrors old ManaListener.onCharacterLoad. */
+    /** Initialises the player's mana to their max mana on character load. */
     @EventHandler
     fun onCharacterLoad(event: GameCharacterLoadEvent) {
         val character = event.character
-        currentManaList[character.bukkitPlayer.uniqueId] = calculateMaxMana(character)
+        spellManager.setMana(character.bukkitPlayer.uniqueId, calculateMaxMana(character))
     }
 
-    /** Cleans up stored mana when a character logs out. */
+    /** Cleans up mana state when a character logs out. */
     @EventHandler
     fun onCharacterQuit(event: GameCharacterQuitEvent) {
-        currentManaList.remove(event.character.bukkitPlayer.uniqueId)
+        spellManager.setMana(event.character.bukkitPlayer.uniqueId, 0)
     }
 
-    /** Returns the player's current mana, or 0 if not yet initialised. */
-    fun getCurrentMana(uuid: UUID): Int = currentManaList[uuid] ?: 0
+    /** Returns the player's current mana via [SpellManager] (the single mana store). */
+    fun getCurrentMana(uuid: UUID): Int = spellManager.getMana(uuid)
 
     /**
-     * Adds mana to the current pool for the given player. Cannot add above max mana pool
+     * Adds mana to the current pool for the given player. Cannot exceed max mana.
      *
-     * @param player to receive mana
-     * @param amount of mana to receive
+     * @param character to receive mana
+     * @param amount of mana to add
      */
     fun addMana(character: GameCharacter, amount: Int) {
-        // Sync context
-        val player = character.bukkitPlayer
-        val mana = currentManaList[player.uniqueId]!!
+        val uuid = character.bukkitPlayer.uniqueId
+        val mana = spellManager.getMana(uuid)
         val maxMana: Int = calculateMaxMana(character)
         if (mana < maxMana)
-            currentManaList[player.uniqueId] =
-                min((mana + amount).toDouble(), maxMana.toDouble()).toInt()
+            spellManager.setMana(uuid, min((mana + amount).toDouble(), maxMana.toDouble()).toInt())
     }
 
     /**
-     * Determines the amount of mana to award per level to the given player based on class
+     * Returns the mana-per-level multiplier for the given character based on their class.
      *
-     * @param player to calculate mana for
-     * @return the mana per level
+     * @param character to calculate mana for
+     * @return the mana awarded per level
      */
     fun getManaPerLv(character: GameCharacter): Double {
-        // Sync context
         return character.withSyncCharacterData {
             when (traits.classType) {
                 ClassType.ARCHER -> ARCHER_MANA_LV
@@ -107,9 +109,8 @@ constructor(
         }
     }
 
-    /** Task to regen health with appropriate modifiers */
+    /** Periodic task: regenerates health for one character. */
     private suspend fun regenHealth(character: GameCharacter) {
-        // Sync context
         val player = character.bukkitPlayer
         val regenAmount =
             (HEALTH_REGEN_BASE_VALUE + (HEALTH_REGEN_LEVEL_MULTIPLIER * player.level)).toInt()
@@ -120,47 +121,40 @@ constructor(
         Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
     }
 
-    /** Periodic task to regenerate mana for all online players */
+    /** Periodic task: regenerates mana for one character. */
     private suspend fun regenMana(character: GameCharacter) {
-        // Sync context
         val player = character.bukkitPlayer
-        val mana =
-            if (currentManaList.containsKey(player.uniqueId)) currentManaList[player.uniqueId]!!
-            else (BASE_MANA + getManaPerLv(character)).toInt()
-
+        val uuid = player.uniqueId
+        val mana = spellManager.getMana(uuid)
         val maxMana: Int = calculateMaxMana(character)
         if (mana >= maxMana) return
 
         var regenAmt = calculateManaRegen(player.level)
-
-        if (!combatManager.isInCombat(player.uniqueId)) regenAmt *= OOC_MULTIPLIER
+        if (!combatManager.isInCombat(uuid)) regenAmt *= OOC_MULTIPLIER
 
         val event = ManaRegenEvent(player, regenAmt)
         Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
         if (!event.isCancelled) {
-            currentManaList[player.uniqueId] = (mana + event.amount).coerceAtMost(maxMana)
+            spellManager.setMana(uuid, (mana + event.amount).coerceAtMost(maxMana))
         }
     }
 
     /**
-     * Calculates the total mana for the given player
-     *
-     * @param player to calculate mana for
+     * Calculates the character's total max mana from base, class-per-level scaling, and wisdom.
+     * Also clamps current mana down to the new max if it exceeds it (e.g. after equipment swap).
      */
     fun calculateMaxMana(character: GameCharacter): Int {
-        // Sync context
-        val maxMana: Int
-        // recalculate max mana based on player level
         val player = character.bukkitPlayer
+        val uuid = player.uniqueId
         val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)).toInt()
-        val wisdom = statManager.getStat(player.uniqueId, StatType.WISDOM)
+        val wisdom = statManager.getStat(uuid, StatType.WISDOM)
         val wisdomBoost: Double = newMaxMana * (STAT_MAX_MANA_MULT * wisdom)
-        maxMana = (newMaxMana + wisdomBoost).toInt()
+        val maxMana = (newMaxMana + wisdomBoost).toInt()
 
-        // fix current mana if it is now too high
-        val currentMana = currentManaList[player.uniqueId] ?: 0
+        // Clamp current mana if equipment change lowered the cap
+        val currentMana = spellManager.getMana(uuid)
         if (currentMana > maxMana) {
-            currentManaList[player.uniqueId] = maxMana
+            spellManager.setMana(uuid, maxMana)
         }
         return maxMana
     }
@@ -168,8 +162,8 @@ constructor(
     companion object {
         private const val HEALTH_REGEN_BASE_VALUE = 5
         private const val HEALTH_REGEN_LEVEL_MULTIPLIER = 0.15
-        private const val OOC_MULTIPLIER = 4 // out-of-combat
-        private const val REGEN_PERIOD = 4 // seconds
+        private const val OOC_MULTIPLIER = 4 // out-of-combat regen multiplier
+        private const val REGEN_PERIOD = 4L // seconds
 
         const val BASE_MANA: Int = 150
         private const val BASE_MANA_REGEN_AMT = 5
@@ -183,10 +177,10 @@ constructor(
         private const val STAT_MAX_MANA_MULT = 0.01
 
         /**
-         * Mana regen increases each level
+         * Mana regen amount increases slightly each level.
          *
          * @param level of the player
-         * @return the mana they should receive each tick
+         * @return mana awarded per regen tick
          */
         fun calculateManaRegen(level: Int): Int {
             return (BASE_MANA_REGEN_AMT + (level.toDouble() / 12)).roundToInt()
