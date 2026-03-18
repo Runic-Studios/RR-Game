@@ -7,6 +7,8 @@ import com.google.inject.Inject
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.UserDataRegistry
+import com.runicrealms.game.data.event.GameCharacterLoadEvent
+import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.game.GameCharacter
 import com.runicrealms.game.gameplay.player.stat.StatManager
 import com.runicrealms.game.gameplay.spell.combat.CombatManager
@@ -18,6 +20,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
 /**
@@ -33,11 +37,12 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val statManager: StatManager,
     private val combatManager: CombatManager,
-) {
+) : Listener {
 
     private val currentManaList = ConcurrentHashMap<UUID, Int>()
 
     init {
+        Bukkit.getPluginManager().registerEvents(this, plugin)
         // regen async to speed up
         plugin.launch {
             withContext(plugin.asyncDispatcher) {
@@ -48,6 +53,19 @@ constructor(
                 delay(REGEN_PERIOD * 1000L)
             }
         }
+    }
+
+    /** Initialises the player's mana to their max mana. Mirrors old ManaListener.onCharacterLoad. */
+    @EventHandler
+    fun onCharacterLoad(event: GameCharacterLoadEvent) {
+        val character = event.character
+        currentManaList[character.bukkitPlayer.uniqueId] = calculateMaxMana(character)
+    }
+
+    /** Cleans up stored mana when a character logs out. */
+    @EventHandler
+    fun onCharacterQuit(event: GameCharacterQuitEvent) {
+        currentManaList.remove(event.character.bukkitPlayer.uniqueId)
     }
 
     /** Returns the player's current mana, or 0 if not yet initialised. */
@@ -134,7 +152,7 @@ constructor(
         val maxMana: Int
         // recalculate max mana based on player level
         val player = character.bukkitPlayer
-        val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)) as Int
+        val newMaxMana = (BASE_MANA + (getManaPerLv(character) * player.level)).toInt()
         val wisdom = statManager.getStat(player.uniqueId, StatType.WISDOM)
         val wisdomBoost: Double = newMaxMana * (STAT_MAX_MANA_MULT * wisdom)
         maxMana = (newMaxMana + wisdomBoost).toInt()
