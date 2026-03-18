@@ -24,9 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Compute short SHA
+      - name: Compute short SHA and commit message
         id: sha
-        run: echo "sha7=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha7=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+          echo "commit_message=$(git log -1 --pretty=%s ${{ github.event.pull_request.head.sha }})" >> "$GITHUB_OUTPUT"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -42,7 +44,7 @@ jobs:
         env:
           RUNIC_GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
           RUNIC_GIT_SHA: ${{ github.event.pull_request.head.sha }}
-          RUNIC_GIT_MESSAGE: ${{ github.event.pull_request.title }}
+          RUNIC_GIT_MESSAGE: ${{ steps.sha.outputs.commit_message }}
           RUNIC_BUILD_ID: ${{ github.run_id }}
         run: ./gradlew :plugin:shadowJar --no-daemon
 
