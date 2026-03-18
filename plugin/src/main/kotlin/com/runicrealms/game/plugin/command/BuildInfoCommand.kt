@@ -10,7 +10,7 @@ import com.runicrealms.game.plugin.buildinfo.RunicBuildInfoProvider
 import org.bukkit.command.CommandSender
 
 @CommandAlias("runic|r")
-class RunicInfoCommand
+class BuildInfoCommand
 @Inject
 constructor(
     commandManager: PaperCommandManager,
@@ -20,7 +20,7 @@ constructor(
         commandManager.registerCommand(this)
     }
 
-    @Subcommand("info")
+    @Subcommand("buildinfo")
     fun onInfo(sender: CommandSender) {
         val info = runicBuildInfoProvider.info
 
