@@ -16,6 +16,9 @@ import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
+import com.runicrealms.game.gameplay.player.death.DeathListener
+import com.runicrealms.game.gameplay.player.death.DeathTriggerListener
+import com.runicrealms.game.gameplay.player.death.GravestoneManager
 import com.runicrealms.game.gameplay.player.stat.StatListener
 import com.runicrealms.game.gameplay.player.stat.StatManager
 import com.runicrealms.game.gameplay.scoreboard.ScoreboardManager
@@ -50,6 +53,10 @@ class GameplayModule : AbstractModule() {
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
         bind(ScoreboardManager::class.java).asEagerSingleton()
+
+        bind(GravestoneManager::class.java).asEagerSingleton()
+        bind(DeathTriggerListener::class.java).asEagerSingleton()
+        bind(DeathListener::class.java).asEagerSingleton()
 
         bind(RegenManager::class.java).asEagerSingleton()
         bind(StatManager::class.java).asEagerSingleton()

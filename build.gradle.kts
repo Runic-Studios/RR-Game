@@ -71,6 +71,7 @@ subprojects {
         compileOnly(rootProject.libs.protocollib)
         compileOnly(rootProject.libs.fancyHolograms)
         compileOnly(rootProject.libs.mythicMobs)
+        compileOnly(rootProject.libs.modelEngine)
     }
 }
 

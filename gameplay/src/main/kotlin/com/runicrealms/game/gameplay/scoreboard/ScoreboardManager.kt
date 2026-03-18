@@ -23,6 +23,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLevelChangeEvent
 import org.bukkit.plugin.Plugin
+import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
 
@@ -98,7 +99,7 @@ constructor(
             Component.text("     Runic Realms")
                 .color(NamedTextColor.LIGHT_PURPLE)
                 .decorate(TextDecoration.BOLD)
-        val obj = scoreboard.registerNewObjective("ServerName", "dummy", title)
+        val obj = scoreboard.registerNewObjective("ServerName", Criteria.DUMMY, title)
         obj.displaySlot = DisplaySlot.SIDEBAR
 
         // Spacer + player name header (static scores, set directly on the objective)

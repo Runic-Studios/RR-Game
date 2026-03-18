@@ -5,7 +5,6 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.util.ChatPaginator
 
@@ -42,7 +41,8 @@ fun String.breakLines(lineLength: Int = LINE_LENGTH): List<String> {
  * Minecraft renders them with the default item-lore style (purple italic).
  */
 fun String.toLoreComponents(lineLength: Int = LINE_LENGTH): List<Component> {
-    val sectionStr = ChatColor.translateAlternateColorCodes('&', this)
+    val section = LegacyComponentSerializer.legacy('&').deserialize(this)
+    val sectionStr = LegacyComponentSerializer.legacy('&').serialize(section)
     return ChatPaginator.wordWrap(sectionStr, lineLength).map { line ->
         LegacyComponentSerializer.legacySection()
             .deserialize(line)
