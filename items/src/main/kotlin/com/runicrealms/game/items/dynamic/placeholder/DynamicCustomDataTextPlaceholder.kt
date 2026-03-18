@@ -1,6 +1,5 @@
 package com.runicrealms.game.items.dynamic.placeholder
 
-import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import com.google.inject.assistedinject.AssistedInject
 import com.runicrealms.game.data.game.GameCharacter

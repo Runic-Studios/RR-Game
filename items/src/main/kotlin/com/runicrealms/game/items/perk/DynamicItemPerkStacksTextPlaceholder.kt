@@ -38,6 +38,6 @@ class DynamicItemPerkStacksTextPlaceholder(
             } else {
                 Component.text("[${handler.template.maxStacks}]", Style.style(NamedTextColor.GRAY))
             }
-        return LegacyComponentSerializer.legacySection().serialize(component)
+        return LegacyComponentSerializer.legacySection().serialize(component) + " "
     }
 }

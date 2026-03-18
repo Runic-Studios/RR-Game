@@ -15,17 +15,14 @@ import org.bukkit.inventory.CraftingInventory
 import org.bukkit.plugin.Plugin
 
 /**
- * Custom handler for shift-click (MOVE_TO_OTHER_INVENTORY) when the player has a
- * non-player inventory open (chest, shop, etc.). Uses smart stacking via [InventoryHelper].
+ * Custom handler for shift-click (MOVE_TO_OTHER_INVENTORY) when the player has a non-player
+ * inventory open (chest, shop, etc.). Uses smart stacking via [InventoryHelper].
  *
  * Player's own inventory is handled by [PlayerMoveToInventoryListener].
  */
 class MoveToInventoryListener
 @Inject
-constructor(
-    plugin: Plugin,
-    private val inventoryHelper: InventoryHelper,
-) : Listener {
+constructor(plugin: Plugin, private val inventoryHelper: InventoryHelper) : Listener {
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
@@ -42,11 +39,12 @@ constructor(
         val currentItem = event.currentItem
         if (currentItem == null || currentItem.type == Material.AIR) return
 
-        val targetInventory = if (clickedInventory == event.view.topInventory) {
-            event.view.bottomInventory
-        } else {
-            event.view.topInventory
-        }
+        val targetInventory =
+            if (clickedInventory == event.view.topInventory) {
+                event.view.bottomInventory
+            } else {
+                event.view.topInventory
+            }
 
         inventoryHelper.combineItemStacks(player, event, currentItem, targetInventory)
     }

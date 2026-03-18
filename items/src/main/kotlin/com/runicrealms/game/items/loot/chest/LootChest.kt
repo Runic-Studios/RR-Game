@@ -2,9 +2,7 @@ package com.runicrealms.game.items.loot.chest
 
 import org.bukkit.Location
 
-/**
- * Sealed interface representing all types of loot chests in the game.
- */
+/** Sealed interface representing all types of loot chests in the game. */
 sealed interface LootChest {
 
     /** The chest template ID that determines what loot to generate. */

@@ -15,15 +15,12 @@ import org.bukkit.inventory.CraftingInventory
 import org.bukkit.plugin.Plugin
 
 /**
- * Custom handler for shift-click (MOVE_TO_OTHER_INVENTORY) when the player's own
- * inventory is open. Moves items between hotbar and main inventory with smart stacking.
+ * Custom handler for shift-click (MOVE_TO_OTHER_INVENTORY) when the player's own inventory is open.
+ * Moves items between hotbar and main inventory with smart stacking.
  */
 class PlayerMoveToInventoryListener
 @Inject
-constructor(
-    plugin: Plugin,
-    private val inventoryHelper: InventoryHelper,
-) : Listener {
+constructor(plugin: Plugin, private val inventoryHelper: InventoryHelper) : Listener {
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)

@@ -11,6 +11,8 @@ import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.toLegacy
@@ -28,11 +30,13 @@ import com.runicrealms.game.items.loot.LootManager
 import java.util.Locale
 import java.util.stream.Stream
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 
 @CommandAlias("runic|r")
 @Subcommand("item|i")
@@ -41,6 +45,7 @@ class ItemCommand
 @Inject
 constructor(
     commandManager: PaperCommandManager,
+    private val plugin: Plugin,
     private val itemTemplateRegistry: GameItemTemplateRegistry,
     private val perkTemplateRegistry: GameItemPerkTemplateRegistry,
     private val userDataRegistry: UserDataRegistry,
@@ -232,12 +237,13 @@ constructor(
 
     @Subcommand("drop-lt")
     @Conditions("is-op")
-    @Syntax("<loot-table> <location>")
-    @CommandCompletion("@loot-tables @nothing")
+    @Syntax("<loot-table> <min-level> <max-level> <location>")
+    @CommandCompletion("@loot-tables @range:0-60 @range:0-60 @nothing")
     fun onCommandDropLootTable(sender: CommandSender, args: Array<String>) {
-        if (args.size != 2) {
+        if (args.size != 4) {
             sender.sendMessage(
-                "$PREFIX&dInvalid syntax! Please check &7/runicitem help".colorFormat()
+                "$PREFIX&dInvalid syntax! Usage: /runic item drop-lt <loot-table> <min-level> <max-level> <location>"
+                    .colorFormat()
             )
             return
         }
@@ -246,9 +252,15 @@ constructor(
             sender.sendMessage("$PREFIX&dThat loot table does not exist!".colorFormat())
             return
         }
+        if (!isInt(args[1]) || !isInt(args[2])) {
+            sender.sendMessage("$PREFIX&dMin-level and max-level must be integers!".colorFormat())
+            return
+        }
+        val minLevel = args[1].toInt()
+        val maxLevel = args[2].toInt()
 
         val splitLocation =
-            args[1].split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            args[3].split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val location =
             Location(
                 Bukkit.getWorld(splitLocation[0]),
@@ -256,6 +268,8 @@ constructor(
                 splitLocation[2].toDouble(),
                 splitLocation[3].toDouble(),
             )
+        // minLevel and maxLevel are available for script item generation when that system is
+        // implemented
         val item = table.generateLoot(itemTemplateRegistry) { id -> lootManager.getLootTable(id) }
         if (item != null) {
             location.getWorld().dropItem(location, item)
@@ -706,19 +720,23 @@ constructor(
                 null
             }
 
-        // iterating and picking item is async, slight delay and item is given on main thread after
-        // async task is complete
-        val template = lootHelper.getItem(range, rarities, clazz, items, lqm)
+        // Async loot computation on async dispatcher, then give item on main thread
+        plugin.launch {
+            val template =
+                withContext(plugin.asyncDispatcher) {
+                    lootHelper.getItem(range, rarities, clazz, items, lqm)
+                }
 
-        if (template == null) {
-            player.sendMessage(
-                "$PREFIX&cThere are no item templates that match your conditions!".colorFormat()
-            )
-            return
+            if (template == null) {
+                player.sendMessage(
+                    "$PREFIX&cThere are no item templates that match your conditions!".colorFormat()
+                )
+                return@launch
+            }
+
+            val item = itemTemplateRegistry.generateGameItem(template).generateItemStack(1)
+            inventoryHelper.addItem(player.inventory, item, player.location)
         }
-
-        val item = itemTemplateRegistry.generateGameItem(template).generateItemStack(1)
-        inventoryHelper.addItem(player.inventory, item, player.location)
     }
 
     /** An enum to keep track of parameters for the get-random subcommand */

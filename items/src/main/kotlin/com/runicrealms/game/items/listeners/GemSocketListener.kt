@@ -24,8 +24,8 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.plugin.Plugin
 
 /**
- * Handles gem socketing: when a player drags a gem onto an armor piece, this listener
- * applies the gem bonus to the armor's data and regenerates the item.
+ * Handles gem socketing: when a player drags a gem onto an armor piece, this listener applies the
+ * gem bonus to the armor's data and regenerates the item.
  */
 class GemSocketListener
 @Inject
@@ -43,9 +43,11 @@ constructor(
     fun onGemApply(event: InventoryClickEvent) {
         if (event.isCancelled) return
         // SWAP_WITH_CURSOR for normal slots, NOTHING for armor slots
-        if (event.action != InventoryAction.SWAP_WITH_CURSOR &&
-            event.action != InventoryAction.NOTHING
-        ) return
+        if (
+            event.action != InventoryAction.SWAP_WITH_CURSOR &&
+                event.action != InventoryAction.NOTHING
+        )
+            return
 
         val currentItem = event.currentItem
         val cursor = event.cursor
@@ -79,12 +81,11 @@ constructor(
         for (existingGem in armorData.gemBonuses) {
             gemSlotsUsed += GemStatUtil.getGemSlots(existingGem.tier)
         }
-        if (gemSlotsUsed + GemStatUtil.getGemSlots(gemData.bonus.tier) > armorTemplate.maxGemSlots) {
+        if (
+            gemSlotsUsed + GemStatUtil.getGemSlots(gemData.bonus.tier) > armorTemplate.maxGemSlots
+        ) {
             event.whoClicked.sendMessage(
-                Component.text(
-                    "This item doesn't have enough free gem slots!",
-                    NamedTextColor.RED,
-                )
+                Component.text("This item doesn't have enough free gem slots!", NamedTextColor.RED)
             )
             return
         }
@@ -99,32 +100,33 @@ constructor(
         if (event.slotType == InventoryType.SlotType.ARMOR) {
             val armorType = ArmorEquipEvent.ArmorType.matchType(generatedItem)
             if (armorType != null) {
-                val armorEvent = ArmorEquipEvent(
-                    event.whoClicked as Player,
-                    ArmorEquipEvent.EquipMethod.DRAG,
-                    armorType,
-                    currentItem,
-                    generatedItem,
-                )
+                val armorEvent =
+                    ArmorEquipEvent(
+                        event.whoClicked as Player,
+                        ArmorEquipEvent.EquipMethod.DRAG,
+                        armorType,
+                        currentItem,
+                        generatedItem,
+                    )
                 Bukkit.getPluginManager().callEvent(armorEvent)
             }
         }
 
-        val gemDisplayName = cursor.itemMeta?.displayName()
-            ?: Component.text("Gem", NamedTextColor.WHITE)
+        val gemDisplayName =
+            cursor.itemMeta?.displayName() ?: Component.text("Gem", NamedTextColor.WHITE)
 
         event.whoClicked.sendMessage(
             Component.text()
                 .append(Component.text("Applied ", NamedTextColor.GREEN))
                 .append(gemDisplayName)
                 .append(Component.text(" to ", NamedTextColor.GREEN))
-                .append(armorTemplate.display.displayName)
+                .append(armorTemplate.display.name)
                 .append(Component.text(".", NamedTextColor.GREEN))
                 .build()
         )
 
         event.currentItem = generatedItem
-        event.setCursor(null)
+        event.whoClicked.setItemOnCursor(null)
         event.isCancelled = true
     }
 }

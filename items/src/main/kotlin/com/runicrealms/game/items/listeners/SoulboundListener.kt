@@ -15,15 +15,12 @@ import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.plugin.Plugin
 
 /**
- * Prevents dropping of items tagged as [GameItemTag.SOULBOUND].
- * Players in creative mode bypass this restriction.
+ * Prevents dropping of items tagged as [GameItemTag.SOULBOUND]. Players in creative mode bypass
+ * this restriction.
  */
 class SoulboundListener
 @Inject
-constructor(
-    plugin: Plugin,
-    private val itemStackConverter: ItemStackConverter,
-) : Listener {
+constructor(plugin: Plugin, private val itemStackConverter: ItemStackConverter) : Listener {
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)

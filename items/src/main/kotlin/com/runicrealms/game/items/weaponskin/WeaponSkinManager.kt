@@ -3,28 +3,45 @@ package com.runicrealms.game.items.weaponskin
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.data.model.WeaponData
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.game.items.util.ItemDataUpdater
+import java.io.File
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
-import java.io.File
+
+private val logger = LoggerFactory.getLogger("items")
 
 /**
- * Manages weapon skins: loading from configuration, checking eligibility,
- * and applying or removing skins from items.
+ * Manages weapon skins: loading from configuration, checking eligibility, and applying or removing
+ * skins from items.
+ *
+ * Config format (`weapon-skins.yml`) matches the old Java system exactly:
+ * ```yaml
+ * <skin-id>:
+ *   material: STONE_SWORD
+ *   skin-damage: 100
+ *   name: "Cool Skin"
+ *   class: WARRIOR            # optional
+ *   achievement: some-id      # optional
+ *   rank:                     # optional
+ *     - MVP
+ *   permission: some.permission # optional
+ * ```
  */
 @Singleton
 class WeaponSkinManager
 @Inject
 constructor(
     private val plugin: Plugin,
+    private val itemStackConverter: ItemStackConverter,
+    private val templateRegistry: GameItemTemplateRegistry,
 ) {
-
-    private val logger = LoggerFactory.getLogger("items")
 
     private val skinsById = mutableMapOf<String, WeaponSkin>()
     private val skinsByMaterial = mutableMapOf<Material, MutableList<WeaponSkin>>()
@@ -33,9 +50,6 @@ constructor(
         loadConfig()
     }
 
-    /**
-     * Loads weapon skins from the `weapon-skins.yml` configuration file.
-     */
     fun loadConfig() {
         skinsById.clear()
         skinsByMaterial.clear()
@@ -47,34 +61,35 @@ constructor(
         }
 
         val config = YamlConfiguration.loadConfiguration(file)
-        val skinsSection = config.getConfigurationSection("skins") ?: run {
-            logger.warn("No 'skins' section found in weapon-skins.yml")
-            return
-        }
 
-        for (skinKey in skinsSection.getKeys(false)) {
-            val section = skinsSection.getConfigurationSection(skinKey) ?: continue
+        for (skinKey in config.getKeys(false)) {
+            val section = config.getConfigurationSection(skinKey) ?: continue
 
-            val materialName = section.getString("material") ?: run {
+            val materialName = section.getString("material")
+            if (materialName == null) {
                 logger.warn("Weapon skin '{}' is missing a material", skinKey)
                 continue
             }
 
-            val material = try {
-                Material.valueOf(materialName.uppercase())
-            } catch (exception: IllegalArgumentException) {
-                logger.warn("Weapon skin '{}' has invalid material: {}", skinKey, materialName)
-                continue
-            }
+            val material =
+                try {
+                    Material.valueOf(materialName.uppercase())
+                } catch (exception: IllegalArgumentException) {
+                    logger.warn("Weapon skin '{}' has invalid material: {}", skinKey, materialName)
+                    continue
+                }
 
-            val skin = WeaponSkin(
-                id = skinKey,
-                material = material,
-                permission = section.getString("permission"),
-                donorRank = section.getStringList("donor-rank").ifEmpty { null },
-                achievementID = section.getString("achievement-id"),
-                customModelData = section.getInt("custom-model-data", 0),
-            )
+            val skin =
+                WeaponSkin(
+                    id = skinKey,
+                    name = section.getString("name"),
+                    material = material,
+                    damage = section.getInt("skin-damage"),
+                    classType = section.getString("class"),
+                    permission = section.getString("permission"),
+                    rank = section.getStringList("rank").ifEmpty { null },
+                    achievementID = section.getString("achievement"),
+                )
 
             skinsById[skinKey] = skin
             skinsByMaterial.getOrPut(material) { mutableListOf() }.add(skin)
@@ -83,38 +98,18 @@ constructor(
         logger.info("Loaded {} weapon skins", skinsById.size)
     }
 
-    /**
-     * Returns the weapon skin with the given ID, or null if not found.
-     */
     fun getSkin(id: String): WeaponSkin? = skinsById[id]
 
-    /**
-     * Returns all weapon skins available for the given material.
-     */
     fun getMaterialSkins(material: Material): List<WeaponSkin> =
         skinsByMaterial[material] ?: emptyList()
 
-    /**
-     * Checks whether a player can activate the given weapon skin.
-     */
     fun canActivateSkin(player: Player, skin: WeaponSkin): Boolean {
-        // Check permission if one is specified
-        if (skin.permission != null && !player.hasPermission(skin.permission)) {
-            return false
-        }
-
+        if (skin.permission != null && !player.hasPermission(skin.permission)) return false
         // TODO: Check DonorRank when implemented
-        // if (skin.donorRank != null) { ... }
-
         // TODO: Check achievement when implemented
-        // if (skin.achievementID != null) { ... }
-
         return true
     }
 
-    /**
-     * Applies the given skin to all matching weapons in the player's inventory.
-     */
     fun activateSkin(player: Player, skin: WeaponSkin) {
         val inventory = player.inventory
         for (slot in 0 until inventory.size) {
@@ -125,9 +120,6 @@ constructor(
         }
     }
 
-    /**
-     * Removes the given skin from all matching weapons in the player's inventory.
-     */
     fun deactivateSkin(player: Player, skin: WeaponSkin) {
         val inventory = player.inventory
         for (slot in 0 until inventory.size) {
@@ -139,12 +131,12 @@ constructor(
     }
 
     /**
-     * Applies the weapon skin's custom model data to the given item stack and
-     * updates the skinID in the item's [WeaponData].
+     * Applies the weapon skin's damage value to the given item stack and records the [skinID] in
+     * the item's [WeaponData] CBOR data.
      */
     fun applySkin(itemStack: ItemStack, skin: WeaponSkin) {
-        val meta = itemStack.itemMeta ?: return
-        meta.setCustomModelData(skin.customModelData)
+        val meta = itemStack.itemMeta as? Damageable ?: return
+        meta.damage = skin.damage
         itemStack.itemMeta = meta
 
         ItemDataUpdater.updateItemData(itemStack) { itemData ->
@@ -158,20 +150,30 @@ constructor(
     }
 
     /**
-     * Removes custom model data from the given item stack and clears the skinID
-     * in the item's [WeaponData].
+     * Removes any active weapon skin from the given item stack. Resets damage to the template's
+     * base damage value (from [DisplayableItem.damage]), or 0 if the template has none.
      */
     fun removeSkin(itemStack: ItemStack) {
-        val meta = itemStack.itemMeta ?: return
-        meta.setCustomModelData(null)
+        val meta = itemStack.itemMeta as? Damageable ?: return
+
+        // Look up the template to restore the base display damage
+        val itemData = itemStackConverter.generateItemData(itemStack)
+        val baseDamage =
+            if (itemData != null) {
+                templateRegistry.getItemTemplate(itemData.templateID)?.display?.damage?.toInt() ?: 0
+            } else {
+                0
+            }
+
+        meta.damage = baseDamage
         itemStack.itemMeta = meta
 
-        ItemDataUpdater.updateItemData(itemStack) { itemData ->
-            val typeData = itemData.typeData
+        ItemDataUpdater.updateItemData(itemStack) { data ->
+            val typeData = data.typeData
             if (typeData is WeaponData) {
-                itemData.copy(typeData = typeData.copy(skinID = null))
+                data.copy(typeData = typeData.copy(skinID = null))
             } else {
-                itemData
+                data
             }
         }
     }

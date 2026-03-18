@@ -7,23 +7,22 @@ import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.dynamic.placeholder.DynamicCustomDataTextPlaceholder
 import com.runicrealms.game.items.event.GameItemGenericTriggerEvent
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.game.items.util.ItemDataUpdater
 import com.runicrealms.game.items.util.ItemInventoryUtil
+import java.util.UUID
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
-import java.util.UUID
 
 /**
  * Handles gold pouch interactions:
  * - Left-click: empties coins from pouch into inventory
  * - Right-click: fills pouch with coins from inventory
  *
- * Uses the customData approach: the pouch stores its coin count in
- * `ItemData.customData["coins"]` and displays it via a `<coins>` dynamic placeholder.
+ * Uses the customData approach: the pouch stores its coin count in `ItemData.customData["coins"]`
+ * and displays it via a `<coins>` dynamic placeholder.
  */
 class GoldPouchListener
 @Inject
@@ -49,20 +48,20 @@ constructor(
         val player = event.player
 
         // Dupe prevention: ignore if the same item is in the offhand
-        if (player.inventory.itemInOffHand.type != Material.AIR &&
-            ItemInventoryUtil.isSimilar(
-                itemStackConverter,
-                player.inventory.itemInOffHand,
-                event.itemStack,
-            )
-        ) return
+        if (
+            player.inventory.itemInOffHand.type != Material.AIR &&
+                ItemInventoryUtil.isSimilar(
+                    itemStackConverter,
+                    player.inventory.itemInOffHand,
+                    event.itemStack,
+                )
+        )
+            return
 
         playersUpdatingPouches.add(player.uniqueId)
 
-        val currentCoins =
-            event.item.getCustomData(COINS_KEY)?.toIntOrNull() ?: 0
-        val maxCoins =
-            event.item.getCustomData(MAX_COINS_KEY)?.toIntOrNull() ?: 0
+        val currentCoins = event.item.getCustomData(COINS_KEY)?.toIntOrNull() ?: 0
+        val maxCoins = event.item.getCustomData(MAX_COINS_KEY)?.toIntOrNull() ?: 0
 
         if (event.trigger.type == GameItemClickTrigger.Type.LEFT_CLICK) {
             // Empty the pouch: give coins to player, set pouch coins to 0
@@ -73,18 +72,13 @@ constructor(
 
             // Give coins in stacks of 64
             if (currentCoins > 0) {
-                val coinTemplate =
-                    templateRegistry.getItemTemplate(COIN_TEMPLATE_ID) ?: return
+                val coinTemplate = templateRegistry.getItemTemplate(COIN_TEMPLATE_ID) ?: return
                 var remaining = currentCoins
                 while (remaining > 0) {
                     val stackSize = minOf(remaining, 64)
                     val coinItem = templateRegistry.generateGameItem(coinTemplate)
                     val coinStack = coinItem.generateItemStack(stackSize)
-                    ItemInventoryUtil.addItem(
-                        player.inventory,
-                        coinStack,
-                        player.location,
-                    )
+                    ItemInventoryUtil.addItem(player.inventory, coinStack, player.location)
                     remaining -= stackSize
                 }
             }
@@ -97,8 +91,7 @@ constructor(
             // Fill the pouch: take coins from inventory, add to pouch
             player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f)
 
-            val coinTemplate =
-                templateRegistry.getItemTemplate(COIN_TEMPLATE_ID) ?: return
+            val coinTemplate = templateRegistry.getItemTemplate(COIN_TEMPLATE_ID) ?: return
             val coinRefItem = templateRegistry.generateGameItem(coinTemplate).generateItemStack(1)
 
             val newCoins = fillPouch(currentCoins, maxCoins, player, coinRefItem)
@@ -111,11 +104,12 @@ constructor(
         }
 
         // Cooldown to prevent exploit
-        Bukkit.getScheduler().runTaskLater(
-            plugin,
-            Runnable { playersUpdatingPouches.remove(player.uniqueId) },
-            INTERACT_DELAY_TICKS,
-        )
+        Bukkit.getScheduler()
+            .runTaskLater(
+                plugin,
+                Runnable { playersUpdatingPouches.remove(player.uniqueId) },
+                INTERACT_DELAY_TICKS,
+            )
     }
 
     private fun fillPouch(
@@ -136,8 +130,9 @@ constructor(
         // Otherwise fill in decreasing stack sizes
         var coins = currentAmount
         for (stackSize in FILL_STACK_SIZES) {
-            while (coins < maxAmount &&
-                ItemInventoryUtil.hasItem(itemStackConverter, player, coinRefItem, stackSize)
+            while (
+                coins < maxAmount &&
+                    ItemInventoryUtil.hasItem(itemStackConverter, player, coinRefItem, stackSize)
             ) {
                 ItemInventoryUtil.takeItem(itemStackConverter, player, coinRefItem, stackSize)
                 coins += stackSize

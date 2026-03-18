@@ -1,8 +1,8 @@
 package com.runicrealms.game.items.ability
 
 /**
- * Registry for artifact abilities. Other systems (spells, gameplay) register abilities here
- * and look them up by ID.
+ * Registry for artifact abilities. Other systems (spells, gameplay) register abilities here and
+ * look them up by ID.
  */
 class GameAbilityManager {
 

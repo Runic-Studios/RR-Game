@@ -2,14 +2,13 @@ package com.runicrealms.game.items.util
 
 import com.runicrealms.game.items.generator.ItemStackConverter
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 /**
- * Utility functions for common item inventory operations: similarity checking,
- * counting, taking, and adding items.
+ * Utility functions for common item inventory operations: similarity checking, counting, taking,
+ * and adding items.
  */
 object ItemInventoryUtil {
 
@@ -17,11 +16,7 @@ object ItemInventoryUtil {
      * Checks whether two ItemStacks represent the same game item template (ignoring count).
      * Non-game items (no CBOR data) are never considered similar.
      */
-    fun isSimilar(
-        converter: ItemStackConverter,
-        first: ItemStack,
-        second: ItemStack,
-    ): Boolean {
+    fun isSimilar(converter: ItemStackConverter, first: ItemStack, second: ItemStack): Boolean {
         val firstData = converter.generateItemData(first) ?: return false
         val secondData = converter.generateItemData(second) ?: return false
         return firstData.templateID == secondData.templateID

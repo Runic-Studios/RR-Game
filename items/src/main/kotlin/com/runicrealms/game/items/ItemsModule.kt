@@ -27,6 +27,7 @@ import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
 import com.runicrealms.game.items.listeners.GemSocketListener
 import com.runicrealms.game.items.listeners.GoldPouchListener
+import com.runicrealms.game.items.listeners.ItemPickupListener
 import com.runicrealms.game.items.listeners.MoveToInventoryListener
 import com.runicrealms.game.items.listeners.PlayerMoveToInventoryListener
 import com.runicrealms.game.items.listeners.SoulboundListener
@@ -38,7 +39,7 @@ import com.runicrealms.game.items.loot.command.LootChestCommand
 import com.runicrealms.game.items.perk.GameItemPerkHandlerRegistry
 import com.runicrealms.game.items.perk.GameItemPerkManager
 import com.runicrealms.game.items.weaponskin.WeaponSkinManager
-import com.runicrealms.game.items.weaponskin.ui.WeaponAppearancesUI
+import com.runicrealms.game.items.weaponskin.ui.WeaponAppearancesMenu
 import kotlin.reflect.KClass
 
 class ItemsModule : AbstractModule() {
@@ -52,7 +53,10 @@ class ItemsModule : AbstractModule() {
         addFactory(GameItemGeneric::class, GameItemGeneric.Factory::class)
         addFactory(GameItemOffhand::class, GameItemOffhand.Factory::class)
         addFactory(GameItemWeapon::class, GameItemWeapon.Factory::class)
-        addFactory(DynamicCustomDataTextPlaceholder::class, DynamicCustomDataTextPlaceholder.Factory::class)
+        addFactory(
+            DynamicCustomDataTextPlaceholder::class,
+            DynamicCustomDataTextPlaceholder.Factory::class,
+        )
 
         bind(DynamicItemManager::class.java).asEagerSingleton()
         bind(DynamicItemRegistry::class.java).to(DynamicItemManager::class.java)
@@ -75,7 +79,7 @@ class ItemsModule : AbstractModule() {
         bind(ReloadItemsCommand::class.java).asEagerSingleton()
 
         bind(WeaponSkinManager::class.java).asEagerSingleton()
-        bind(WeaponAppearancesUI::class.java).asEagerSingleton()
+        addFactory(WeaponAppearancesMenu::class, WeaponAppearancesMenu.Factory::class)
         bind(WeaponryCommand::class.java).asEagerSingleton()
 
         bind(DynamicItemClassRequirementTextPlaceholder::class.java).asEagerSingleton()
@@ -90,6 +94,7 @@ class ItemsModule : AbstractModule() {
         bind(GoldPouchListener::class.java).asEagerSingleton()
         bind(MoveToInventoryListener::class.java).asEagerSingleton()
         bind(PlayerMoveToInventoryListener::class.java).asEagerSingleton()
+        bind(ItemPickupListener::class.java).asEagerSingleton()
 
         // Loot system
         bind(LootManager::class.java).asEagerSingleton()

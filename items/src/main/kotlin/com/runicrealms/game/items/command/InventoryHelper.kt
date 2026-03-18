@@ -87,8 +87,8 @@ class InventoryHelper @Inject constructor(val converter: ItemStackConverter) {
     }
 
     /**
-     * Adds an ItemStack into an inventory while stacking with existing matching items.
-     * Items are matched by templateID (same game item template stacks together).
+     * Adds an ItemStack into an inventory while stacking with existing matching items. Items are
+     * matched by templateID (same game item template stacks together).
      *
      * @param inventory the inventory to add to
      * @param itemStack the ItemStack to add
@@ -124,9 +124,7 @@ class InventoryHelper @Inject constructor(val converter: ItemStackConverter) {
         return HashMap()
     }
 
-    /**
-     * Adds an ItemStack with smart stacking, dropping overflow at the specified location.
-     */
+    /** Adds an ItemStack with smart stacking, dropping overflow at the specified location. */
     fun addItem(inventory: Inventory, itemStack: ItemStack?, location: Location) {
         val overflow = addItem(inventory, itemStack)
         for ((_, leftOver) in overflow) {
@@ -135,8 +133,8 @@ class InventoryHelper @Inject constructor(val converter: ItemStackConverter) {
     }
 
     /**
-     * Handles shift-click (MOVE_TO_OTHER_INVENTORY) transfers between inventories,
-     * using smart stacking. Cancels the vanilla event and handles the transfer manually.
+     * Handles shift-click (MOVE_TO_OTHER_INVENTORY) transfers between inventories, using smart
+     * stacking. Cancels the vanilla event and handles the transfer manually.
      *
      * @param player the player performing the shift-click
      * @param event the click event (will be cancelled)

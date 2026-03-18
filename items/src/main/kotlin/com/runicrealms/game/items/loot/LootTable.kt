@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("items")
 
-/**
- * Represents a single weighted item entry in a loot table.
- */
+/** Represents a single weighted item entry in a loot table. */
 data class LootItem(
     val templateID: String,
     val weight: Double,
@@ -17,22 +15,15 @@ data class LootItem(
     val maxStackSize: Int = 1,
 )
 
-/**
- * Represents a weighted entry for custom script-based loot handling.
- */
+/** Represents a weighted entry for custom script-based loot handling. */
 data class LootScriptItem(val weight: Double)
 
-/**
- * A reference to a sub-table that can be included in another loot table.
- */
-data class LootTableReference(
-    val tableID: String,
-    val weight: Double,
-)
+/** A reference to a sub-table that can be included in another loot table. */
+data class LootTableReference(val tableID: String, val weight: Double)
 
 /**
- * A loot table with weighted items that can reference sub-tables.
- * Items are selected based on weighted random selection.
+ * A loot table with weighted items that can reference sub-tables. Items are selected based on
+ * weighted random selection.
  */
 class LootTable(
     val identifier: String,
@@ -41,8 +32,8 @@ class LootTable(
 ) {
 
     /**
-     * Generates a random loot item from this table, considering sub-table references.
-     * Uses weighted random selection across all entries.
+     * Generates a random loot item from this table, considering sub-table references. Uses weighted
+     * random selection across all entries.
      *
      * @param templateRegistry the registry used to generate items from template IDs
      * @param tableResolver a function that resolves sub-table IDs to their LootTable instances
@@ -79,7 +70,8 @@ class LootTable(
             accumulated += entry.weight
             if (roll < accumulated) {
                 return when (entry) {
-                    is WeightedEntry.ItemEntry -> generateItemFromEntry(entry.item, templateRegistry)
+                    is WeightedEntry.ItemEntry ->
+                        generateItemFromEntry(entry.item, templateRegistry)
                     is WeightedEntry.SubTableEntry -> {
                         val subTable = tableResolver(entry.reference.tableID)
                         if (subTable == null) {
@@ -114,16 +106,18 @@ class LootTable(
             logger.warn("Loot table '$identifier' references unknown template '${item.templateID}'")
             return null
         }
-        val stackSize = if (item.minStackSize >= item.maxStackSize) {
-            item.minStackSize
-        } else {
-            ThreadLocalRandom.current().nextInt(item.minStackSize, item.maxStackSize + 1)
-        }
+        val stackSize =
+            if (item.minStackSize >= item.maxStackSize) {
+                item.minStackSize
+            } else {
+                ThreadLocalRandom.current().nextInt(item.minStackSize, item.maxStackSize + 1)
+            }
         return templateRegistry.generateGameItem(template).generateItemStack(stackSize)
     }
 
     private sealed class WeightedEntry(val weight: Double) {
         class ItemEntry(val item: LootItem) : WeightedEntry(item.weight)
+
         class SubTableEntry(val reference: LootTableReference) : WeightedEntry(reference.weight)
     }
 }
