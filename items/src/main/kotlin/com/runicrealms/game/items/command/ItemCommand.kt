@@ -24,6 +24,7 @@ import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
 import com.runicrealms.game.items.config.perk.GameItemPerkTemplateRegistry
 import com.runicrealms.game.items.generator.AddedStatsHolder
 import com.runicrealms.game.items.generator.ItemStackConverter
+import com.runicrealms.game.items.loot.LootManager
 import java.util.Locale
 import java.util.stream.Stream
 import kotlinx.coroutines.runBlocking
@@ -46,6 +47,7 @@ constructor(
     private val itemStackConverter: ItemStackConverter,
     private val lootHelper: LootHelper,
     private val inventoryHelper: InventoryHelper,
+    private val lootManager: LootManager,
 ) : BaseCommand() {
     init {
         val templateIdentifiers = itemTemplateRegistry.getItemTemplates().map { it.id }
@@ -96,13 +98,10 @@ constructor(
             return@registerAsyncCompletion if (context.sender.isOp) perkIdentifiers else emptySet()
         }
 
-        // TODO
-        //        commandManager.commandCompletions.registerAsyncCompletion("loot-tables") { context
-        // ->
-        //            if (!context.sender.isOp) return@registerAsyncCompletion emptySet()
-        //            RunicItems.getLootAPI().getLootTables().stream().map(LootTable::getIdentifier)
-        //                .collect(Collectors.toSet<T>())
-        //        }
+        commandManager.commandCompletions.registerAsyncCompletion("loot-tables") { context ->
+            if (!context.sender.isOp) return@registerAsyncCompletion emptySet()
+            lootManager.getLootTables().map { it.identifier }.toSet()
+        }
 
         commandManager.registerCommand(this)
     }
@@ -231,37 +230,39 @@ constructor(
         location.getWorld().dropItem(location, item)
     }
 
-    // TODO
-    //    @Subcommand("drop-lt")
-    //    @Conditions("is-op")
-    //    @Syntax("<loot-table> <min-level> <max-level> <location>")
-    //    @CommandCompletion("@loot-tables @nothing")
-    //    fun onCommandDropLootTable(sender: CommandSender, args: Array<String>) {
-    //        if (args.size != 4) {
-    //            sender.sendMessage("$PREFIX&dInvalid syntax! Please check &7/runicitem
-    // help".colorFormat())
-    //            return
-    //        }
-    //        val table: LootTable? = RunicItems.getLootAPI().getLootTable(args[0])
-    //        if (table == null) {
-    //            sender.sendMessage("$PREFIX&dThat loot table does not exist!".colorFormat())
-    //            return
-    //        }
-    //
-    //        val minLevel = args[1].toInt()
-    //        val maxLevel = args[2].toInt()
-    //
-    //        val splitLocation = args[3].split(",".toRegex()).dropLastWhile { it.isEmpty()
-    // }.toTypedArray()
-    //        val location = Location(
-    //            Bukkit.getWorld(splitLocation[0]),
-    //            splitLocation[1].toDouble(),
-    //            splitLocation[2].toDouble(),
-    //            splitLocation[3].toDouble()
-    //        )
-    //        val item: ItemStack = table.generateLoot(GenericLootHolder(minLevel, maxLevel))
-    //        location.getWorld().dropItem(location, item)
-    //    }
+    @Subcommand("drop-lt")
+    @Conditions("is-op")
+    @Syntax("<loot-table> <location>")
+    @CommandCompletion("@loot-tables @nothing")
+    fun onCommandDropLootTable(sender: CommandSender, args: Array<String>) {
+        if (args.size != 2) {
+            sender.sendMessage(
+                "$PREFIX&dInvalid syntax! Please check &7/runicitem help".colorFormat()
+            )
+            return
+        }
+        val table = lootManager.getLootTable(args[0])
+        if (table == null) {
+            sender.sendMessage("$PREFIX&dThat loot table does not exist!".colorFormat())
+            return
+        }
+
+        val splitLocation =
+            args[1].split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val location =
+            Location(
+                Bukkit.getWorld(splitLocation[0]),
+                splitLocation[1].toDouble(),
+                splitLocation[2].toDouble(),
+                splitLocation[3].toDouble(),
+            )
+        val item = table.generateLoot(itemTemplateRegistry) { id -> lootManager.getLootTable(id) }
+        if (item != null) {
+            location.getWorld().dropItem(location, item)
+        } else {
+            sender.sendMessage("$PREFIX&dFailed to generate loot from table!".colorFormat())
+        }
+    }
 
     @Subcommand("dupe-item")
     @Conditions("is-op")
@@ -313,9 +314,7 @@ constructor(
             }
         }
         val item = itemTemplateRegistry.generateGameItem(template).generateItemStack(count)
-        player.inventory.addItem(item)
-        // TODO check works
-        //        RunicItemsAPI.addItem(player.inventory, item)
+        inventoryHelper.addItem(player.inventory, item, player.location)
     }
 
     @Subcommand("get-data")
@@ -373,8 +372,7 @@ constructor(
             }
         }
         val item = itemTemplateRegistry.generateGameItem(template)
-        // TODO check works
-        player.inventory.addItem(item.generateItemStack(count))
+        inventoryHelper.addItem(player.inventory, item.generateItemStack(count), player.location)
         player.sendMessage(
             "$PREFIX&dGiven you &5${count}x &r${item.template.display.name.toLegacy()}"
                 .colorFormat()
@@ -419,9 +417,7 @@ constructor(
         if (args.size == 4) {
             item.setCustomData("dynamic", args[3])
         }
-        // TODO check works
-        //        RunicItemsAPI.addItem(target.inventory, item.generateItemStack(count))
-        target.inventory.addItem(item.generateItemStack(count))
+        inventoryHelper.addItem(target.inventory, item.generateItemStack(count), target.location)
     }
 
     @Subcommand("give-range")
@@ -464,9 +460,7 @@ constructor(
             }
         }
         val item = itemTemplateRegistry.generateGameItem(template)
-        // TODO check works
-        target.inventory.addItem(item.generateItemStack(count))
-        //        RunicItemsAPI.addItem(target.inventory, item.generateItemStack(count))
+        inventoryHelper.addItem(target.inventory, item.generateItemStack(count), target.location)
     }
 
     @Default
@@ -521,16 +515,11 @@ constructor(
 
             var itemClass = (template as? ClassTypeRequirementHolder)?.classType
             if (itemClass == null || itemClass != classType) continue
-            // TODO check works
-            target.inventory.addItem(
-                itemTemplateRegistry.generateGameItem(template).generateItemStack(1)
+            inventoryHelper.addItem(
+                target.inventory,
+                itemTemplateRegistry.generateGameItem(template).generateItemStack(1),
+                target.location,
             )
-            //            RunicItemsAPI.addItem(
-            //                target.inventory,
-            //                itemTemplateRegistry.generateGameItem(template,
-            // 1).generateItemStack(),
-            //                target.location
-            //            )
             return
         }
     }
@@ -729,9 +718,7 @@ constructor(
         }
 
         val item = itemTemplateRegistry.generateGameItem(template).generateItemStack(1)
-        // TODO check works
-        player.inventory.addItem(item)
-        //        RunicItemsAPI.addItem(player.inventory, item.generateItemStack())
+        inventoryHelper.addItem(player.inventory, item, player.location)
     }
 
     /** An enum to keep track of parameters for the get-random subcommand */
