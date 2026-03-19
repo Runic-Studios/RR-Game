@@ -9,9 +9,25 @@ import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
 import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.command.SetLevelCommand
+import com.runicrealms.game.gameplay.mob.HerbFallDamageListener
+import com.runicrealms.game.gameplay.mob.MobCleanupListener
+import com.runicrealms.game.gameplay.mob.MobMechanicsListener
+import com.runicrealms.game.gameplay.mob.MobTaggerListener
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.ArmorEquipRestrictionListener
+import com.runicrealms.game.gameplay.player.HearthstoneListener
+import com.runicrealms.game.gameplay.player.PlayerInteractCorrectionListener
+import com.runicrealms.game.gameplay.player.PreCommandListener
 import com.runicrealms.game.gameplay.player.RegenManager
+import com.runicrealms.game.gameplay.player.damage.BasicAttackListener
+import com.runicrealms.game.gameplay.player.damage.BowListener
+import com.runicrealms.game.gameplay.player.damage.DamageListener
+import com.runicrealms.game.gameplay.player.damage.EnvironmentDamageListener
+import com.runicrealms.game.gameplay.spell.AllyVerifyListener
+import com.runicrealms.game.gameplay.spell.EnemyVerifyListener
+import com.runicrealms.game.gameplay.spell.ShieldListener
+import com.runicrealms.game.gameplay.world.DaylightCycleManager
+import com.runicrealms.game.gameplay.world.VanillaRestrictionsListener
 import com.runicrealms.game.gameplay.player.charselect.CharacterAddMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
@@ -51,6 +67,27 @@ class GameplayModule : AbstractModule() {
 
     override fun configure() {
         bind(TipsDataListener::class.java).asEagerSingleton()
+
+        // --- World / vanilla restrictions ---
+        bind(VanillaRestrictionsListener::class.java).asEagerSingleton()
+        bind(DaylightCycleManager::class.java).asEagerSingleton()
+
+        // --- Player listeners ---
+        bind(PlayerInteractCorrectionListener::class.java).asEagerSingleton()
+        bind(PreCommandListener::class.java).asEagerSingleton()
+        bind(HearthstoneListener::class.java).asEagerSingleton()
+
+        // --- Damage system ---
+        bind(EnvironmentDamageListener::class.java).asEagerSingleton()
+        bind(BasicAttackListener::class.java).asEagerSingleton()
+        bind(DamageListener::class.java).asEagerSingleton()
+        bind(BowListener::class.java).asEagerSingleton()
+
+        // --- Mob listeners ---
+        bind(HerbFallDamageListener::class.java).asEagerSingleton()
+        bind(MobMechanicsListener::class.java).asEagerSingleton()
+        bind(MobTaggerListener::class.java).asEagerSingleton()
+        bind(MobCleanupListener::class.java).asEagerSingleton()
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
         bind(ArmorEquipRestrictionListener::class.java).asEagerSingleton()
@@ -101,6 +138,9 @@ class GameplayModule : AbstractModule() {
         bind(SpellScalingListener::class.java).asEagerSingleton()
         bind(RuneListener::class.java).asEagerSingleton()
         bind(SkillPointsListener::class.java).asEagerSingleton()
+        bind(ShieldListener::class.java).asEagerSingleton()
+        bind(AllyVerifyListener::class.java).asEagerSingleton()
+        bind(EnemyVerifyListener::class.java).asEagerSingleton()
 
         // Skill tree GUI factories (OdalitaMenus @AssistedInject)
         addFactory(RuneMenu::class, RuneMenu.Factory::class)

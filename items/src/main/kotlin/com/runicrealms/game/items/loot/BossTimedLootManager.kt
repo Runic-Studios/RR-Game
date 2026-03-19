@@ -4,8 +4,13 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.items.loot.chest.BossTimedLoot
+import io.lumine.mythic.bukkit.MythicBukkit
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.slf4j.LoggerFactory
 
@@ -24,6 +29,12 @@ constructor(private val plugin: Plugin, private val lootManager: LootManager) {
 
     /** Map of boss ID to currently active timed loot instances. */
     private val activeLoot = HashMap<String, MutableList<BossTimedLoot>>()
+
+    /**
+     * Per-boss damage tracking: boss entity UUID -> (player UUID -> total damage dealt).
+     * Used by [BossTimedLootDamageListener] to record damage contributions for loot thresholds.
+     */
+    private val bossDamageMap = ConcurrentHashMap<UUID, ConcurrentHashMap<UUID, Int>>()
 
     init {
         startTickTask()
@@ -54,6 +65,24 @@ constructor(private val plugin: Plugin, private val lootManager: LootManager) {
     /** Returns all active loot instances for a given boss ID. */
     fun getActiveLoot(bossID: String): List<BossTimedLoot> {
         return activeLoot[bossID] ?: emptyList()
+    }
+
+    /**
+     * Records [damage] dealt by [player] to [boss].
+     *
+     * Only accumulates damage for entities that are tracked MythicMobs bosses with a configured
+     * loot threshold. Non-boss entities are silently ignored.
+     *
+     * TODO: Implement loot threshold logic once MythicMobs death event wiring is complete.
+     *   Currently this method accumulates damage but the data is not acted upon.
+     */
+    fun trackBossDamage(player: Player, boss: LivingEntity, damage: Int) {
+        val optional = MythicBukkit.inst().mobManager.getActiveMob(boss.uniqueId)
+        if (!optional.isPresent) return
+        // TODO: Filter to only tracked boss types via lootManager.getBossTimedLootConfig(mobType)
+        bossDamageMap
+            .getOrPut(boss.uniqueId) { ConcurrentHashMap() }
+            .merge(player.uniqueId, damage, Int::plus)
     }
 
     /** Returns all active boss timed loot instances across all bosses. */
