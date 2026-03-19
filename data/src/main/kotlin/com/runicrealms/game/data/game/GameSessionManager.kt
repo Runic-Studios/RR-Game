@@ -31,6 +31,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -482,19 +483,25 @@ constructor(
     }
 
     /**
-     * Synchronously saves all remaining sessions and releases all distributed locks.
+     * Kicks all online players, fires quit events to serialise their state, then synchronously
+     * saves all sessions and releases all distributed locks.
      *
      * Called from [com.runicrealms.game.plugin.GamePlugin.onDisable] to ensure a clean shutdown.
      * During normal play, [onPlayerQuit] handles teardown per-player via a coroutine. However, when
      * the server stops, Bukkit fires [PlayerQuitEvent] for every online player but MCCoroutine
      * cancels the plugin's coroutine scope before those async handlers finish, leaving locks
-     * unreleased. This method runs synchronously (via [runBlocking]) so all saves and releases are
-     * guaranteed to complete before [onDisable] returns.
+     * unreleased and quit-event state serialisation (location, inventory, etc.) incomplete.
+     * This method runs synchronously (via [runBlocking]) so everything is guaranteed to complete
+     * before [onDisable] returns.
      *
-     * Game events are not fired here: other plugins may already be disabled by this point.
+     * Each session is removed from [sessions] before kicking the player, so any [endSession]
+     * coroutine launched from the resulting [PlayerQuitEvent] will find no session and return
+     * early - there is no double-processing.
      *
-     * Sessions already removed by an in-flight [endSession] coroutine are skipped via the atomic
-     * [sessions].remove call, so there is no double-processing.
+     * Quit events are dispatched synchronously via [org.bukkit.plugin.PluginManager.callEvent]
+     * rather than [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] because the
+     * plugin's coroutine scope may already be tearing down during [onDisable]. All current quit
+     * event handlers are non-suspending so synchronous dispatch is sufficient.
      */
     fun shutdown() {
         val sessionIds = sessions.keys.toList()
@@ -502,11 +509,36 @@ constructor(
         logger.info("Shutdown: saving ${sessionIds.size} active session(s)...")
         runBlocking {
             for (userId in sessionIds) {
+                // Remove from the sessions map first so any endSession() coroutine launched
+                // from the kick's PlayerQuitEvent finds no session and returns early.
                 val session = sessions.remove(userId) ?: continue
-                players.remove(userId)
+
+                Bukkit.getPlayer(userId)?.kick(
+                    Component.text("Server is shutting down. Please reconnect shortly.", NamedTextColor.RED)
+                )
+
+                // Fire GameCharacterQuitEvent so handlers can serialise character state
+                // (location, inventory, etc.) back into the in-memory document before we save.
+                val activeSlot = session.activeCharacterSlot
+                if (activeSlot != null) {
+                    val character = players[userId] as? GameCharacter
+                    if (character != null) {
+                        Bukkit.getPluginManager()
+                            .callSuspendingEvent(GameCharacterQuitEvent(character, isOnLogout = true), plugin).joinAll()
+                    }
+                }
+
+                // Remove the player handle after events so handlers can still call
+                // getCharacter/getPlayer during event processing.
+                val player = players.remove(userId)
+                if (player != null) {
+                    Bukkit.getPluginManager().callSuspendingEvent(GamePlayerQuitEvent(player), plugin).joinAll()
+                }
+
                 // Cancel the periodic save loop and wait for any in-flight NonCancellable save
                 // to finish before we take our own snapshot.
                 session.saveJob.cancelAndJoin()
+
                 // Use Dispatchers.IO directly: plugin.asyncDispatcher may be unavailable once
                 // MCCoroutine starts tearing down the plugin's coroutine session.
                 withContext(Dispatchers.IO) {
