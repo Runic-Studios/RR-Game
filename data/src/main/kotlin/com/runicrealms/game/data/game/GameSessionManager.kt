@@ -499,8 +499,9 @@ constructor(
      * early - there is no double-processing.
      *
      * Quit events are dispatched synchronously via [org.bukkit.plugin.PluginManager.callEvent]
-     * rather than [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] because the
-     * plugin's coroutine scope may already be tearing down during [onDisable]. All current quit
+     * rather than [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] because MCCoroutine
+     * disposes the plugin's coroutine session before [onDisable] is called, making
+     * [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] unavailable. All current quit
      * event handlers are non-suspending so synchronous dispatch is sufficient.
      */
     fun shutdown() {
@@ -514,7 +515,7 @@ constructor(
                 val session = sessions.remove(userId) ?: continue
 
                 Bukkit.getPlayer(userId)?.kick(
-                    Component.text("Server is shutting down. Please reconnect shortly.", NamedTextColor.RED)
+                    Component.text("This server is shutting down", NamedTextColor.RED)
                 )
 
                 // Fire GameCharacterQuitEvent so handlers can serialise character state
@@ -524,7 +525,7 @@ constructor(
                     val character = players[userId] as? GameCharacter
                     if (character != null) {
                         Bukkit.getPluginManager()
-                            .callSuspendingEvent(GameCharacterQuitEvent(character, isOnLogout = true), plugin).joinAll()
+                            .callEvent(GameCharacterQuitEvent(character, isOnLogout = true))
                     }
                 }
 
@@ -532,7 +533,7 @@ constructor(
                 // getCharacter/getPlayer during event processing.
                 val player = players.remove(userId)
                 if (player != null) {
-                    Bukkit.getPluginManager().callSuspendingEvent(GamePlayerQuitEvent(player), plugin).joinAll()
+                    Bukkit.getPluginManager().callEvent(GamePlayerQuitEvent(player))
                 }
 
                 // Cancel the periodic save loop and wait for any in-flight NonCancellable save
