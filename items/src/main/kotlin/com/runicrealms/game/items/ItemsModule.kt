@@ -25,7 +25,6 @@ import com.runicrealms.game.items.generator.GameItemGeneric
 import com.runicrealms.game.items.generator.GameItemOffhand
 import com.runicrealms.game.items.generator.GameItemWeapon
 import com.runicrealms.game.items.generator.ItemStackConverter
-import com.runicrealms.game.items.listeners.BossTimedLootDamageListener
 import com.runicrealms.game.items.listeners.GemSocketListener
 import com.runicrealms.game.items.listeners.GoldPouchListener
 import com.runicrealms.game.items.listeners.ItemPickupListener
@@ -96,7 +95,6 @@ class ItemsModule : AbstractModule() {
         bind(MoveToInventoryListener::class.java).asEagerSingleton()
         bind(PlayerMoveToInventoryListener::class.java).asEagerSingleton()
         bind(ItemPickupListener::class.java).asEagerSingleton()
-        bind(BossTimedLootDamageListener::class.java).asEagerSingleton()
 
         // Loot system
         bind(LootManager::class.java).asEagerSingleton()

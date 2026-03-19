@@ -66,7 +66,7 @@ constructor(private val plugin: Plugin) : Listener {
     /** Prevents number-key hotbar swaps and "collect to cursor" inventory actions. */
     @EventHandler(priority = EventPriority.NORMAL)
     fun onInventoryClick(event: InventoryClickEvent) {
-        if (event.click == ClickType.NUMBER_KEY || event.click == ClickType.COLLECT_TO_CURSOR) {
+        if (event.click == ClickType.NUMBER_KEY || event.click == ClickType.DOUBLE_CLICK) {
             event.isCancelled = true
         }
     }

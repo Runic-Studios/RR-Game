@@ -15,6 +15,7 @@ import com.runicrealms.game.gameplay.mob.MobMechanicsListener
 import com.runicrealms.game.gameplay.mob.MobTaggerListener
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.ArmorEquipRestrictionListener
+import com.runicrealms.game.gameplay.player.BossTimedLootDamageListener
 import com.runicrealms.game.gameplay.player.HearthstoneListener
 import com.runicrealms.game.gameplay.player.PlayerInteractCorrectionListener
 import com.runicrealms.game.gameplay.player.PreCommandListener
@@ -61,6 +62,7 @@ import com.runicrealms.game.gameplay.spell.skilltrees.gui.SubClassMenu
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.StackTaskRegistry
 import com.runicrealms.game.gameplay.tips.TipsDataListener
+import kotlin.jvm.java
 import kotlin.reflect.KClass
 
 class GameplayModule : AbstractModule() {
@@ -76,6 +78,8 @@ class GameplayModule : AbstractModule() {
         bind(PlayerInteractCorrectionListener::class.java).asEagerSingleton()
         bind(PreCommandListener::class.java).asEagerSingleton()
         bind(HearthstoneListener::class.java).asEagerSingleton()
+        bind(BossTimedLootDamageListener::class.java).asEagerSingleton()
+
 
         // --- Damage system ---
         bind(EnvironmentDamageListener::class.java).asEagerSingleton()

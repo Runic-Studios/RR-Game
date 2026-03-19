@@ -1,4 +1,4 @@
-package com.runicrealms.game.items.listeners
+package com.runicrealms.game.gameplay.player
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -12,12 +12,12 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
 /**
- * Forwards player damage events to [BossTimedLootManager] so it can track per-player
+ * Forwards player damage events to [com.runicrealms.game.items.loot.BossTimedLootManager] so it can track per-player
  * damage contribution for boss loot eligibility thresholds.
  *
- * This listener exists in the items module because the damage events ([PhysicalDamageEvent],
+ * This listener exists in the gameplay module because the damage events ([PhysicalDamageEvent],
  * [MagicDamageEvent]) are defined in the gameplay module and the loot tracking sits in items.
- * Running this listener here avoids adding a gameplay -> items module dependency.
+ * Running this listener here avoids adding a items -> gameplay module dependency.
  */
 @Singleton
 class BossTimedLootDamageListener

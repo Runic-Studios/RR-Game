@@ -5,8 +5,8 @@ import com.google.inject.Singleton
 import com.runicrealms.game.gameplay.spell.event.MagicDamageEvent
 import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
 import io.lumine.mythic.bukkit.MythicBukkit
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import org.bukkit.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Horse
 import org.bukkit.entity.LivingEntity
@@ -91,16 +91,22 @@ constructor(private val plugin: Plugin) : Listener {
             }, 1L)
         } else {
             val healthBar = buildHealthBar(entity, damage)
-            entity.customName(LegacyComponentSerializer.legacySection().deserialize(healthBar))
+            entity.customName(healthBar)
             entity.isCustomNameVisible = true
         }
     }
 
-    private fun buildHealthBar(entity: LivingEntity, damage: Int): String {
+    private fun buildHealthBar(entity: LivingEntity, damage: Int): Component {
         val numBars = calculateNumColours(entity)
         val (firstHalf, secondHalf) = colourBars(numBars)
-        val healthStr = "${ChatColor.WHITE}${(entity.health - damage).toInt().coerceAtLeast(0)}"
-        return "${ChatColor.YELLOW}[$firstHalf$healthStr$secondHalf${ChatColor.YELLOW}]"
+        val healthStr = (entity.health - damage).toInt().coerceAtLeast(0).toString()
+        return Component.text()
+            .append(Component.text("[", NamedTextColor.YELLOW))
+            .append(firstHalf)
+            .append(Component.text(healthStr, NamedTextColor.WHITE))
+            .append(secondHalf)
+            .append(Component.text("]", NamedTextColor.YELLOW))
+            .build()
     }
 
     private fun calculateNumColours(entity: LivingEntity): Int {
@@ -110,24 +116,33 @@ constructor(private val plugin: Plugin) : Listener {
         return percentage / 10
     }
 
-    private fun colourBars(numBars: Int): Pair<String, String> {
-        val green = ChatColor.GREEN.toString()
-        val yellow = ChatColor.YELLOW.toString()
-        val red = ChatColor.RED.toString()
-        val gray = ChatColor.DARK_GRAY.toString()
+    private fun colourBars(numBars: Int): Pair<Component, Component> {
         val pipe = "|||||"
         return when (numBars) {
-            10 -> Pair("$green$pipe", "$green$pipe")
-            9  -> Pair("$green$pipe", "${green}||||${gray}|")
-            8  -> Pair("$green$pipe", "${green}|||${gray}||")
-            7  -> Pair("$yellow$pipe", "${yellow}||${gray}|||")
-            6  -> Pair("$yellow$pipe", "${yellow}|${gray}||||")
-            5  -> Pair("$yellow$pipe", "$gray$pipe")
-            4  -> Pair("${yellow}||||${gray}|", "$gray$pipe")
-            3  -> Pair("${red}|||${gray}||", "$gray$pipe")
-            2  -> Pair("${red}||${gray}|||", "$gray$pipe")
-            1  -> Pair("${red}|${gray}||||", "$gray$pipe")
-            else -> Pair("$gray$pipe", "$gray$pipe")
+            10 -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 0))
+            9  -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 1))
+            8  -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 2))
+            7  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.YELLOW, 3))
+            6  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.YELLOW, 4))
+            5  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            4  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 1), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            3  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 2), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            2  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 3), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            1  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 4), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            else -> Pair(pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+        }
+    }
+
+    /** Builds a pipe segment: first N chars in [color], rest in DARK_GRAY. */
+    private fun pipeComponent(pipe: String, color: NamedTextColor, grayCount: Int): Component {
+        val coloredCount = pipe.length - grayCount
+        return if (grayCount == 0) {
+            Component.text(pipe, color)
+        } else {
+            Component.text()
+                .append(Component.text(pipe.take(coloredCount), color))
+                .append(Component.text(pipe.takeLast(grayCount), NamedTextColor.DARK_GRAY))
+                .build()
         }
     }
 }
