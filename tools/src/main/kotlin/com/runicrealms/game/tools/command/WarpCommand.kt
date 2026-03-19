@@ -92,8 +92,6 @@ constructor(
     }
 
     @Subcommand("warps")
-    @Default
-    @CatchUnknown
     fun onWarps(sender: CommandSender) {
         val builder =
             Component.text()
