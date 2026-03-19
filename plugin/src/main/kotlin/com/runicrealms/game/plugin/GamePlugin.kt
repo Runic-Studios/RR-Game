@@ -7,6 +7,7 @@ import com.runicrealms.game.data.config.MongoModule
 import com.runicrealms.game.data.game.GameSessionManager
 import com.runicrealms.game.gameplay.GameplayModule
 import com.runicrealms.game.items.ItemsModule
+import com.runicrealms.game.tools.ToolsModule
 import java.io.File
 import java.util.UUID
 import org.bukkit.plugin.java.JavaPlugin
@@ -47,6 +48,7 @@ class GamePlugin : JavaPlugin() {
         val dataModule = DataModule()
         val gameplayModule = GameplayModule()
         val itemsModule = ItemsModule()
+        val toolsModule = ToolsModule()
 
         val injector =
             Guice.createInjector(
@@ -56,6 +58,7 @@ class GamePlugin : JavaPlugin() {
                 dataModule,
                 gameplayModule,
                 itemsModule,
+                toolsModule,
             )
 
         sessionManager = injector.getInstance(GameSessionManager::class.java)
