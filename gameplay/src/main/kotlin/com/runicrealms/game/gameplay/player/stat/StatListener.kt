@@ -3,6 +3,7 @@ package com.runicrealms.game.gameplay.player.stat
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.common.StatType
+import com.runicrealms.game.gameplay.character.util.CharacterHealthHelper
 import com.runicrealms.game.gameplay.player.RegenManager
 import com.runicrealms.game.gameplay.player.stat.StatConstants.ABILITY_HASTE
 import com.runicrealms.game.gameplay.player.stat.StatConstants.DAMAGE_REDUCTION_CAP
@@ -45,6 +46,7 @@ constructor(
     private val statManager: StatManager,
     private val regenManager: RegenManager,
     private val spellManager: SpellManager,
+    private val characterHealthHelper: CharacterHealthHelper,
 ) : Listener {
 
     init {
@@ -133,6 +135,7 @@ constructor(
     @EventHandler(priority = EventPriority.NORMAL)
     fun onStatUpdate(event: GameStatUpdateEvent) {
         regenManager.calculateMaxMana(event.character)
+        characterHealthHelper.setCharacterMaxHealth(event.character)
     }
 
     /**
