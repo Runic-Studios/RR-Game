@@ -10,6 +10,7 @@ import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.command.SetLevelCommand
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
+import com.runicrealms.game.gameplay.player.ArmorEquipRestrictionListener
 import com.runicrealms.game.gameplay.player.RegenManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterAddMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
@@ -52,6 +53,7 @@ class GameplayModule : AbstractModule() {
         bind(TipsDataListener::class.java).asEagerSingleton()
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
+        bind(ArmorEquipRestrictionListener::class.java).asEagerSingleton()
         bind(ScoreboardManager::class.java).asEagerSingleton()
 
         bind(GravestoneManager::class.java).asEagerSingleton()

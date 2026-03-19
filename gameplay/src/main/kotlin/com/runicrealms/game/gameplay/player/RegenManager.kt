@@ -15,6 +15,7 @@ import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import java.util.UUID
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.bukkit.attribute.Attribute
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import org.bukkit.Bukkit
@@ -116,6 +117,10 @@ constructor(
             else regenAmount
         val event = HealthRegenEvent(player, regenAmountFinal)
         Bukkit.getPluginManager().callSuspendingEvent(event, plugin).joinAll()
+        if (!event.isCancelled) {
+            val maxHealth = player.getAttribute(Attribute.MAX_HEALTH)!!.value
+            player.health = min(player.health + event.amount.toDouble(), maxHealth)
+        }
     }
 
     /** Periodic task: regenerates mana for one character. */
