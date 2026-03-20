@@ -21,6 +21,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.plugin.Plugin
 
 /**
@@ -47,6 +48,9 @@ constructor(
 
     @EventHandler(priority = EventPriority.NORMAL)
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
+        // Skip programmatic re-triggers from victim.damage() inside DamageHandler
+        if (event.cause == EntityDamageEvent.DamageCause.CUSTOM) return
+
         val attacker = event.damager as? Player ?: return
 
         // Always cancel vanilla damage; Runic replaces it with PhysicalDamageEvent
