@@ -3,7 +3,6 @@ package com.runicrealms.game.items
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.common.event.ArmorEquipEvent
-import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.character.CharacterEquipmentCache
@@ -22,7 +21,6 @@ class PlayerItemManager
 @Inject
 constructor(
     private val plugin: Plugin,
-    private val userDataRegistry: UserDataRegistry,
     private val equipmentFactory: CharacterEquipmentCache.Factory,
 ) : Listener, CharacterEquipmentCacheRegistry {
 
@@ -51,7 +49,7 @@ constructor(
     fun onArmorChange(event: EntityEquipmentChangedEvent) {
         if (event.entity !is Player) return
         val holder = cachedCharacterStats[event.entity.uniqueId] ?: return
-        holder.updateAllItems(false, true)
+        holder.updateAllItems(onLogin = false, callEvent = true)
     }
 
     /**
@@ -64,6 +62,6 @@ constructor(
         if (event.isCancelled) return
         if (event.type != ArmorEquipEvent.ArmorType.OFFHAND) return
         val holder = cachedCharacterStats[event.player.uniqueId] ?: return
-        Bukkit.getScheduler().runTask(plugin) { _ -> holder.updateAllItems(false, true) }
+        Bukkit.getScheduler().runTask(plugin) { _ -> holder.updateAllItems(onLogin = false, callEvent = true) }
     }
 }
