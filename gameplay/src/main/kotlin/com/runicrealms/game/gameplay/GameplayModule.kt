@@ -8,6 +8,7 @@ import com.runicrealms.game.gameplay.character.util.CharacterHealthHelper
 import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
 import com.runicrealms.game.gameplay.character.util.SaveZoneRegistry
 import com.runicrealms.game.gameplay.command.CharacterCommand
+import com.runicrealms.game.gameplay.command.HealCommand
 import com.runicrealms.game.gameplay.command.RunicDamageCommand
 import com.runicrealms.game.gameplay.command.SetClassCommand
 import com.runicrealms.game.gameplay.command.SetLevelCommand
@@ -108,6 +109,7 @@ class GameplayModule : AbstractModule() {
         bind(StatListener::class.java).asEagerSingleton()
 
         bind(CharacterCommand::class.java).asEagerSingleton()
+        bind(HealCommand::class.java).asEagerSingleton()
         bind(SetLevelCommand::class.java).asEagerSingleton()
         bind(SetClassCommand::class.java).asEagerSingleton()
         bind(RunicDamageCommand::class.java).asEagerSingleton()

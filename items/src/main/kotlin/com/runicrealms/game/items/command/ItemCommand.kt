@@ -278,30 +278,6 @@ constructor(
         }
     }
 
-    @Subcommand("dupe-item")
-    @Conditions("is-op")
-    fun onCommandDupeItem(player: Player) {
-        val item = player.inventory.itemInMainHand
-        if (item.type == Material.AIR) {
-            player.sendMessage("$PREFIX&dYou are not holding an item!".colorFormat())
-            return
-        }
-        var slot = -1
-        for (i in 0..34) {
-            val slotItem = player.inventory.getItem(i)
-            if (slotItem == null || slotItem.type == Material.AIR) {
-                slot = i
-                break
-            }
-        }
-        if (slot != -1) {
-            player.inventory.setItem(slot, item)
-            player.sendMessage("$PREFIX&dAdded duped item to your inventory!".colorFormat())
-        } else {
-            player.sendMessage("$PREFIX&dYou do not have space in your inventory!".colorFormat())
-        }
-    }
-
     @Subcommand("get")
     @Conditions("is-player|is-op")
     @Syntax("<item> [amount]")
@@ -482,15 +458,20 @@ constructor(
     @Conditions("is-op")
     @Subcommand("help|h")
     fun onCommandHelp(sender: CommandSender) {
-        sender.sendMessage("$PREFIX&dAvailable commands: ".colorFormat())
-        sender.sendMessage("$PREFIX&7/runicitem help".colorFormat())
-        sender.sendMessage("$PREFIX&7/runicitem get <item> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runicitem give <player> <item> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runicitem clear <player> [item] [amount]".colorFormat())
-        sender.sendMessage(
-            "$PREFIX&7/runicitem toggle-database &dWARNING - don't use if you don't know what this does!"
-                .colorFormat()
-        )
+        sender.sendMessage("$PREFIX&dAvailable commands:".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item help".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item clear <player> [item] [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item drop <item> <location> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item drop-range <min-level> <max-level> <location> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item drop-lt <loot-table> <min-level> <max-level> <location>".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item get <item> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item get-data".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item get-range <level-min> <level-max> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item get-random [-range X,Y] [-rarity R] [-class C] [-items T] [-lqm L]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item give <player> <item> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item give-range <player> <level-min> <level-max> [amount]".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item picker <player> <item> <item> <item> <item> <item>".colorFormat())
+        sender.sendMessage("$PREFIX&7/runic item set-perk <perk-type> <stacks>".colorFormat())
     }
 
     @Subcommand("picker")
