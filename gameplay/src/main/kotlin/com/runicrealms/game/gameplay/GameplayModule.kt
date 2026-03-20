@@ -24,6 +24,7 @@ import com.runicrealms.game.gameplay.player.damage.BasicAttackListener
 import com.runicrealms.game.gameplay.player.damage.BowListener
 import com.runicrealms.game.gameplay.player.damage.DamageListener
 import com.runicrealms.game.gameplay.player.damage.EnvironmentDamageListener
+import com.runicrealms.game.gameplay.player.damage.StaffListener
 import com.runicrealms.game.gameplay.spell.AllyVerifyListener
 import com.runicrealms.game.gameplay.spell.EnemyVerifyListener
 import com.runicrealms.game.gameplay.spell.ShieldListener
@@ -85,6 +86,7 @@ class GameplayModule : AbstractModule() {
         bind(EnvironmentDamageListener::class.java).asEagerSingleton()
         bind(BasicAttackListener::class.java).asEagerSingleton()
         bind(DamageListener::class.java).asEagerSingleton()
+        bind(StaffListener::class.java).asEagerSingleton()
         bind(BowListener::class.java).asEagerSingleton()
 
         // --- Mob listeners ---

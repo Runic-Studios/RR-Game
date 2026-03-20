@@ -2,9 +2,20 @@ package com.runicrealms.game.gameplay.player.damage
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.runicrealms.game.common.ClassType
+import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.combat.CombatManager
+import com.runicrealms.game.gameplay.spell.damage.DamageHandler
 import com.runicrealms.game.gameplay.spell.event.BasicAttackEvent
+import com.runicrealms.game.gameplay.spell.event.EnemyVerifyEvent
+import com.runicrealms.game.items.generator.GameItemWeapon
+import com.runicrealms.game.items.generator.ItemStackConverter
+import java.util.concurrent.ThreadLocalRandom
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
+import org.bukkit.Sound
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -15,20 +26,9 @@ import org.bukkit.plugin.Plugin
 /**
  * Handles core melee (non-bow, non-staff) damage from players to entities.
  *
- * This listener:
- * 1. Verifies the attacker has the correct weapon type for their class
- * 2. Checks the attack cooldown
- * 3. Checks the player's level meets the weapon's minimum level requirement
- * 4. Fires [BasicAttackEvent] so cooldowns and stat scaling are applied
- * 5. Cancels the vanilla damage and fires the appropriate custom damage event
- * 6. Handles death via [RunicDeathEvent] on fatal hits
- *
- * TODO: Implement this listener once the following are available:
- * - Weapon-class matching logic (ClassType -> allowed WeaponType set)
- * - Item level requirement read via ItemStackConverter / GameItemWeapon
- * - DamageHandler integration for custom damage calculation
- * - RunicDeathEvent wiring for mob kill detection
- * - MythicMobs entity death hook
+ * Warrior, Rogue, and Cleric use direct melee attacks via [EntityDamageByEntityEvent].
+ * Mage (staff) attacks are handled by [StaffListener] via [StaffAttackEvent].
+ * Archer (bow) attacks are handled by [BowListener] via [EntityShootBowEvent].
  */
 @Singleton
 class DamageListener
@@ -36,6 +36,9 @@ class DamageListener
 constructor(
     private val plugin: Plugin,
     private val combatManager: CombatManager,
+    private val spellManager: SpellManager,
+    private val itemStackConverter: ItemStackConverter,
+    private val damageHandler: DamageHandler,
 ) : Listener {
 
     init {
@@ -46,40 +49,53 @@ constructor(
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val attacker = event.damager as? Player ?: return
 
-        // TODO: Add weapon-class verification
-        //   val gameCharacter = userDataRegistry.getCharacter(attacker.uniqueId) ?: return
-        //   val classType = gameCharacter.document.character.traits.classType
-        //   val weapon = ItemStackConverter.convertToGameItem(attacker.inventory.itemInMainHand)
-        //   if (weapon is GameItemWeapon && !classType.allowedWeaponTypes.contains(weapon.weaponType)) {
-        //       attacker.sendMessage(RED + "Your class cannot use that weapon!")
-        //       event.isCancelled = true
-        //       return
-        //   }
+        // Always cancel vanilla damage; Runic replaces it with PhysicalDamageEvent
+        event.isCancelled = true
 
-        // TODO: Add attack cooldown check
-        //   val material = attacker.inventory.itemInMainHand.type
-        //   if (attacker.getCooldown(material) > 0) {
-        //       event.isCancelled = true
-        //       return
-        //   }
+        val item = attacker.inventory.itemInMainHand
+        val gameItem = itemStackConverter.convertToGameItem(item) as? GameItemWeapon ?: return
 
-        // TODO: Add level requirement check
-        //   if (weapon is GameItemWeapon && weapon.level > gameCharacter.document.character.traits.level) {
-        //       attacker.sendMessage(RED + "You must be level ${weapon.level} to use that weapon!")
-        //       event.isCancelled = true
-        //       return
-        //   }
+        val classType = spellManager.getPlayerClassType(attacker.uniqueId)
 
-        // TODO: Fire BasicAttackEvent with correct cooldown and damage values from DamageHandler
-        //   val material = attacker.inventory.itemInMainHand.type
-        //   val attackEvent = BasicAttackEvent(attacker, material, BASE_MELEE_COOLDOWN, BASE_MELEE_COOLDOWN.toDouble(), damage, maxDamage)
-        //   Bukkit.getPluginManager().callEvent(attackEvent)
-        //   if (attackEvent.isCancelled) return
+        // Weapon must belong to this player's class
+        if (gameItem.weaponTemplate.classType != classType) return
 
-        // TODO: Cancel vanilla damage and fire PhysicalDamageEvent via DamageHandler
-        //   event.isCancelled = true
-        //   damageHandler.applyMeleeDamage(attacker, event.entity as? LivingEntity ?: return, attackEvent.damage)
+        // Staff (Mage) and bow (Archer) attacks are handled by their own listeners
+        if (classType == ClassType.MAGE || classType == ClassType.ARCHER) return
 
-        // TODO: Handle mob death -> RunicDeathEvent / loot drop
+        val material = item.type
+        if (attacker.getCooldown(material) > 0) return
+
+        if (gameItem.weaponTemplate.level > attacker.level) {
+            attacker.playSound(attacker.location, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f)
+            attacker.sendMessage(Component.text("Your level is too low to wield this!", NamedTextColor.RED))
+            return
+        }
+
+        val victim = event.entity as? LivingEntity ?: return
+
+        val enemyVerifyEvent = EnemyVerifyEvent(attacker, victim)
+        Bukkit.getPluginManager().callEvent(enemyVerifyEvent)
+        if (enemyVerifyEvent.isCancelled) return
+
+        val minDamage = gameItem.weaponTemplate.damage.min
+        val maxDamage = gameItem.weaponTemplate.damage.max
+        val randomNum =
+            if (maxDamage > minDamage) ThreadLocalRandom.current().nextInt(minDamage, maxDamage + 1)
+            else minDamage
+
+        val attackEvent =
+            BasicAttackEvent(
+                attacker,
+                material,
+                BasicAttackEvent.BASE_MELEE_COOLDOWN,
+                BasicAttackEvent.BASE_MELEE_COOLDOWN.toDouble(),
+                minDamage,
+                maxDamage,
+            )
+        Bukkit.getPluginManager().callEvent(attackEvent)
+        if (attackEvent.isCancelled) return
+
+        damageHandler.dealPhysicalDamage(randomNum, victim, attacker, isBasicAttack = true, isRanged = false)
     }
 }

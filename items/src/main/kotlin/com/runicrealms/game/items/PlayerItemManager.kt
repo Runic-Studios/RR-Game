@@ -8,10 +8,11 @@ import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.character.CharacterEquipmentCache
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
-import io.papermc.paper.event.player.PlayerArmorChangeEvent
+import io.papermc.paper.event.entity.EntityEquipmentChangedEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -44,12 +45,12 @@ constructor(
 
     /**
      * Paper's PlayerArmorChangeEvent fires AFTER the armor slot is committed to the inventory, so
-     * reading inventory.helmet/chestplate/etc. returns the correct new item immediately. This
-     * replaces the old plugin.launch{} approach which had unreliable timing.
+     * reading inventory.helmet/chestplate/etc. Returns the correct new item immediately.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun onArmorChange(event: PlayerArmorChangeEvent) {
-        val holder = cachedCharacterStats[event.player.uniqueId] ?: return
+    fun onArmorChange(event: EntityEquipmentChangedEvent) {
+        if (event.entity !is Player) return
+        val holder = cachedCharacterStats[event.entity.uniqueId] ?: return
         holder.updateAllItems(false, true)
     }
 
