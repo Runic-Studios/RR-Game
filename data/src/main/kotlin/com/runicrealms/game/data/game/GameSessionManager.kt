@@ -536,9 +536,12 @@ constructor(
                     Bukkit.getPluginManager().callEvent(GamePlayerQuitEvent(player))
                 }
 
-                // Cancel the periodic save loop and wait for any in-flight NonCancellable save
-                // to finish before we take our own snapshot.
-                session.saveJob.cancelAndJoin()
+                // Cancel the periodic save loop. Cannot join: plugin.asyncDispatcher is disposed
+                // by the time shutdown() runs, so the saveJob coroutine is frozen and
+                // cancelAndJoin() would block forever. cancel() signals intent and we proceed;
+                // the dataLock.withLock below serialises our snapshot against any in-flight
+                // NonCancellable snapshot the loop may be taking on a still-active dispatcher.
+                session.saveJob.cancel()
 
                 // Use Dispatchers.IO directly: plugin.asyncDispatcher may be unavailable once
                 // MCCoroutine starts tearing down the plugin's coroutine session.
