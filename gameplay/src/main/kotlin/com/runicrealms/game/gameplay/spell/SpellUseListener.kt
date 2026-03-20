@@ -2,11 +2,13 @@ package com.runicrealms.game.gameplay.spell
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.gameplay.spell.event.SpellCastEvent
 import com.runicrealms.game.gameplay.spell.event.SpellTriggerEvent
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellSlot
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellTriggerType
+import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
 import java.util.UUID
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -26,19 +28,22 @@ import org.bukkit.scheduler.BukkitTask
 
 /**
  * Manages the two-step spell cast activation UI:
- * 1. First trigger (right-click / left-click / swap hands): opens the cast menu title and starts a
- *    [SPELL_TIMEOUT]-second window.
+ * 1. First trigger (right-click for most classes, left-click for Archer): opens the cast menu
+ *    and starts a [SPELL_TIMEOUT]-second window.
  * 2. Second trigger within the window: fires [SpellCastEvent] which calls [Spell.execute].
  *
  * Current stubs (see SPELL_MIGRATION.md):
  * - Settings check (`SettingsManager.getCastMenuEnabled()`) not yet migrated — always enabled.
- * - Weapon-type class validation (`DamageListener.matchClass()`) not yet migrated — skipped.
  * - [BasicAttackEvent] is fired from an un-migrated DamageListener — stubbed.
  */
 @Singleton
 class SpellUseListener
 @Inject
-constructor(private val plugin: Plugin, private val spellManager: SpellManager) : Listener {
+constructor(
+    private val plugin: Plugin,
+    private val spellManager: SpellManager,
+    private val equipmentCacheRegistry: CharacterEquipmentCacheRegistry,
+) : Listener {
 
     private val casters: MutableMap<UUID, BukkitTask> = HashMap()
 
@@ -60,7 +65,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
             val isArcher = event.spellTriggerType == SpellTriggerType.ARCHER
             val isValidFirstSlot =
                 if (isArcher) {
-                    event.spellSlot == SpellSlot.RIGHT_CLICK
+                    event.spellSlot == SpellSlot.LEFT_CLICK
                 } else {
                     event.spellSlot == SpellSlot.RIGHT_CLICK
                 }
@@ -95,13 +100,18 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onItemHeld(event: PlayerItemHeldEvent) {
-        if (event.newSlot == 0) {
-            fireSpellTrigger(event.player, SpellSlot.HOT_BAR_ONE)
+        val player = event.player
+        if (event.newSlot == 0 && casters.containsKey(player.uniqueId)) {
+            // Cancel the slot change so the hotbar snaps back, then cast HOT_BAR_ONE
+            event.isCancelled = true
+            casters.remove(player.uniqueId)?.cancel()
+            castSpell(player, SpellSlot.HOT_BAR_ONE)
+            return
         }
-        // Cancel spell if slot changes while casting
-        if (casters.containsKey(event.player.uniqueId) && event.newSlot != 0) {
-            casters.remove(event.player.uniqueId)?.cancel()
-            event.player.sendActionBar(Component.text("Spell cancelled.", NamedTextColor.GRAY))
+        // Cancel cast session if the player scrolls to any other slot mid-cast
+        if (casters.containsKey(player.uniqueId)) {
+            casters.remove(player.uniqueId)?.cancel()
+            player.sendActionBar(Component.text("Spell cancelled.", NamedTextColor.GRAY))
         }
     }
 
@@ -118,8 +128,9 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         // Slot 0 is the rune slot; right-clicking it opens the RuneMenu, not a spell cast window.
         if (player.inventory.heldItemSlot == RUNE_SLOT) return
 
-        // TODO: Add weapon-type check (DamageListener.matchClass) once migrated.
-        // For now, allow any click with item in hand.
+        // Only allow the cast menu to open when holding a valid class weapon.
+        val cache = equipmentCacheRegistry.cachedCharacterStats[player.uniqueId]
+        if (cache?.getWeapon() == null) return
 
         when (event.action) {
             Action.LEFT_CLICK_AIR,
@@ -138,10 +149,11 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
     // --- Helpers ---
 
     private fun fireSpellTrigger(player: Player, slot: SpellSlot) {
-        // TODO: Determine Archer vs DEFAULT via GameCharacter classType once wired.
-        val triggerType = SpellTriggerType.DEFAULT
-        val triggerEvent = SpellTriggerEvent(player, slot, triggerType)
-        Bukkit.getPluginManager().callEvent(triggerEvent)
+        val classType = spellManager.getPlayerClassType(player.uniqueId)
+        val triggerType =
+            if (classType == ClassType.ARCHER) SpellTriggerType.ARCHER
+            else SpellTriggerType.DEFAULT
+        Bukkit.getPluginManager().callEvent(SpellTriggerEvent(player, slot, triggerType))
     }
 
     private fun castSpell(player: Player, slot: SpellSlot) {
