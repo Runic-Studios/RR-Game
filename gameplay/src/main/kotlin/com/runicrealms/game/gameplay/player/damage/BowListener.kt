@@ -26,9 +26,9 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.ProjectileHitEvent
-import org.bukkit.event.inventory.EquipmentSlot
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerPickupArrowEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.Plugin
 
 /**
@@ -135,7 +135,6 @@ constructor(
         val arrow = player.launchProjectile(Arrow::class.java)
         arrow.velocity = arrow.velocity.multiply(ARROW_SPEED_MULTIPLIER)
         arrow.shooter = player
-        arrow.isBounce = false
 
         val bowEvent = RunicBowEvent(player, arrow)
         Bukkit.getPluginManager().callEvent(bowEvent)
