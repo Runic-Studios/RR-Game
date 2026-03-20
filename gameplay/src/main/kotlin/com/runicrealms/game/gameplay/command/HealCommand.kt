@@ -46,7 +46,7 @@ constructor(
             found
         }
 
-        val maxHealth = target.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 20.0
+        val maxHealth = target.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
         target.health = maxHealth
         target.sendMessage("&aYou have been restored to full health.".colorFormat())
         if (sender != target) {
