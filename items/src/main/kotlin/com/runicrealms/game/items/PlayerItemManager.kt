@@ -1,7 +1,5 @@
 package com.runicrealms.game.items
 
-import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.common.event.ArmorEquipEvent
@@ -10,12 +8,10 @@ import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.character.CharacterEquipmentCache
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
-import com.runicrealms.game.items.event.GameStatUpdateEvent
+import io.papermc.paper.event.player.PlayerArmorChangeEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.joinAll
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -46,34 +42,27 @@ constructor(
         cachedCharacterStats.remove(event.character.bukkitPlayer.uniqueId)
     }
 
-    @EventHandler(
-        priority = EventPriority.HIGHEST
-    ) // Fire after other armor equip events to allow them to cancel it
+    /**
+     * Paper's PlayerArmorChangeEvent fires AFTER the armor slot is committed to the inventory, so
+     * reading inventory.helmet/chestplate/etc. returns the correct new item immediately. This
+     * replaces the old plugin.launch{} approach which had unreliable timing.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onArmorChange(event: PlayerArmorChangeEvent) {
+        val holder = cachedCharacterStats[event.player.uniqueId] ?: return
+        holder.updateAllItems(false, true)
+    }
+
+    /**
+     * PlayerArmorChangeEvent does not cover the OFF_HAND slot, so we still listen to
+     * ArmorEquipEvent for that case. A one-tick Bukkit scheduler delay ensures the off-hand slot
+     * is committed before we read it.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onArmorEquipEvent(event: ArmorEquipEvent) {
-        val player: Player = event.player
-        val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
-        val uuid = player.uniqueId
-        if (!cachedCharacterStats.containsKey(uuid)) return
         if (event.isCancelled) return
-        val holder = cachedCharacterStats[uuid] ?: return
-        // Defer to next tick: ArmorEquipEvent fires inside InventoryClickEvent before Bukkit
-        // commits the slot change, so reading inventory slots here would return stale data.
-        plugin.launch {
-            when (event.type) {
-                ArmorEquipEvent.ArmorType.HELMET ->
-                    holder.updateItems(false, CharacterEquipmentCache.StatHolderType.HELMET)
-                ArmorEquipEvent.ArmorType.CHESTPLATE ->
-                    holder.updateItems(false, CharacterEquipmentCache.StatHolderType.CHESTPLATE)
-                ArmorEquipEvent.ArmorType.LEGGINGS ->
-                    holder.updateItems(false, CharacterEquipmentCache.StatHolderType.LEGGINGS)
-                ArmorEquipEvent.ArmorType.BOOTS ->
-                    holder.updateItems(false, CharacterEquipmentCache.StatHolderType.BOOTS)
-                ArmorEquipEvent.ArmorType.OFFHAND ->
-                    holder.updateItems(false, CharacterEquipmentCache.StatHolderType.OFFHAND)
-            }
-            Bukkit.getPluginManager()
-                .callSuspendingEvent(GameStatUpdateEvent(character, holder), plugin)
-                .joinAll()
-        }
+        if (event.type != ArmorEquipEvent.ArmorType.OFFHAND) return
+        val holder = cachedCharacterStats[event.player.uniqueId] ?: return
+        Bukkit.getScheduler().runTask(plugin) { _ -> holder.updateAllItems(false, true) }
     }
 }

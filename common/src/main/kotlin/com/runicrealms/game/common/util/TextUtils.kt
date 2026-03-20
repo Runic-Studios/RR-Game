@@ -42,7 +42,7 @@ fun String.breakLines(lineLength: Int = LINE_LENGTH): List<String> {
  */
 fun String.toLoreComponents(lineLength: Int = LINE_LENGTH): List<Component> {
     val section = LegacyComponentSerializer.legacy('&').deserialize(this)
-    val sectionStr = LegacyComponentSerializer.legacy('&').serialize(section)
+    val sectionStr = LegacyComponentSerializer.legacySection().serialize(section)
     return ChatPaginator.wordWrap(sectionStr, lineLength).map { line ->
         LegacyComponentSerializer.legacySection()
             .deserialize(line)
