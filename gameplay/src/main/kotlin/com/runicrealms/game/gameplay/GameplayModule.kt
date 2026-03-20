@@ -11,7 +11,6 @@ import com.runicrealms.game.gameplay.command.CharacterCommand
 import com.runicrealms.game.gameplay.command.RunicDamageCommand
 import com.runicrealms.game.gameplay.command.SetLevelCommand
 import com.runicrealms.game.gameplay.mob.HerbFallDamageListener
-import com.runicrealms.game.gameplay.mob.MobCleanupListener
 import com.runicrealms.game.gameplay.mob.MobMechanicsListener
 import com.runicrealms.game.gameplay.mob.MobTaggerListener
 import com.runicrealms.game.gameplay.player.ArmorEquipListener
@@ -92,7 +91,6 @@ class GameplayModule : AbstractModule() {
         bind(HerbFallDamageListener::class.java).asEagerSingleton()
         bind(MobMechanicsListener::class.java).asEagerSingleton()
         bind(MobTaggerListener::class.java).asEagerSingleton()
-        bind(MobCleanupListener::class.java).asEagerSingleton()
 
         bind(ArmorEquipListener::class.java).asEagerSingleton()
         bind(ArmorEquipRestrictionListener::class.java).asEagerSingleton()
