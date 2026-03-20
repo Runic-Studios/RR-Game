@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Arrow
 import org.bukkit.entity.LivingEntity
@@ -23,17 +24,22 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.block.Action
 import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.inventory.EquipmentSlot
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerPickupArrowEvent
 import org.bukkit.plugin.Plugin
 
 /**
  * Handles custom bow mechanics for the Archer class.
  *
- * Intercepts [EntityShootBowEvent] for class, cooldown, and level verification, tags auto-attack
- * arrows via [autoAttackArrows], and applies [DamageHandler.dealPhysicalDamage] when the arrow
- * hits an entity in [ProjectileHitEvent].
+ * Intercepts [PlayerInteractEvent] on right-click to verify class, cooldown, and level, then
+ * manually launches an arrow via [Player.launchProjectile]. This matches the original instant-fire
+ * mechanic (no draw-and-release required, no arrows needed in inventory).
+ *
+ * Arrow UUIDs are tracked in [autoAttackArrows] so [ProjectileHitEvent] can apply
+ * [DamageHandler.dealPhysicalDamage] when the arrow hits an entity.
  */
 @Singleton
 class BowListener
@@ -60,7 +66,7 @@ constructor(
     }
 
     /** Applies damage when an auto-attack arrow hits an entity, then removes the arrow. */
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onProjectileHit(event: ProjectileHitEvent) {
         val projectile = event.entity
         if (projectile !is Arrow) return
@@ -96,66 +102,67 @@ constructor(
         plugin.server.scheduler.runTaskLater(plugin, Runnable { projectile.remove() }, 1L)
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
-    fun onBowShoot(event: EntityShootBowEvent) {
-        val player = event.entity as? Player ?: return
+    /**
+     * Fires a custom arrow on right-click with a Runic bow, bypassing the vanilla draw mechanic.
+     * The vanilla interaction is always cancelled to prevent the bow-drawing animation and ensure
+     * Runic cooldowns govern fire rate.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onBowShoot(event: PlayerInteractEvent) {
+        if (event.hand != EquipmentSlot.HAND) return
+        if (event.action != Action.RIGHT_CLICK_AIR && event.action != Action.RIGHT_CLICK_BLOCK) return
 
-        // Cancel vanilla bow shooting for non-Archers or invalid weapons
-        val bow = event.bow
-        if (bow == null) {
-            event.isCancelled = true
-            return
-        }
+        val player = event.player
+        val item = player.inventory.itemInMainHand
+        if (item.type != Material.BOW) return
 
-        val gameItem = itemStackConverter.convertToGameItem(bow) as? GameItemWeapon
-        if (gameItem == null) {
-            event.isCancelled = true
-            return
-        }
+        // Cancel the vanilla interaction so the bow draw animation never starts
+        event.isCancelled = true
+
+        val gameItem = itemStackConverter.convertToGameItem(item) as? GameItemWeapon ?: return
 
         val classType = spellManager.getPlayerClassType(player.uniqueId)
-        if (classType != ClassType.ARCHER || gameItem.weaponTemplate.classType != ClassType.ARCHER) {
-            event.isCancelled = true
-            return
-        }
+        if (classType != ClassType.ARCHER || gameItem.weaponTemplate.classType != ClassType.ARCHER) return
 
-        if (player.getCooldown(bow.type) > 0) {
-            event.isCancelled = true
-            return
-        }
+        if (player.getCooldown(Material.BOW) > 0) return
 
         if (gameItem.weaponTemplate.level > player.level) {
             player.playSound(player.location, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f)
             player.sendMessage(Component.text("Your level is too low to wield this!", NamedTextColor.RED))
-            event.isCancelled = true
             return
         }
 
-        val arrow = event.projectile as? Arrow ?: return
+        val arrow = player.launchProjectile(Arrow::class.java)
+        arrow.velocity = arrow.velocity.multiply(ARROW_SPEED_MULTIPLIER)
+        arrow.shooter = player
+        arrow.isBounce = false
 
         val bowEvent = RunicBowEvent(player, arrow)
         Bukkit.getPluginManager().callEvent(bowEvent)
         if (bowEvent.isCancelled) {
-            event.isCancelled = true
+            arrow.remove()
             return
         }
 
         autoAttackArrows.add(arrow.uniqueId)
 
-        // Boost arrow speed on the following tick so vanilla velocity is set first
-        plugin.server.scheduler.runTask(plugin, Runnable { arrow.velocity = arrow.velocity.multiply(1.75) })
+        player.playSound(player.location, Sound.ENTITY_ARROW_SHOOT, 0.25f, 1.0f)
 
         val minDamage = gameItem.weaponTemplate.damage.min
         val maxDamage = gameItem.weaponTemplate.damage.max
         val attackEvent =
             BasicAttackEvent(
                 player,
-                bow.type,
+                Material.BOW,
                 BasicAttackEvent.BASE_BOW_COOLDOWN,
                 BasicAttackEvent.BASE_BOW_COOLDOWN.toDouble(),
                 minDamage,
                 maxDamage,
             )
         Bukkit.getPluginManager().callEvent(attackEvent)
+    }
+
+    private companion object {
+        const val ARROW_SPEED_MULTIPLIER = 1.75
     }
 }

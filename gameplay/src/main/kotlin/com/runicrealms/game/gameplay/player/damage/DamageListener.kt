@@ -21,8 +21,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.plugin.Plugin
+
 
 /**
  * Handles core melee (non-bow, non-staff) damage from players to entities.
@@ -48,8 +48,9 @@ constructor(
 
     @EventHandler(priority = EventPriority.NORMAL)
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
-        // Skip programmatic re-triggers from victim.damage() inside DamageHandler
-        if (event.cause == EntityDamageEvent.DamageCause.CUSTOM) return
+        // DamageHandler.dealPhysicalDamage calls victim.damage() which re-fires this event.
+        // Let that re-trigger through so the HP change actually applies.
+        if (damageHandler.isDealing) return
 
         val attacker = event.damager as? Player ?: return
 

@@ -16,6 +16,14 @@ import org.bukkit.plugin.Plugin
 @Singleton
 class DamageHandler @Inject constructor(private val plugin: Plugin) {
 
+    /**
+     * True while [dealMagicDamage] or [dealPhysicalDamage] is executing [LivingEntity.damage].
+     * Bukkit re-fires [EntityDamageByEntityEvent] during that call; listeners check this flag
+     * to avoid intercepting the re-trigger.
+     */
+    var isDealing: Boolean = false
+        private set
+
     fun dealMagicDamage(
         amount: Int,
         victim: LivingEntity,
@@ -29,7 +37,9 @@ class DamageHandler @Inject constructor(private val plugin: Plugin) {
         val finalAmount =
             if (event.isCritical) (event.amount * CRITICAL_MULTIPLIER).toInt() else event.amount
         victim.noDamageTicks = 0
+        isDealing = true
         victim.damage(finalAmount.toDouble(), caster)
+        isDealing = false
         spawnDamageHologram(victim.location, finalAmount, event.isCritical, MAGIC_COLOR_TAG)
         return finalAmount
     }
@@ -49,7 +59,9 @@ class DamageHandler @Inject constructor(private val plugin: Plugin) {
         val finalAmount =
             if (event.isCritical) (event.amount * CRITICAL_MULTIPLIER).toInt() else event.amount
         victim.noDamageTicks = 0
+        isDealing = true
         victim.damage(finalAmount.toDouble(), caster)
+        isDealing = false
         spawnDamageHologram(victim.location, finalAmount, event.isCritical, PHYSICAL_COLOR_TAG)
         return finalAmount
     }

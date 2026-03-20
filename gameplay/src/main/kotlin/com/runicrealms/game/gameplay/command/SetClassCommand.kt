@@ -36,7 +36,7 @@ constructor(
 
     @Subcommand("setclass|sc")
     @Syntax("<player> <class>")
-    @CommandCompletion("@players @nothing")
+    @CommandCompletion("@players archer|cleric|mage|rogue|warrior")
     fun onSetClass(sender: CommandSender, args: Array<String>) {
         if (args.size < 2) {
             sender.sendMessage("&cUsage: /runic setclass <player> <class>".colorFormat())
