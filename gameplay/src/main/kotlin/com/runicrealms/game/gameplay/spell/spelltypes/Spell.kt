@@ -6,6 +6,7 @@ import com.runicrealms.game.gameplay.spell.effect.SpellEffect
 import com.runicrealms.game.gameplay.spell.effect.SpellEffectType
 import com.runicrealms.game.gameplay.spell.event.AllyVerifyEvent
 import com.runicrealms.game.gameplay.spell.event.EnemyVerifyEvent
+import com.runicrealms.game.gameplay.spell.event.SpellCastSuccessEvent
 import com.runicrealms.game.gameplay.spell.spelltypes.components.AttributeSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DistanceSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
@@ -118,6 +119,7 @@ abstract class Spell(
 
         spellManagerRef.addCooldown(player, this, cooldown)
         executeSpell(player, type)
+        Bukkit.getPluginManager().callEvent(SpellCastSuccessEvent(player, this))
         return true
     }
 

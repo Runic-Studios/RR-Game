@@ -66,6 +66,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         val absorbed = minOf(payload.shield.amount, event.damage)
         payload.shield.amount -= absorbed
         event.damage -= absorbed
+        event.player.absorptionAmount = maxOf(0.0, payload.shield.amount)
         if (payload.shield.amount <= 0) {
             Bukkit.getPluginManager()
                 .callEvent(ShieldBreakEvent(payload, ShieldBreakEvent.BreakReason.DAMAGE))
@@ -78,6 +79,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
     fun onShieldBreak(event: ShieldBreakEvent) {
         val player = event.shieldPayload.player
         spellManager.removeShield(player.uniqueId)
+        player.absorptionAmount = 0.0
         player.sendActionBar(Component.text("Your shield has broken!", NamedTextColor.RED))
     }
 
@@ -95,6 +97,7 @@ constructor(private val plugin: Plugin, private val spellManager: SpellManager) 
         val absorbed = minOf(payload.shield.amount, event.amount.toDouble()).toInt()
         payload.shield.amount -= absorbed
         event.amount -= absorbed
+        player.absorptionAmount = maxOf(0.0, payload.shield.amount)
         if (payload.shield.amount <= 0) {
             Bukkit.getPluginManager()
                 .callEvent(ShieldBreakEvent(payload, ShieldBreakEvent.BreakReason.DAMAGE))

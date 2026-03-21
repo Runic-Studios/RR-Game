@@ -18,7 +18,7 @@ import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.event.MagicDamageEvent
 import com.runicrealms.game.gameplay.spell.event.MobDamageEvent
 import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
-import com.runicrealms.game.gameplay.spell.event.SpellCastEvent
+import com.runicrealms.game.gameplay.spell.event.SpellCastSuccessEvent
 import com.runicrealms.game.gameplay.spell.event.SpellHealEvent
 import com.runicrealms.game.gameplay.spell.event.SpellShieldEvent
 import com.runicrealms.game.gameplay.spell.spells.Potion
@@ -100,10 +100,13 @@ constructor(
         event.amount += bonus
     }
 
-    /** Reduces spell cooldown via dexterity haste. Skips [Potion] casts (no cooldown scaling). */
+    /**
+     * Reduces spell cooldown via dexterity haste. Only fires after a successful cast so failed
+     * attempts (on cooldown, wrong class, no mana) do not bleed the cooldown down.
+     * Skips [Potion] casts (no cooldown scaling).
+     */
     @EventHandler(priority = EventPriority.NORMAL)
-    fun onSpellCast(event: SpellCastEvent) {
-        if (event.isCancelled) return
+    fun onSpellCastSuccess(event: SpellCastSuccessEvent) {
         if (event.spell is Potion) return
         val uuid = event.caster.uniqueId
         val dex = getStat(uuid, StatType.DEXTERITY)
