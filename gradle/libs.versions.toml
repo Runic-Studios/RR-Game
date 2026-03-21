@@ -43,7 +43,7 @@ mongodb-driver = { module = "org.mongodb:mongodb-driver-kotlin-coroutine", versi
 mongodb-bson = { module = "org.mongodb:bson", version.ref = "mongodb" }
 
 # Plugin dependencies
-velagones-paper = "com.runicrealms.velagones:velagones-paper:0.1.6"
+velagones-paper = "com.runicrealms.velagones:velagones-paper:0.2.0"
 nbtapi = "de.tr7zw:item-nbt-api-plugin:2.15.5"
 protocollib = "net.dmulloy2:ProtocolLib:5.4.0"
 fancyHolograms = "de.oliver:FancyHolograms:2.9.1"
