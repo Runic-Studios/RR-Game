@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.google.common.collect.ImmutableMultimap
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.common.util.colorFormat
@@ -143,7 +144,13 @@ constructor(
             Material.IRON_PICKAXE,
             "&eGathering Skills",
             "\n&6&lCLICK\n&7To view your gathering skills!\n&7They are account-wide!",
-        )
+        ).apply {
+            // HIDE_ATTRIBUTES often does not survive ProtocolLib SET_SLOT for tools; set an explicit
+            // empty attribute modifier map instead so no default "When in main hand" lines appear.
+            editMeta { meta ->
+                meta.attributeModifiers = ImmutableMultimap.of()
+            }
+        }
 
     private fun donorPerksIcon(): ItemStack =
         buildIconItem(
