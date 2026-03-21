@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.StatType
+import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
