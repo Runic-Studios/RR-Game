@@ -7,6 +7,7 @@ import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
 import io.lumine.mythic.bukkit.MythicBukkit
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Horse
 import org.bukkit.entity.LivingEntity
@@ -113,7 +114,7 @@ class MobMechanicsListener @Inject constructor(private val plugin: Plugin) : Lis
     }
 
     private fun calculateNumColours(entity: LivingEntity): Int {
-        val maxHealth = entity.maxHealth
+        val maxHealth = entity.getAttribute(Attribute.MAX_HEALTH)!!.value
         val current = entity.health.coerceAtLeast(0.0)
         val percentage = ((current / maxHealth) * 100.0).toInt()
         return percentage / 10

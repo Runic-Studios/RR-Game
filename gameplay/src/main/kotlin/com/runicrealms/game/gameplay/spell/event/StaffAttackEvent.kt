@@ -5,11 +5,7 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
-/**
- * Fired when a Mage fires a particle bolt for their basic attack.
- *
- * TODO: Replace runicItemWeapon with the new items module weapon type once items are migrated.
- */
+/** Fired when a Mage fires a particle bolt for their basic attack. */
 class StaffAttackEvent(val player: Player, val range: Int) : Event(), Cancellable {
 
     private var cancelled = false

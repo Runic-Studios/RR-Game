@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.gameplay.spell.event.MagicDamageEvent
 import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
+import com.runicrealms.game.items.loot.BossTimedLootManager
 import io.lumine.mythic.bukkit.MythicBukkit
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -36,7 +37,10 @@ private const val TAG_TIME_SECONDS = 10
  * TODO: Connect [dropTaggedLoot] to the mob death/loot-drop handler once that system is migrated.
  */
 @Singleton
-class MobTaggerListener @Inject constructor(private val plugin: Plugin) : Listener {
+class MobTaggerListener
+@Inject
+constructor(private val plugin: Plugin, private val bossTimedLootManager: BossTimedLootManager) :
+    Listener {
 
     /** Maps player UUID -> mob UUID (the mob that player has tagged). */
     private val taggedMobs = ConcurrentHashMap<UUID, UUID>()
@@ -131,10 +135,7 @@ class MobTaggerListener @Inject constructor(private val plugin: Plugin) : Listen
 
         // Boss-faction mobs are handled separately by BossTimedLootDamageListener
         val mythicMob = MythicBukkit.inst().mobManager.getActiveMob(entityId)
-        if (mythicMob.isPresent) {
-            // TODO: Check if this mob is a tracked boss via BossTimedLootManager and skip if so
-            //   if (bossTimedLootManager.isBoss(mythicMob.get().mobType)) return
-        }
+        if (mythicMob.isPresent && bossTimedLootManager.isBoss(entityId)) return
 
         if (taggedMobs.containsKey(playerId)) {
             // If this player has already tagged the same mob, refresh the timer

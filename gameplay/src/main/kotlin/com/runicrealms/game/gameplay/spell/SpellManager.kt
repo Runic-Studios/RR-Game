@@ -134,6 +134,10 @@ constructor(
 
     fun getShieldedPlayers(): Map<UUID, ShieldPayload> = shieldedPlayers
 
+    fun removeShield(uuid: UUID) {
+        shieldedPlayers.remove(uuid)
+    }
+
     override fun isShielded(player: Player): Boolean = shieldedPlayers.containsKey(player.uniqueId)
 
     /** Returns the remaining cooldown in seconds for the given spell, or 0.0 if not on cooldown. */

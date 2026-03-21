@@ -1,80 +1,118 @@
 package com.runicrealms.game.gameplay.spell
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.gameplay.spell.event.EnvironmentDamageEvent
 import com.runicrealms.game.gameplay.spell.event.MagicDamageEvent
 import com.runicrealms.game.gameplay.spell.event.MobDamageEvent
 import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
+import com.runicrealms.game.gameplay.spell.event.RunicDamageEvent
 import com.runicrealms.game.gameplay.spell.event.ShieldBreakEvent
-import com.runicrealms.game.gameplay.spell.event.SpellShieldEvent
+import com.runicrealms.game.gameplay.spell.spelltypes.ShieldPayload
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
 /**
- * Manages the player shield system.
+ * Manages the player shield absorption system.
  *
- * Shields are granted via [SpellShieldEvent] and absorb damage from [MagicDamageEvent],
- * [PhysicalDamageEvent], [MobDamageEvent], and [EnvironmentDamageEvent]. When a shield is
- * exhausted, [ShieldBreakEvent] is fired.
+ * Shield state is owned by [SpellManager.shieldedPlayers] and populated by
+ * [SpellManager.shieldPlayer]. This listener intercepts all incoming damage events for shielded
+ * players, absorbs damage from the active shield, and fires [ShieldBreakEvent] when the shield is
+ * depleted or expires.
  *
- * TODO: Implement this listener once the following are available:
- * - ShieldData model for storing per-player shield state (amount, expiry, caster)
- * - Integration with character data (withSyncCharacterData or a separate in-memory cache)
- * - Async shield expiration timer (plugin.launch loop checking per-player expiry)
- * - Shield cap logic (max shield amount per class/level)
- * - Visual feedback: boss bar or action bar showing shield amount
- * - On [SpellShieldEvent]: store ShieldData for recipient
- * - On damage events: absorb damage from shield first, reduce shield HP, fire ShieldBreakEvent if
- *   depleted
- * - On [ShieldBreakEvent]: clear shield data and notify player
- * - On GameCharacterQuitEvent: clear shield data for the player
+ * Expiry is checked every 500 ms via a coroutine loop. Shield storage requires no character data
+ * field - shields are transient in-memory state cleared on logout.
  */
 @Singleton
-class ShieldListener @Inject constructor(private val plugin: Plugin) : Listener {
+class ShieldListener
+@Inject
+constructor(private val plugin: Plugin, private val spellManager: SpellManager) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
+        startExpiryLoop()
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    fun onSpellShield(event: SpellShieldEvent) {
-        // TODO: Store shield data for event.recipient
-        //   val shieldPayload = ShieldPayload(event.recipient, event.amount,
-        // System.currentTimeMillis() + SHIELD_DURATION_MS)
-        //   shieldCache[event.recipient.uniqueId] = shieldPayload
-    }
+    // --- Damage absorption ---
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onPhysicalDamage(event: PhysicalDamageEvent) {
-        // TODO: Absorb damage from shield if player has one
-        //   absorbDamage(event.victim as? Player ?: return, event)
+        absorbRunicDamage(event.victim as? Player ?: return, event)
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onMagicDamage(event: MagicDamageEvent) {
-        // TODO: Absorb damage from shield if player has one
-        //   absorbDamage(event.victim as? Player ?: return, event)
+        absorbRunicDamage(event.victim as? Player ?: return, event)
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onMobDamage(event: MobDamageEvent) {
-        // TODO: Absorb damage from shield if player has one
-        //   absorbDamage(event.victim as? Player ?: return, event)
+        absorbRunicDamage(event.victim as? Player ?: return, event)
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onEnvironmentDamage(event: EnvironmentDamageEvent) {
-        // TODO: Absorb damage from shield if player has one
-        //   absorbEnvironmentDamage(event.player, event)
+        val payload = spellManager.getShieldedPlayers()[event.player.uniqueId] ?: return
+        val absorbed = minOf(payload.shield.amount, event.damage)
+        payload.shield.amount -= absorbed
+        event.damage -= absorbed
+        if (payload.shield.amount <= 0) {
+            Bukkit.getPluginManager()
+                .callEvent(ShieldBreakEvent(payload, ShieldBreakEvent.BreakReason.DAMAGE))
+        }
     }
+
+    // --- Shield break ---
 
     @EventHandler(priority = EventPriority.NORMAL)
     fun onShieldBreak(event: ShieldBreakEvent) {
-        // TODO: Clear shield cache and notify player
-        //   shieldCache.remove(event.shieldPayload.player.uniqueId)
-        //   event.shieldPayload.player.sendMessage(RED + "Your shield has broken!")
+        val player = event.shieldPayload.player
+        spellManager.removeShield(player.uniqueId)
+        player.sendActionBar(Component.text("Your shield has broken!", NamedTextColor.RED))
+    }
+
+    // --- Cleanup on logout ---
+
+    @EventHandler
+    fun onCharacterQuit(event: GameCharacterQuitEvent) {
+        spellManager.removeShield(event.character.bukkitPlayer.uniqueId)
+    }
+
+    // --- Internal ---
+
+    private fun absorbRunicDamage(player: Player, event: RunicDamageEvent) {
+        val payload = spellManager.getShieldedPlayers()[player.uniqueId] ?: return
+        val absorbed = minOf(payload.shield.amount, event.amount.toDouble()).toInt()
+        payload.shield.amount -= absorbed
+        event.amount -= absorbed
+        if (payload.shield.amount <= 0) {
+            Bukkit.getPluginManager()
+                .callEvent(ShieldBreakEvent(payload, ShieldBreakEvent.BreakReason.DAMAGE))
+        }
+    }
+
+    /** Fires [ShieldBreakEvent] for any shield that has passed its expiry time. */
+    private fun startExpiryLoop() {
+        plugin.launch {
+            while (isActive) {
+                delay(500L)
+                val expired: List<ShieldPayload> =
+                    spellManager.getShieldedPlayers().values.filter { it.shield.isExpired() }
+                for (payload in expired) {
+                    Bukkit.getPluginManager()
+                        .callEvent(ShieldBreakEvent(payload, ShieldBreakEvent.BreakReason.FALLOFF))
+                }
+            }
+        }
     }
 }

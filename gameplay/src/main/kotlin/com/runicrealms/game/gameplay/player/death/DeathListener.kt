@@ -9,6 +9,7 @@ import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import com.runicrealms.game.gameplay.spell.event.RunicDeathEvent
 import com.runicrealms.game.items.config.item.GameItemTag
 import com.runicrealms.game.items.generator.ItemStackConverter
+import com.runicrealms.game.items.weaponskin.WeaponSkinManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -41,6 +42,7 @@ constructor(
     private val combatManager: CombatManager,
     private val saveZoneRegistry: SaveZoneRegistry,
     private val itemStackConverter: ItemStackConverter,
+    private val weaponSkinManager: WeaponSkinManager,
 ) : Listener {
 
     init {
@@ -127,9 +129,9 @@ constructor(
     /**
      * Collects items from backpack slots 9-35, skipping protected tags. Items are removed from the
      * player's inventory and returned in a fresh 36-slot inventory. Returns null if no items were
-     * collected (or if the player is in a dungeon — TODO).
+     * collected (or if the player is in a dungeon — TODO when dungeon system is migrated).
      *
-     * TODO: call weapon skin disable API on each item when that system is migrated
+     * Weapon skins are stripped from dropped items so skins are not lost permanently.
      */
     private fun buildDroppedItemsInventory(victim: Player): Inventory? {
         val toDrop = mutableListOf<ItemStack>()
@@ -145,7 +147,9 @@ constructor(
                 )
                     continue
             }
-            toDrop.add(item.clone())
+            val clone = item.clone()
+            weaponSkinManager.removeSkin(clone)
+            toDrop.add(clone)
             victim.inventory.setItem(slot, null)
         }
         if (toDrop.isEmpty()) return null

@@ -34,8 +34,6 @@ import org.bukkit.plugin.Plugin
  *
  * TODO: Key binding letters (slot 1 = "1", slot 4 = "F") are hardcoded. They should come from a
  *   player settings system once one is implemented. See SPELL_MIGRATION.md.
- * TODO: Reset button cost calculation is not implemented; cost shows a placeholder. See
- *   SPELL_MIGRATION.md.
  */
 @Menu(title = "Spell Editor", type = MenuType.CHEST_6_ROW)
 class SpellEditorMenu
@@ -112,7 +110,7 @@ constructor(
         menuContents.set(
             0,
             5,
-            ClickableItem.of(buildResetButton()) {
+            ClickableItem.of(buildResetButton(playerLevel)) {
                 resetSpells(player, spellData)
                 odalitaMenus.openMenu(this, player)
             },
@@ -215,13 +213,14 @@ constructor(
             .map { it.spellName }
     }
 
-    private fun buildResetButton(): ItemStack =
+    private fun buildResetButton(playerLevel: Int): ItemStack =
         ItemStack(Material.MILK_BUCKET).apply {
             editMeta { meta ->
                 meta.displayName(Component.text("Reset Skill Trees", NamedTextColor.LIGHT_PURPLE))
-                // TODO: Calculate actual reset cost from player level (see SPELL_MIGRATION.md)
+                val cost = calculateResetCost(playerLevel)
+                val costText = if (cost == 0) "&afree" else "&a$cost gold"
                 val lore =
-                    "\n&6&lCLICK &7to reset and refund your skill points! " + "Current cost: &aTODO"
+                    "\n&6&lCLICK &7to reset and refund your skill points! Current cost: $costText"
                 meta.lore(
                     buildList {
                         add(Component.empty())
@@ -229,6 +228,20 @@ constructor(
                     }
                 )
             }
+        }
+
+    /**
+     * Returns the gold cost to reset all skill trees, based on the player's level.
+     *
+     * Tiers: 1-24 = free, 25-40 = 50g, 41-59 = 100g, 60+ = 250g. Note: gold deduction is not yet
+     * wired (economy system not migrated); cost is display-only.
+     */
+    private fun calculateResetCost(playerLevel: Int): Int =
+        when {
+            playerLevel >= 60 -> 250
+            playerLevel >= 41 -> 100
+            playerLevel >= 25 -> 50
+            else -> 0
         }
 
     private fun buildSpellSlotButton(

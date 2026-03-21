@@ -1,6 +1,7 @@
 package com.runicrealms.game.gameplay.spell.spells.mage
 
 import com.runicrealms.game.common.ClassType
+import com.runicrealms.game.common.StatType
 import com.runicrealms.game.gameplay.spell.effect.SpellEffectType
 import com.runicrealms.game.gameplay.spell.effect.mage.ChilledEffect
 import com.runicrealms.game.gameplay.spell.effect.mage.IceBarrierEffect
@@ -56,7 +57,9 @@ class Shatter(deps: SpellDependencies) :
         // Reduce damage taken by victim if they have IceBarrier stacks
         val victimBarrier = getSpellEffect(victimId, victimId, SpellEffectType.ICE_BARRIER)
         if (victimBarrier.isPresent) {
-            val damageToReduce = (attributeBaseValue / 100.0) * event.amount
+            val statValue = deps.statManager.getStat(victimId, StatType.INTELLIGENCE)
+            val reductionPercent = attributeBaseValue + attributeMultiplier * statValue
+            val damageToReduce = (reductionPercent / 100.0) * event.amount
             event.amount = (event.amount - damageToReduce).toInt().coerceAtLeast(0)
         }
 
@@ -91,8 +94,9 @@ class Shatter(deps: SpellDependencies) :
         val victimBarrier = getSpellEffect(victimId, victimId, SpellEffectType.ICE_BARRIER)
         if (victimBarrier.isEmpty) return
 
-        // TODO: Use StatAPI to get statValue when migrated. Currently using baseValue only.
-        val damageToReduce = (attributeBaseValue / 100.0) * event.amount
+        val statValue = deps.statManager.getStat(victimId, StatType.INTELLIGENCE)
+        val reductionPercent = attributeBaseValue + attributeMultiplier * statValue
+        val damageToReduce = (reductionPercent / 100.0) * event.amount
         event.amount = (event.amount - damageToReduce).toInt().coerceAtLeast(0)
     }
 

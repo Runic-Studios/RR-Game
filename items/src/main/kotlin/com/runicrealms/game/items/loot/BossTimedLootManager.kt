@@ -85,6 +85,13 @@ constructor(private val plugin: Plugin, private val lootManager: LootManager) {
             .merge(player.uniqueId, damage, Int::plus)
     }
 
+    /**
+     * Returns true if [entityId] is a currently tracked boss (i.e. has received damage via
+     * [trackBossDamage]). Used by [com.runicrealms.game.gameplay.mob.MobTaggerListener] to skip
+     * regular loot-tagging for boss mobs.
+     */
+    fun isBoss(entityId: UUID): Boolean = bossDamageMap.containsKey(entityId)
+
     /** Returns all active boss timed loot instances across all bosses. */
     fun getAllActiveLoot(): Collection<BossTimedLoot> {
         return activeLoot.values.flatten()

@@ -3,6 +3,7 @@ package com.runicrealms.game.gameplay.spell.spelltypes
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.data.UserDataRegistry
+import com.runicrealms.game.gameplay.player.stat.StatManager
 import com.runicrealms.game.gameplay.spell.api.SkillTreeAPI
 import com.runicrealms.game.gameplay.spell.api.SpellEffectAPI
 import com.runicrealms.game.gameplay.spell.api.StatusEffectAPI
@@ -30,4 +31,5 @@ constructor(
     val damageHandler: DamageHandler,
     val itemStackConverter: ItemStackConverter,
     val combatManager: CombatManager,
+    val statManager: StatManager,
 )

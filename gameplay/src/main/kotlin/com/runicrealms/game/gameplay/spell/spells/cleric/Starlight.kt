@@ -110,7 +110,7 @@ class Starlight(deps: SpellDependencies) :
             val ally = entity as? Player ?: continue
             if (!isValidAlly(player, ally)) continue
             val payload = manager.getShieldedPlayers()[ally.uniqueId] ?: continue
-            payload.shield.startTime = System.currentTimeMillis()
+            payload.shield.refresh()
         }
     }
 
