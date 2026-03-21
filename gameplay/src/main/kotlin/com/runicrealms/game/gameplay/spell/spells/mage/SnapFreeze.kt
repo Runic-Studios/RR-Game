@@ -57,7 +57,7 @@ class SnapFreeze(deps: SpellDependencies) :
                 }
             },
             0L,
-            (PERIOD * 20).toLong(),
+            1L,
         )
     }
 

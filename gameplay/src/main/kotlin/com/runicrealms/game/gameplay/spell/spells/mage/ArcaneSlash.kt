@@ -7,6 +7,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DistanceSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.ShieldingSpell
+import com.runicrealms.game.gameplay.spell.spellutil.particles.SlashEffect
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.LivingEntity
@@ -30,6 +31,9 @@ class ArcaneSlash(deps: SpellDependencies) :
         "Slash in a line dealing $magicDamage magic damage. If an enemy is hit, gain a shield."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
+        player.world.playSound(player.location, Sound.ENTITY_BLAZE_SHOOT, 0.5f, 2.0f)
+        player.world.playSound(player.location, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5f, 1.2f)
+        SlashEffect.slashHorizontal(player, Particle.ENCHANT, player.location)
         val origin = player.location.add(0.0, 1.0, 0.0)
         val dir = origin.direction.normalize()
         var hitAny = false
@@ -53,7 +57,6 @@ class ArcaneSlash(deps: SpellDependencies) :
         if (hitAny) {
             shieldPlayer(player, player, shieldAmount)
         }
-        player.world.playSound(player.location, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.2f)
     }
 
     companion object {

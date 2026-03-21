@@ -2,6 +2,7 @@ package com.runicrealms.game.gameplay.spell.spells.mage
 
 import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.gameplay.spell.effect.RunicStatusEffect
+import com.runicrealms.game.gameplay.spell.effect.SpellEffectType
 import com.runicrealms.game.gameplay.spell.effect.mage.ChilledEffect
 import com.runicrealms.game.gameplay.spell.spelltypes.Spell
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
@@ -12,7 +13,6 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpel
 import com.runicrealms.game.gameplay.spell.spelltypes.components.RadiusSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.WarmupSpell
 import java.util.UUID
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.Sound
@@ -82,7 +82,8 @@ class Blizzard(deps: SpellDependencies) :
                     activeBlizzards.remove(player.uniqueId)
                     return@runTaskTimer
                 }
-                spawnSnowball(player, location)
+                spawnSnowballs(player, location)
+                blizzardDamage(player, location)
                 ticks++
             },
             0L,
@@ -90,31 +91,45 @@ class Blizzard(deps: SpellDependencies) :
         )
     }
 
-    private fun spawnSnowball(caster: Player, location: Location) {
+    private fun blizzardDamage(caster: Player, location: Location) {
+        for (entity in caster.world.getNearbyEntities(location, radius, radius, radius)) {
+            if (entity !is LivingEntity) continue
+            if (!isValidEnemy(caster, entity)) continue
+            caster.world.playSound(entity.location, Sound.BLOCK_GLASS_BREAK, 0.25f, 1.0f)
+            deps.damageHandler.dealMagicDamage(magicDamage.toInt(), entity, caster, this)
+            addStatusEffect(entity, RunicStatusEffect.SLOW_III, SLOW_DURATION, false)
+            val existingChill =
+                getSpellEffect(caster.uniqueId, entity.uniqueId, SpellEffectType.CHILLED)
+            if (existingChill.isPresent) {
+                existingChill.get().cancel()
+            }
+            ChilledEffect(caster, entity, duration = 4.0, spellEffectAPI = deps.spellEffectAPI)
+                .initialize()
+        }
+    }
+
+    private fun spawnSnowballs(caster: Player, location: Location) {
         val dropFrom = location.clone().add(0.0, HEIGHT.toDouble(), 0.0)
-        val snowball = caster.world.spawn(dropFrom, Snowball::class.java)
-        snowball.shooter = caster
-        snowball.velocity = Vector(0.0, -SNOWBALL_SPEED, 0.0)
-        snowball.setMetadata(
-            "blizzard_caster",
-            FixedMetadataValue(deps.plugin, caster.uniqueId.toString()),
-        )
+        val fixedRadius = radius - 1
+        repeat(SNOWBALL_COUNT) {
+            val offsetX = (Math.random() * fixedRadius * 2) - fixedRadius
+            val offsetZ = (Math.random() * fixedRadius * 2) - fixedRadius
+            val spawnLoc = dropFrom.clone().add(offsetX, 0.0, offsetZ)
+            val snowball = caster.world.spawn(spawnLoc, Snowball::class.java)
+            snowball.shooter = caster
+            snowball.velocity = Vector(0.0, -SNOWBALL_SPEED, 0.0)
+            snowball.setMetadata(
+                "blizzard_caster",
+                FixedMetadataValue(deps.plugin, caster.uniqueId.toString()),
+            )
+        }
     }
 
     @EventHandler
     fun onSnowballHit(event: ProjectileHitEvent) {
         val projectile = event.entity
         if (projectile !is Snowball) return
-        val casterStr =
-            projectile.getMetadata("blizzard_caster").firstOrNull()?.asString() ?: return
-        val caster = Bukkit.getPlayer(UUID.fromString(casterStr)) ?: return
-        val hitEntity = event.hitEntity as? LivingEntity ?: return
-        if (!isValidEnemy(caster, hitEntity)) return
-
-        deps.damageHandler.dealMagicDamage(magicDamage.toInt(), hitEntity, caster, this)
-        addStatusEffect(hitEntity, RunicStatusEffect.SLOW_III, SLOW_DURATION, false)
-        ChilledEffect(caster, hitEntity, duration = 4.0, spellEffectAPI = deps.spellEffectAPI)
-            .initialize()
+        if (!projectile.hasMetadata("blizzard_caster")) return
         projectile.remove()
     }
 
@@ -138,5 +153,6 @@ class Blizzard(deps: SpellDependencies) :
         const val SLOW_DURATION = 2.0
         const val SNOWBALL_SPEED = 0.5
         const val RAY_SIZE = 1.0
+        const val SNOWBALL_COUNT = 4
     }
 }
