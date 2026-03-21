@@ -19,6 +19,7 @@ import com.runicrealms.game.gameplay.player.ArmorEquipListener
 import com.runicrealms.game.gameplay.player.ArmorEquipRestrictionListener
 import com.runicrealms.game.gameplay.player.BossTimedLootDamageListener
 import com.runicrealms.game.gameplay.player.HearthstoneListener
+import com.runicrealms.game.gameplay.player.HungerManager
 import com.runicrealms.game.gameplay.player.PlayerInteractCorrectionListener
 import com.runicrealms.game.gameplay.player.PreCommandListener
 import com.runicrealms.game.gameplay.player.RegenManager
@@ -106,6 +107,7 @@ class GameplayModule : AbstractModule() {
         bind(DeathTriggerListener::class.java).asEagerSingleton()
         bind(DeathListener::class.java).asEagerSingleton()
 
+        bind(HungerManager::class.java).asEagerSingleton()
         bind(RegenManager::class.java).asEagerSingleton()
         bind(StatManager::class.java).asEagerSingleton()
         bind(StatListener::class.java).asEagerSingleton()
