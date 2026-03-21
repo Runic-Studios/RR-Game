@@ -46,17 +46,20 @@ class PrimalArcanum(deps: SpellDependencies) :
         const val SHIELD_PER_LEVEL = 0.5
         const val COOLDOWN = 14.0
         const val MANA_COST = 30
-        const val MANA_PER_SLASH = 8
+        // From PrimalArcanum.yml: mana-per-slash: 4
+        const val MANA_PER_SLASH = 4
         const val MAX_ALLIES = 3
         const val SHIELD_PER_SLASH = 5.0
-        const val SHIELD_PER_SLASH_PER_LEVEL = 0.4
+        // From PrimalArcanum.yml: shield-per-slash-per-level: 0.5
+        const val SHIELD_PER_SLASH_PER_LEVEL = 0.5
     }
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         player.world.playSound(player.location, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 2.0f)
         player.world.playSound(player.location, Sound.BLOCK_CONDUIT_ACTIVATE, 1.0f, 1.0f)
-        HelixParticleFrame(3.0, 30.0, 12.0)
-            .playParticle(player, Particle.WITCH, player.location, 15.0)
+        // Old: HelixParticleFrame(radius=3.0, height=30, frequency=12.0) -> ~60 particles at r=3
+        HelixParticleFrame(height = 2.0, radius = 3.0, frequency = 12.0)
+            .playParticle(player, Particle.WITCH, player.location, 0.1)
 
         shieldPlayer(player, player, shieldAmount)
 

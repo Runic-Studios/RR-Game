@@ -45,12 +45,8 @@ class ArcaneSlash(deps: SpellDependencies) :
             for (entity in point.world.getNearbyEntities(point, BEAM_WIDTH, 1.0, BEAM_WIDTH)) {
                 if (entity !is LivingEntity || entity == player) continue
                 if (!isValidEnemy(player, entity)) continue
-                if (
-                    deps.damageHandler.dealMagicDamage(magicDamage.toInt(), entity, player, this) >
-                        0
-                ) {
-                    hitAny = true
-                }
+                hitAny = true
+                deps.damageHandler.dealMagicDamage(magicDamage.toInt(), entity, player, this)
             }
         }
 
