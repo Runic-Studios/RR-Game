@@ -122,8 +122,19 @@ constructor(
         val event = SpellShieldEvent(caster, recipient, spell, amount.toInt())
         Bukkit.getPluginManager().callEvent(event)
         if (event.isCancelled) return
-        val shield = Shield(amount, System.currentTimeMillis(), caster.uniqueId)
-        shieldedPlayers[recipient.uniqueId] = ShieldPayload(recipient, caster, shield)
+        val finalAmount = event.amount.toDouble()
+        val existing = shieldedPlayers[recipient.uniqueId]
+        if (existing != null) {
+            // Stack onto the existing shield rather than overwriting it.
+            existing.shield.amount += finalAmount
+            existing.shield.addSource(caster.uniqueId)
+            existing.shield.refresh()
+            recipient.absorptionAmount = existing.shield.amount
+        } else {
+            val shield = Shield(finalAmount, System.currentTimeMillis(), caster.uniqueId)
+            shieldedPlayers[recipient.uniqueId] = ShieldPayload(recipient, caster, shield)
+            recipient.absorptionAmount = finalAmount
+        }
     }
 
     // --- Public API (also satisfies SpellManagerBridge) ---
