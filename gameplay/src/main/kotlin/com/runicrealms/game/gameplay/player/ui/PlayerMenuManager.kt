@@ -4,13 +4,12 @@ import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.google.common.collect.ImmutableMultimap
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
-import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.TooltipDisplay
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.delay
@@ -146,17 +145,11 @@ constructor(
             "&eGathering Skills",
             "\n&6&lCLICK\n&7To view your gathering skills!\n&7They are account-wide!",
         ).apply {
-            // HIDE_ATTRIBUTES often does not survive ProtocolLib SET_SLOT for tools; hide defaults explicitly.
-            setData(
-                DataComponentTypes.TOOLTIP_DISPLAY,
-                TooltipDisplay.tooltipDisplay()
-                    .addHiddenComponents(
-                        DataComponentTypes.ATTRIBUTE_MODIFIERS,
-                        DataComponentTypes.TOOL,
-                        DataComponentTypes.WEAPON,
-                    )
-                    .build(),
-            )
+            // HIDE_ATTRIBUTES often does not survive ProtocolLib SET_SLOT for tools; set an explicit
+            // empty attribute modifier map instead so no default "When in main hand" lines appear.
+            editMeta { meta ->
+                meta.attributeModifiers = ImmutableMultimap.of()
+            }
         }
 
     private fun donorPerksIcon(): ItemStack =
