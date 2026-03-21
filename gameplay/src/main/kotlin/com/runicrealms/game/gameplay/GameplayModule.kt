@@ -23,29 +23,27 @@ import com.runicrealms.game.gameplay.player.HungerManager
 import com.runicrealms.game.gameplay.player.PlayerInteractCorrectionListener
 import com.runicrealms.game.gameplay.player.PreCommandListener
 import com.runicrealms.game.gameplay.player.RegenManager
-import com.runicrealms.game.gameplay.player.damage.BasicAttackListener
-import com.runicrealms.game.gameplay.player.damage.BowListener
-import com.runicrealms.game.gameplay.player.damage.DamageListener
-import com.runicrealms.game.gameplay.player.damage.EnvironmentDamageListener
-import com.runicrealms.game.gameplay.player.damage.StaffListener
-import com.runicrealms.game.gameplay.spell.AllyVerifyListener
-import com.runicrealms.game.gameplay.spell.EnemyVerifyListener
-import com.runicrealms.game.gameplay.spell.ShieldListener
-import com.runicrealms.game.gameplay.world.DaylightCycleManager
-import com.runicrealms.game.gameplay.world.VanillaRestrictionsListener
 import com.runicrealms.game.gameplay.player.charselect.CharacterAddMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterDeleteMenu
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
+import com.runicrealms.game.gameplay.player.damage.BasicAttackListener
+import com.runicrealms.game.gameplay.player.damage.BowListener
+import com.runicrealms.game.gameplay.player.damage.DamageListener
+import com.runicrealms.game.gameplay.player.damage.EnvironmentDamageListener
+import com.runicrealms.game.gameplay.player.damage.StaffListener
 import com.runicrealms.game.gameplay.player.death.DeathListener
-import com.runicrealms.game.gameplay.player.ui.PlayerMenuManager
-import com.runicrealms.game.gameplay.player.ui.StatsMenu
 import com.runicrealms.game.gameplay.player.death.DeathTriggerListener
 import com.runicrealms.game.gameplay.player.death.GravestoneManager
 import com.runicrealms.game.gameplay.player.stat.StatListener
 import com.runicrealms.game.gameplay.player.stat.StatManager
+import com.runicrealms.game.gameplay.player.ui.PlayerMenuManager
+import com.runicrealms.game.gameplay.player.ui.StatsMenu
 import com.runicrealms.game.gameplay.scoreboard.ScoreboardManager
+import com.runicrealms.game.gameplay.spell.AllyVerifyListener
+import com.runicrealms.game.gameplay.spell.EnemyVerifyListener
+import com.runicrealms.game.gameplay.spell.ShieldListener
 import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.SpellScalingListener
 import com.runicrealms.game.gameplay.spell.SpellStaffListener
@@ -68,6 +66,8 @@ import com.runicrealms.game.gameplay.spell.skilltrees.gui.SubClassMenu
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.StackTaskRegistry
 import com.runicrealms.game.gameplay.tips.TipsDataListener
+import com.runicrealms.game.gameplay.world.DaylightCycleManager
+import com.runicrealms.game.gameplay.world.VanillaRestrictionsListener
 import kotlin.jvm.java
 import kotlin.reflect.KClass
 
@@ -85,7 +85,6 @@ class GameplayModule : AbstractModule() {
         bind(PreCommandListener::class.java).asEagerSingleton()
         bind(HearthstoneListener::class.java).asEagerSingleton()
         bind(BossTimedLootDamageListener::class.java).asEagerSingleton()
-
 
         // --- Damage system ---
         bind(EnvironmentDamageListener::class.java).asEagerSingleton()

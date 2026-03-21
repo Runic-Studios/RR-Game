@@ -58,7 +58,14 @@ class WarpManager @Inject constructor(private val plugin: JavaPlugin) {
             val yaw = if (warp.isDouble("yaw")) warp.getDouble("yaw") else null
             val pitch = if (warp.isDouble("pitch")) warp.getDouble("pitch") else null
 
-            if (worldName == null || x == null || y == null || z == null || yaw == null || pitch == null) {
+            if (
+                worldName == null ||
+                    x == null ||
+                    y == null ||
+                    z == null ||
+                    yaw == null ||
+                    pitch == null
+            ) {
                 continue
             }
 

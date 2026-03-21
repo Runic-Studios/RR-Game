@@ -20,11 +20,7 @@ import org.bukkit.command.CommandSender
  */
 @CommandAlias("runicdamage")
 @CommandPermission("runic.op")
-class RunicDamageCommand
-@Inject
-constructor(
-    commandManager: PaperCommandManager,
-) : BaseCommand() {
+class RunicDamageCommand @Inject constructor(commandManager: PaperCommandManager) : BaseCommand() {
 
     init {
         commandManager.registerCommand(this)

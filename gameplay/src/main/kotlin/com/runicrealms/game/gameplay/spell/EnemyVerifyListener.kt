@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.gameplay.spell.event.EnemyVerifyEvent
 import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -21,9 +20,7 @@ import org.bukkit.plugin.Plugin
  * - The target is in a dungeon world context that disallows this (TODO)
  */
 @Singleton
-class EnemyVerifyListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class EnemyVerifyListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
@@ -46,10 +43,12 @@ constructor(private val plugin: Plugin) : Listener {
         }
 
         // TODO: Cancel if victim is a party member of caster
-        //   if (partyManager.isInSameParty(event.caster.uniqueId, victim.uniqueId)) event.isCancelled = true
+        //   if (partyManager.isInSameParty(event.caster.uniqueId, victim.uniqueId))
+        // event.isCancelled = true
 
         // TODO: Cancel if victim (Player) is in a safe zone
-        //   if (victim is Player && safeZoneRegistry.isInSafeZone(victim.location)) event.isCancelled = true
+        //   if (victim is Player && safeZoneRegistry.isInSafeZone(victim.location))
+        // event.isCancelled = true
 
         // TODO: Cancel based on dungeon world PvP rules (if applicable)
     }

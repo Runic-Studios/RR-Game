@@ -18,13 +18,12 @@ import org.bukkit.plugin.Plugin
  *
  * Currently only caster == recipient is enforced. Party check is stubbed.
  *
- * TODO: Add party membership check once the party system is migrated.
- *   Example: if (!partyManager.isInSameParty(event.caster.uniqueId, event.recipient.uniqueId)) event.isCancelled = true
+ * TODO: Add party membership check once the party system is migrated. Example: if
+ *   (!partyManager.isInSameParty(event.caster.uniqueId, event.recipient.uniqueId))
+ *   event.isCancelled = true
  */
 @Singleton
-class AllyVerifyListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class AllyVerifyListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)

@@ -26,9 +26,9 @@ private const val TAG_TIME_SECONDS = 10
 /**
  * Tracks which player first damages a mob and grants them loot priority for a short window.
  *
- * When a player damages a mob, it is "tagged" to that player. When the mob drops loot, the
- * calling system (typically a death handler) should call [dropTaggedLoot] to mark those items
- * as priority for the tagger. Other players cannot pick up priority items for [PRIORITY_DURATION_SECONDS]
+ * When a player damages a mob, it is "tagged" to that player. When the mob drops loot, the calling
+ * system (typically a death handler) should call [dropTaggedLoot] to mark those items as priority
+ * for the tagger. Other players cannot pick up priority items for [PRIORITY_DURATION_SECONDS]
  * seconds.
  *
  * Boss-faction mobs (tracked by BossTimedLootDamageListener) are excluded from regular tagging.
@@ -36,9 +36,7 @@ private const val TAG_TIME_SECONDS = 10
  * TODO: Connect [dropTaggedLoot] to the mob death/loot-drop handler once that system is migrated.
  */
 @Singleton
-class MobTaggerListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class MobTaggerListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     /** Maps player UUID -> mob UUID (the mob that player has tagged). */
     private val taggedMobs = ConcurrentHashMap<UUID, UUID>()
@@ -68,8 +66,8 @@ constructor(private val plugin: Plugin) : Listener {
     }
 
     /**
-     * Drops [itemStack] at [location] with pickup priority for [player].
-     * Other players cannot pick up this item for [PRIORITY_DURATION_SECONDS] seconds.
+     * Drops [itemStack] at [location] with pickup priority for [player]. Other players cannot pick
+     * up this item for [PRIORITY_DURATION_SECONDS] seconds.
      */
     fun dropTaggedLoot(player: Player, location: Location, itemStack: ItemStack) {
         priorityItems.getOrPut(itemStack) { ConcurrentHashMap.newKeySet() }.add(player.uniqueId)

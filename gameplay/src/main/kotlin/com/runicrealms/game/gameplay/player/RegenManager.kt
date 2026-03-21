@@ -15,10 +15,10 @@ import com.runicrealms.game.gameplay.spell.combat.CombatManager
 import java.util.UUID
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.bukkit.attribute.Attribute
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import org.bukkit.Bukkit
+import org.bukkit.attribute.Attribute
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin

@@ -50,7 +50,8 @@ constructor(
         val classType = getClassTypeFromIdentifier(args[1])
         if (classType == null || classType == ClassType.ANY) {
             sender.sendMessage(
-                "&c'${args[1]}' is not a valid class. Valid: archer, cleric, mage, rogue, warrior.".colorFormat()
+                "&c'${args[1]}' is not a valid class. Valid: archer, cleric, mage, rogue, warrior."
+                    .colorFormat()
             )
             return
         }
@@ -69,15 +70,21 @@ constructor(
             traits.subClassType = null
         }
         // Switch to MC main thread to update Bukkit state and recalculate health for the new class
-        Bukkit.getScheduler().runTask(plugin, Runnable {
-            target.level = 0
-            target.exp = 0.0F
-            characterHealthHelper.setCharacterMaxHealth(character)
-        })
+        Bukkit.getScheduler()
+            .runTask(
+                plugin,
+                Runnable {
+                    target.level = 0
+                    target.exp = 0.0F
+                    characterHealthHelper.setCharacterMaxHealth(character)
+                },
+            )
         val displayName = classType.name.lowercase().replaceFirstChar { it.uppercase() }
         sender.sendMessage("&aSet ${target.name}'s class to &f$displayName&a.".colorFormat())
         if (sender != target) {
-            target.sendMessage("&aYour class has been set to &f$displayName&a by an admin.".colorFormat())
+            target.sendMessage(
+                "&aYour class has been set to &f$displayName&a by an admin.".colorFormat()
+            )
         }
     }
 }

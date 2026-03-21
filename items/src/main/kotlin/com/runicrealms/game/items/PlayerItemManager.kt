@@ -54,14 +54,16 @@ constructor(
 
     /**
      * PlayerArmorChangeEvent does not cover the OFF_HAND slot, so we still listen to
-     * ArmorEquipEvent for that case. A one-tick Bukkit scheduler delay ensures the off-hand slot
-     * is committed before we read it.
+     * ArmorEquipEvent for that case. A one-tick Bukkit scheduler delay ensures the off-hand slot is
+     * committed before we read it.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onArmorEquipEvent(event: ArmorEquipEvent) {
         if (event.isCancelled) return
         if (event.type != ArmorEquipEvent.ArmorType.OFFHAND) return
         val holder = cachedCharacterStats[event.player.uniqueId] ?: return
-        Bukkit.getScheduler().runTask(plugin) { _ -> holder.updateAllItems(onLogin = false, callEvent = true) }
+        Bukkit.getScheduler().runTask(plugin) { _ ->
+            holder.updateAllItems(onLogin = false, callEvent = true)
+        }
     }
 }

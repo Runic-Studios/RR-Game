@@ -18,8 +18,8 @@ class DamageHandler @Inject constructor(private val plugin: Plugin) {
 
     /**
      * True while [dealMagicDamage] or [dealPhysicalDamage] is executing [LivingEntity.damage].
-     * Bukkit re-fires [EntityDamageByEntityEvent] during that call; listeners check this flag
-     * to avoid intercepting the re-trigger.
+     * Bukkit re-fires [EntityDamageByEntityEvent] during that call; listeners check this flag to
+     * avoid intercepting the re-trigger.
      */
     var isDealing: Boolean = false
         private set

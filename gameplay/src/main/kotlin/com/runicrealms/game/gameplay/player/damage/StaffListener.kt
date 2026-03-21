@@ -26,9 +26,9 @@ import org.bukkit.plugin.Plugin
 /**
  * Handles the Mage basic (staff) attack by listening to [StaffAttackEvent].
  *
- * [SpellStaffListener] fires [StaffAttackEvent] when a Mage left-clicks; this listener performs
- * the raycast, draws the particle beam, deals damage via [DamageHandler.dealPhysicalDamage], and
- * fires [BasicAttackEvent] to apply the item cooldown.
+ * [SpellStaffListener] fires [StaffAttackEvent] when a Mage left-clicks; this listener performs the
+ * raycast, draws the particle beam, deals damage via [DamageHandler.dealPhysicalDamage], and fires
+ * [BasicAttackEvent] to apply the item cooldown.
  */
 @Singleton
 class StaffListener
@@ -53,7 +53,9 @@ constructor(
 
         if (gameItem.weaponTemplate.level > player.level) {
             player.playSound(player.location, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f)
-            player.sendMessage(Component.text("Your level is too low to wield this!", NamedTextColor.RED))
+            player.sendMessage(
+                Component.text("Your level is too low to wield this!", NamedTextColor.RED)
+            )
             return
         }
 
@@ -63,7 +65,9 @@ constructor(
                 player.location.direction,
                 event.range.toDouble(),
                 RAY_SIZE,
-            ) { isValidEnemy(player, it) }
+            ) {
+                isValidEnemy(player, it)
+            }
 
         player.playSound(player.location, Sound.ENTITY_GHAST_SHOOT, 0.4f, 2.0f)
 
@@ -96,7 +100,13 @@ constructor(
         val randomNum =
             if (maxDamage > minDamage) ThreadLocalRandom.current().nextInt(minDamage, maxDamage + 1)
             else minDamage
-        damageHandler.dealPhysicalDamage(randomNum, victim, player, isBasicAttack = true, isRanged = true)
+        damageHandler.dealPhysicalDamage(
+            randomNum,
+            victim,
+            player,
+            isBasicAttack = true,
+            isRanged = true,
+        )
         player.playSound(player.location, Sound.ENTITY_PLAYER_HURT, 0.5f, 1.0f)
     }
 

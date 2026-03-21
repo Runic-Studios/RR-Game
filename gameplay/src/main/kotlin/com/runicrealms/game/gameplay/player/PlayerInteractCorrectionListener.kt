@@ -20,19 +20,17 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 /**
- * Fixes a Spigot 1.19+ bug where [PlayerInteractEvent] is not fired when the player's crosshair
- * is within 3-5 blocks of a mob entity.
+ * Fixes a Spigot 1.19+ bug where [PlayerInteractEvent] is not fired when the player's crosshair is
+ * within 3-5 blocks of a mob entity.
  *
  * Reference: https://www.spigotmc.org/threads/574671/
  *
  * Tracks recent [PlayerInteractEvent] timestamps per player. On an ARM_SWING animation, if no
- * interact event was recorded within the past 10ms, a synthetic LEFT_CLICK_AIR interact event
- * is fired with a 2-tick delay (1 tick is too early for damage processing; 3 ticks is noticeable).
+ * interact event was recorded within the past 10ms, a synthetic LEFT_CLICK_AIR interact event is
+ * fired with a 2-tick delay (1 tick is too early for damage processing; 3 ticks is noticeable).
  */
 @Singleton
-class PlayerInteractCorrectionListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class PlayerInteractCorrectionListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     private val playerInteractions = HashMap<UUID, Long>()
 
@@ -46,28 +44,33 @@ constructor(private val plugin: Plugin) : Listener {
 
         val current = System.currentTimeMillis()
 
-        plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            val time = playerInteractions.remove(event.player.uniqueId)
+        plugin.server.scheduler.runTaskLater(
+            plugin,
+            Runnable {
+                val time = playerInteractions.remove(event.player.uniqueId)
 
-            // If an interact event was recorded recently (within 10ms), no correction is needed
-            if (time != null && time + 10 > current) return@Runnable
+                // If an interact event was recorded recently (within 10ms), no correction is needed
+                if (time != null && time + 10 > current) return@Runnable
 
-            val item: ItemStack? =
-                if (event.player.inventory.itemInMainHand.type != Material.AIR) {
-                    event.player.inventory.itemInMainHand
-                } else {
-                    null
-                }
+                val item: ItemStack? =
+                    if (event.player.inventory.itemInMainHand.type != Material.AIR) {
+                        event.player.inventory.itemInMainHand
+                    } else {
+                        null
+                    }
 
-            val interactEvent = PlayerInteractEvent(
-                event.player,
-                Action.LEFT_CLICK_AIR,
-                item,
-                null,
-                event.player.facing,
-            )
-            plugin.server.pluginManager.callEvent(interactEvent)
-        }, 2L)
+                val interactEvent =
+                    PlayerInteractEvent(
+                        event.player,
+                        Action.LEFT_CLICK_AIR,
+                        item,
+                        null,
+                        event.player.facing,
+                    )
+                plugin.server.pluginManager.callEvent(interactEvent)
+            },
+            2L,
+        )
     }
 
     /** Records the timestamp of a real interact event so the correction is suppressed. */
@@ -83,7 +86,9 @@ constructor(private val plugin: Plugin) : Listener {
         playerInteractions[event.player.uniqueId] = System.currentTimeMillis()
     }
 
-    /** Records entity damage as an interact-equivalent to suppress unnecessary correction events. */
+    /**
+     * Records entity damage as an interact-equivalent to suppress unnecessary correction events.
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val player = event.damager as? Player ?: return

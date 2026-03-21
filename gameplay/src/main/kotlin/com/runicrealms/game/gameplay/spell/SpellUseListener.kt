@@ -28,8 +28,8 @@ import org.bukkit.scheduler.BukkitTask
 
 /**
  * Manages the two-step spell cast activation UI:
- * 1. First trigger (right-click for most classes, left-click for Archer): opens the cast menu
- *    and starts a [SPELL_TIMEOUT]-second window.
+ * 1. First trigger (right-click for most classes, left-click for Archer): opens the cast menu and
+ *    starts a [SPELL_TIMEOUT]-second window.
  * 2. Second trigger within the window: fires [SpellCastEvent] which calls [Spell.execute].
  *
  * Current stubs (see SPELL_MIGRATION.md):
@@ -151,8 +151,7 @@ constructor(
     private fun fireSpellTrigger(player: Player, slot: SpellSlot) {
         val classType = spellManager.getPlayerClassType(player.uniqueId)
         val triggerType =
-            if (classType == ClassType.ARCHER) SpellTriggerType.ARCHER
-            else SpellTriggerType.DEFAULT
+            if (classType == ClassType.ARCHER) SpellTriggerType.ARCHER else SpellTriggerType.DEFAULT
         Bukkit.getPluginManager().callEvent(SpellTriggerEvent(player, slot, triggerType))
     }
 

@@ -110,7 +110,8 @@ constructor(
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBowShoot(event: PlayerInteractEvent) {
         if (event.hand != EquipmentSlot.HAND) return
-        if (event.action != Action.RIGHT_CLICK_AIR && event.action != Action.RIGHT_CLICK_BLOCK) return
+        if (event.action != Action.RIGHT_CLICK_AIR && event.action != Action.RIGHT_CLICK_BLOCK)
+            return
 
         val player = event.player
         val item = player.inventory.itemInMainHand
@@ -122,13 +123,16 @@ constructor(
         val gameItem = itemStackConverter.convertToGameItem(item) as? GameItemWeapon ?: return
 
         val classType = spellManager.getPlayerClassType(player.uniqueId)
-        if (classType != ClassType.ARCHER || gameItem.weaponTemplate.classType != ClassType.ARCHER) return
+        if (classType != ClassType.ARCHER || gameItem.weaponTemplate.classType != ClassType.ARCHER)
+            return
 
         if (player.getCooldown(Material.BOW) > 0) return
 
         if (gameItem.weaponTemplate.level > player.level) {
             player.playSound(player.location, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f)
-            player.sendMessage(Component.text("Your level is too low to wield this!", NamedTextColor.RED))
+            player.sendMessage(
+                Component.text("Your level is too low to wield this!", NamedTextColor.RED)
+            )
             return
         }
 

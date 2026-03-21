@@ -3,22 +3,20 @@ package com.runicrealms.game.gameplay.player.damage
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.runicrealms.game.gameplay.spell.event.BasicAttackEvent
+import kotlin.math.max
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
-import kotlin.math.max
 
 /**
  * Applies weapon attack cooldown after a [BasicAttackEvent] fires.
  *
- * Reads [BasicAttackEvent.cooldownTicks] (which may be modified by other listeners, such as
- * stat scaling) and applies it as a Bukkit item cooldown on the weapon material.
+ * Reads [BasicAttackEvent.cooldownTicks] (which may be modified by other listeners, such as stat
+ * scaling) and applies it as a Bukkit item cooldown on the weapon material.
  */
 @Singleton
-class BasicAttackListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class BasicAttackListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)

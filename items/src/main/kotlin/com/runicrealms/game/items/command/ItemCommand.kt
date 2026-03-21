@@ -462,15 +462,31 @@ constructor(
         sender.sendMessage("$PREFIX&7/runic item help".colorFormat())
         sender.sendMessage("$PREFIX&7/runic item clear <player> [item] [amount]".colorFormat())
         sender.sendMessage("$PREFIX&7/runic item drop <item> <location> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item drop-range <min-level> <max-level> <location> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item drop-lt <loot-table> <min-level> <max-level> <location>".colorFormat())
+        sender.sendMessage(
+            "$PREFIX&7/runic item drop-range <min-level> <max-level> <location> [amount]"
+                .colorFormat()
+        )
+        sender.sendMessage(
+            "$PREFIX&7/runic item drop-lt <loot-table> <min-level> <max-level> <location>"
+                .colorFormat()
+        )
         sender.sendMessage("$PREFIX&7/runic item get <item> [amount]".colorFormat())
         sender.sendMessage("$PREFIX&7/runic item get-data".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item get-range <level-min> <level-max> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item get-random [-range X,Y] [-rarity R] [-class C] [-items T] [-lqm L]".colorFormat())
+        sender.sendMessage(
+            "$PREFIX&7/runic item get-range <level-min> <level-max> [amount]".colorFormat()
+        )
+        sender.sendMessage(
+            "$PREFIX&7/runic item get-random [-range X,Y] [-rarity R] [-class C] [-items T] [-lqm L]"
+                .colorFormat()
+        )
         sender.sendMessage("$PREFIX&7/runic item give <player> <item> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item give-range <player> <level-min> <level-max> [amount]".colorFormat())
-        sender.sendMessage("$PREFIX&7/runic item picker <player> <item> <item> <item> <item> <item>".colorFormat())
+        sender.sendMessage(
+            "$PREFIX&7/runic item give-range <player> <level-min> <level-max> [amount]"
+                .colorFormat()
+        )
+        sender.sendMessage(
+            "$PREFIX&7/runic item picker <player> <item> <item> <item> <item> <item>".colorFormat()
+        )
         sender.sendMessage("$PREFIX&7/runic item set-perk <perk-type> <stacks>".colorFormat())
     }
 

@@ -54,8 +54,12 @@ class ArmorEquipListener @Inject constructor(private val plugin: Plugin) : Liste
                 event.slotType != InventoryType.SlotType.CONTAINER
         )
             return
-        if (event.clickedInventory != null && event.clickedInventory!!.type != InventoryType.PLAYER) return
-        if (event.inventory.type != InventoryType.CRAFTING && event.inventory.type != InventoryType.PLAYER)
+        if (event.clickedInventory != null && event.clickedInventory!!.type != InventoryType.PLAYER)
+            return
+        if (
+            event.inventory.type != InventoryType.CRAFTING &&
+                event.inventory.type != InventoryType.PLAYER
+        )
             return
         if (event.whoClicked !is Player) return
         var newArmorType = ArmorType.matchType(if (shift) event.currentItem else event.cursor)
@@ -86,7 +90,10 @@ class ArmorEquipListener @Inject constructor(private val plugin: Plugin) : Liste
                             (if (equipping) null else event.currentItem),
                             (if (equipping) event.currentItem else null),
                         )
-                    Bukkit.getServer().pluginManager.callSuspendingEvent(armorEquipEvent, plugin).joinAll()
+                    Bukkit.getServer()
+                        .pluginManager
+                        .callSuspendingEvent(armorEquipEvent, plugin)
+                        .joinAll()
                     if (armorEquipEvent.isCancelled) {
                         event.isCancelled = true
                     }
@@ -113,7 +120,8 @@ class ArmorEquipListener @Inject constructor(private val plugin: Plugin) : Liste
                     } else { // un-equipping
                         newArmorType =
                             ArmorType.matchType(
-                                if (!isAirOrNull(event.currentItem)) event.currentItem else event.cursor
+                                if (!isAirOrNull(event.currentItem)) event.currentItem
+                                else event.cursor
                             )
                     }
                 }
@@ -140,7 +148,10 @@ class ArmorEquipListener @Inject constructor(private val plugin: Plugin) : Liste
                         oldArmorPiece!!,
                         newArmorPiece,
                     )
-                Bukkit.getServer().pluginManager.callSuspendingEvent(armorEquipEvent, plugin).joinAll()
+                Bukkit.getServer()
+                    .pluginManager
+                    .callSuspendingEvent(armorEquipEvent, plugin)
+                    .joinAll()
                 if (armorEquipEvent.isCancelled()) {
                     event.isCancelled = true
                 }

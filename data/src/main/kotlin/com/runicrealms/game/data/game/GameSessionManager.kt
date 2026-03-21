@@ -490,9 +490,9 @@ constructor(
      * During normal play, [onPlayerQuit] handles teardown per-player via a coroutine. However, when
      * the server stops, Bukkit fires [PlayerQuitEvent] for every online player but MCCoroutine
      * cancels the plugin's coroutine scope before those async handlers finish, leaving locks
-     * unreleased and quit-event state serialisation (location, inventory, etc.) incomplete.
-     * This method runs synchronously (via [runBlocking]) so everything is guaranteed to complete
-     * before [onDisable] returns.
+     * unreleased and quit-event state serialisation (location, inventory, etc.) incomplete. This
+     * method runs synchronously (via [runBlocking]) so everything is guaranteed to complete before
+     * [onDisable] returns.
      *
      * Each session is removed from [sessions] before kicking the player, so any [endSession]
      * coroutine launched from the resulting [PlayerQuitEvent] will find no session and return
@@ -514,9 +514,8 @@ constructor(
                 // from the kick's PlayerQuitEvent finds no session and returns early.
                 val session = sessions.remove(userId) ?: continue
 
-                Bukkit.getPlayer(userId)?.kick(
-                    Component.text("This server is shutting down", NamedTextColor.RED)
-                )
+                Bukkit.getPlayer(userId)
+                    ?.kick(Component.text("This server is shutting down", NamedTextColor.RED))
 
                 // Fire GameCharacterQuitEvent so handlers can serialise character state
                 // (location, inventory, etc.) back into the in-memory document before we save.

@@ -2,12 +2,10 @@ package com.runicrealms.game.tools.command
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.PaperCommandManager
-import co.aikar.commands.annotation.CatchUnknown
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Conditions
-import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
 import com.google.inject.Inject
@@ -25,10 +23,8 @@ import org.bukkit.event.player.PlayerTeleportEvent
 @CommandPermission("runic.warp")
 class WarpCommand
 @Inject
-constructor(
-    commandManager: PaperCommandManager,
-    private val warpManager: WarpManager,
-) : BaseCommand() {
+constructor(commandManager: PaperCommandManager, private val warpManager: WarpManager) :
+    BaseCommand() {
 
     init {
         commandManager.commandCompletions.registerAsyncCompletion("warps") { context ->
@@ -43,19 +39,29 @@ constructor(
     @Syntax("<warp name>")
     fun onWarp(player: Player, args: Array<String>) {
         if (args.size != 1) {
-            player.sendMessage(WARP_PREFIX.append(Component.text("/runic warp <warp name>", NamedTextColor.RED)))
+            player.sendMessage(
+                WARP_PREFIX.append(Component.text("/runic warp <warp name>", NamedTextColor.RED))
+            )
             return
         }
 
         val location = warpManager.getWarp(args[0])
 
         if (location == null || !location.isWorldLoaded) {
-            player.sendMessage(WARP_PREFIX.append(Component.text("You have entered an invalid warp!", NamedTextColor.RED)))
+            player.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("You have entered an invalid warp!", NamedTextColor.RED)
+                )
+            )
             return
         }
 
         player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
-        player.sendMessage(WARP_PREFIX.append(Component.text("You have warped to ${args[0]}!", NamedTextColor.GREEN)))
+        player.sendMessage(
+            WARP_PREFIX.append(
+                Component.text("You have warped to ${args[0]}!", NamedTextColor.GREEN)
+            )
+        )
     }
 
     @Subcommand("setwarp add")
@@ -64,14 +70,26 @@ constructor(
     @Syntax("<warp name>")
     fun onSetWarpAdd(player: Player, args: Array<String>) {
         if (args.size != 1) {
-            player.sendMessage(WARP_PREFIX.append(Component.text("/runic setwarp add <warp name>", NamedTextColor.RED)))
+            player.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("/runic setwarp add <warp name>", NamedTextColor.RED)
+                )
+            )
             return
         }
 
         if (warpManager.addWarp(args[0], player.location)) {
-            player.sendMessage(WARP_PREFIX.append(Component.text("Successfully added the ${args[0]} warp!", NamedTextColor.GREEN)))
+            player.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("Successfully added the ${args[0]} warp!", NamedTextColor.GREEN)
+                )
+            )
         } else {
-            player.sendMessage(WARP_PREFIX.append(Component.text("The ${args[0]} warp already exists!", NamedTextColor.RED)))
+            player.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("The ${args[0]} warp already exists!", NamedTextColor.RED)
+                )
+            )
         }
     }
 
@@ -80,14 +98,29 @@ constructor(
     @Syntax("<warp name>")
     fun onSetWarpRemove(sender: CommandSender, args: Array<String>) {
         if (args.size != 1) {
-            sender.sendMessage(WARP_PREFIX.append(Component.text("/runic setwarp remove <warp name>", NamedTextColor.RED)))
+            sender.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("/runic setwarp remove <warp name>", NamedTextColor.RED)
+                )
+            )
             return
         }
 
         if (warpManager.removeWarp(args[0])) {
-            sender.sendMessage(WARP_PREFIX.append(Component.text("Successfully removed the ${args[0]} warp!", NamedTextColor.GREEN)))
+            sender.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text(
+                        "Successfully removed the ${args[0]} warp!",
+                        NamedTextColor.GREEN,
+                    )
+                )
+            )
         } else {
-            sender.sendMessage(WARP_PREFIX.append(Component.text("The ${args[0]} warp does not exist!", NamedTextColor.RED)))
+            sender.sendMessage(
+                WARP_PREFIX.append(
+                    Component.text("The ${args[0]} warp does not exist!", NamedTextColor.RED)
+                )
+            )
         }
     }
 

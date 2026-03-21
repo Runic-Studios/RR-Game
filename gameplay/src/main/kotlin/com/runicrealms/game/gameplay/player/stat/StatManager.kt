@@ -3,7 +3,6 @@ package com.runicrealms.game.gameplay.player.stat
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.StatType
 import com.runicrealms.game.common.SubClassType
 import com.runicrealms.game.data.UserDataRegistry
@@ -98,7 +97,11 @@ constructor(
                     for (perk in treeData.perks) {
                         if (perk !is PerkBaseStat) continue
                         if (perk.currentlyAllocatedPoints <= 0) continue
-                        statMap.merge(perk.stat, perk.bonusAmount * perk.currentlyAllocatedPoints, Int::plus)
+                        statMap.merge(
+                            perk.stat,
+                            perk.bonusAmount * perk.currentlyAllocatedPoints,
+                            Int::plus,
+                        )
                     }
                 }
             } catch (exception: Exception) {

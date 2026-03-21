@@ -60,8 +60,10 @@ constructor(
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onVanillaRegen(event: EntityRegainHealthEvent) {
         if (event.entity !is Player) return
-        if (event.regainReason == EntityRegainHealthEvent.RegainReason.SATIATED ||
-            event.regainReason == EntityRegainHealthEvent.RegainReason.EATING) {
+        if (
+            event.regainReason == EntityRegainHealthEvent.RegainReason.SATIATED ||
+                event.regainReason == EntityRegainHealthEvent.RegainReason.EATING
+        ) {
             event.isCancelled = true
         }
     }

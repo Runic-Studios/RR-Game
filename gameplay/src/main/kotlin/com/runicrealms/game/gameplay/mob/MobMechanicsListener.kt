@@ -25,17 +25,15 @@ import org.bukkit.plugin.Plugin
  * - Updates the health bar on health regen (for MythicMobs with disguises)
  *
  * For MythicMobs entities, the health bar is updated via the MythicMobs skill system
- * ("UpdateHealthBar_N") which handles the disguise name tag. For non-MythicMob entities,
- * the custom name is set directly.
+ * ("UpdateHealthBar_N") which handles the disguise name tag. For non-MythicMob entities, the custom
+ * name is set directly.
  *
- * TODO: Verify that the MythicMobs skill "UpdateHealthBar_N" exists in the MythicMobs
- *   skill configuration (N = 0-10 representing health percentage deciles).
+ * TODO: Verify that the MythicMobs skill "UpdateHealthBar_N" exists in the MythicMobs skill
+ *   configuration (N = 0-10 representing health percentage deciles).
  * TODO: Verify the MythicMobs APIHelper.castSkill API signature for the current MythicMobs version.
  */
 @Singleton
-class MobMechanicsListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class MobMechanicsListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
@@ -83,12 +81,17 @@ constructor(private val plugin: Plugin) : Listener {
         val optional = MythicBukkit.inst().mobManager.getActiveMob(entity.uniqueId)
         if (optional.isPresent) {
             // Delay by 1 tick so health value reflects the post-damage state
-            plugin.server.scheduler.runTaskLater(plugin, Runnable {
-                val numBars = calculateNumColours(entity)
-                // TODO: Verify castSkill API for the current MythicMobs version.
-                //   Older versions: MythicBukkit.inst().apiHelper.castSkill(entity, "UpdateHealthBar_$numBars")
-                MythicBukkit.inst().apiHelper.castSkill(entity, "UpdateHealthBar_$numBars")
-            }, 1L)
+            plugin.server.scheduler.runTaskLater(
+                plugin,
+                Runnable {
+                    val numBars = calculateNumColours(entity)
+                    // TODO: Verify castSkill API for the current MythicMobs version.
+                    //   Older versions: MythicBukkit.inst().apiHelper.castSkill(entity,
+                    // "UpdateHealthBar_$numBars")
+                    MythicBukkit.inst().apiHelper.castSkill(entity, "UpdateHealthBar_$numBars")
+                },
+                1L,
+            )
         } else {
             val healthBar = buildHealthBar(entity, damage)
             entity.customName(healthBar)
@@ -119,17 +122,61 @@ constructor(private val plugin: Plugin) : Listener {
     private fun colourBars(numBars: Int): Pair<Component, Component> {
         val pipe = "|||||"
         return when (numBars) {
-            10 -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 0))
-            9  -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 1))
-            8  -> Pair(pipeComponent(pipe, NamedTextColor.GREEN, 0), pipeComponent(pipe, NamedTextColor.GREEN, 2))
-            7  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.YELLOW, 3))
-            6  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.YELLOW, 4))
-            5  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 0), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
-            4  -> Pair(pipeComponent(pipe, NamedTextColor.YELLOW, 1), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
-            3  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 2), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
-            2  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 3), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
-            1  -> Pair(pipeComponent(pipe, NamedTextColor.RED, 4), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
-            else -> Pair(pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0), pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0))
+            10 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.GREEN, 0),
+                    pipeComponent(pipe, NamedTextColor.GREEN, 0),
+                )
+            9 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.GREEN, 0),
+                    pipeComponent(pipe, NamedTextColor.GREEN, 1),
+                )
+            8 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.GREEN, 0),
+                    pipeComponent(pipe, NamedTextColor.GREEN, 2),
+                )
+            7 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 0),
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 3),
+                )
+            6 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 0),
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 4),
+                )
+            5 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 0),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
+            4 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.YELLOW, 1),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
+            3 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.RED, 2),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
+            2 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.RED, 3),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
+            1 ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.RED, 4),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
+            else ->
+                Pair(
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                    pipeComponent(pipe, NamedTextColor.DARK_GRAY, 0),
+                )
         }
     }
 

@@ -12,22 +12,20 @@ private const val DAY_THRESHOLD = 12000L
 private const val TICKS_PER_CYCLE = 2L
 
 // Task runs every 2 ticks (100ms). During day, time advances 1 tick per iteration (half speed ->
-// 20-minute days). During night, time advances 2 ticks per iteration (normal speed -> ~7-minute nights).
-private const val DAY_TICK_ADVANCE = 1L   // TICKS_PER_CYCLE * 0.5
+// 20-minute days). During night, time advances 2 ticks per iteration (normal speed -> ~7-minute
+// nights).
+private const val DAY_TICK_ADVANCE = 1L // TICKS_PER_CYCLE * 0.5
 private const val NIGHT_TICK_ADVANCE = 2L // TICKS_PER_CYCLE * 1.0
 
 /**
  * Manages a custom day/night cycle for the Alterra world.
- *
  * - Daytime (tick 0-12000): half speed (20-minute days)
  * - Nighttime (tick 12000+): normal speed (~7-minute nights)
  *
  * Runs on the Minecraft main thread via MCCoroutine to allow safe world mutations.
  */
 @Singleton
-class DaylightCycleManager
-@Inject
-constructor(private val plugin: Plugin) {
+class DaylightCycleManager @Inject constructor(private val plugin: Plugin) {
 
     init {
         val world = Bukkit.getWorld("Alterra")
@@ -49,6 +47,7 @@ constructor(private val plugin: Plugin) {
     private fun tick() {
         val world = Bukkit.getWorld("Alterra") ?: return
         val time = world.time
-        world.time = if (time <= DAY_THRESHOLD) time + DAY_TICK_ADVANCE else time + NIGHT_TICK_ADVANCE
+        world.time =
+            if (time <= DAY_THRESHOLD) time + DAY_TICK_ADVANCE else time + NIGHT_TICK_ADVANCE
     }
 }

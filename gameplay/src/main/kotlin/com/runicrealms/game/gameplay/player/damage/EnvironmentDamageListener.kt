@@ -10,21 +10,22 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.plugin.Plugin
 
-private val ENVIRONMENT_CAUSES = setOf(
-    EntityDamageEvent.DamageCause.FALL,
-    EntityDamageEvent.DamageCause.FIRE,
-    EntityDamageEvent.DamageCause.FIRE_TICK,
-    EntityDamageEvent.DamageCause.LAVA,
-    EntityDamageEvent.DamageCause.DROWNING,
-    EntityDamageEvent.DamageCause.SUFFOCATION,
-    EntityDamageEvent.DamageCause.VOID,
-    EntityDamageEvent.DamageCause.LIGHTNING,
-    EntityDamageEvent.DamageCause.POISON,
-    EntityDamageEvent.DamageCause.WITHER,
-    EntityDamageEvent.DamageCause.HOT_FLOOR,
-    EntityDamageEvent.DamageCause.FREEZE,
-    EntityDamageEvent.DamageCause.STARVATION,
-)
+private val ENVIRONMENT_CAUSES =
+    setOf(
+        EntityDamageEvent.DamageCause.FALL,
+        EntityDamageEvent.DamageCause.FIRE,
+        EntityDamageEvent.DamageCause.FIRE_TICK,
+        EntityDamageEvent.DamageCause.LAVA,
+        EntityDamageEvent.DamageCause.DROWNING,
+        EntityDamageEvent.DamageCause.SUFFOCATION,
+        EntityDamageEvent.DamageCause.VOID,
+        EntityDamageEvent.DamageCause.LIGHTNING,
+        EntityDamageEvent.DamageCause.POISON,
+        EntityDamageEvent.DamageCause.WITHER,
+        EntityDamageEvent.DamageCause.HOT_FLOOR,
+        EntityDamageEvent.DamageCause.FREEZE,
+        EntityDamageEvent.DamageCause.STARVATION,
+    )
 
 /**
  * Intercepts vanilla environment damage for players and routes it through [EnvironmentDamageEvent].
@@ -34,9 +35,7 @@ private val ENVIRONMENT_CAUSES = setOf(
  * - GenericDamageListener: listens to [EnvironmentDamageEvent] and applies the final damage
  */
 @Singleton
-class EnvironmentDamageListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class EnvironmentDamageListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)

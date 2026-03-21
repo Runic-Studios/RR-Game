@@ -31,8 +31,8 @@ constructor(private val plugin: Plugin, private val lootManager: LootManager) {
     private val activeLoot = HashMap<String, MutableList<BossTimedLoot>>()
 
     /**
-     * Per-boss damage tracking: boss entity UUID -> (player UUID -> total damage dealt).
-     * Used by [BossTimedLootDamageListener] to record damage contributions for loot thresholds.
+     * Per-boss damage tracking: boss entity UUID -> (player UUID -> total damage dealt). Used by
+     * [BossTimedLootDamageListener] to record damage contributions for loot thresholds.
      */
     private val bossDamageMap = ConcurrentHashMap<UUID, ConcurrentHashMap<UUID, Int>>()
 

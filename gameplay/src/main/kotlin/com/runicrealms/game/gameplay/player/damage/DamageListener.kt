@@ -23,13 +23,12 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.plugin.Plugin
 
-
 /**
  * Handles core melee (non-bow, non-staff) damage from players to entities.
  *
- * Warrior, Rogue, and Cleric use direct melee attacks via [EntityDamageByEntityEvent].
- * Mage (staff) attacks are handled by [StaffListener] via [StaffAttackEvent].
- * Archer (bow) attacks are handled by [BowListener] via [EntityShootBowEvent].
+ * Warrior, Rogue, and Cleric use direct melee attacks via [EntityDamageByEntityEvent]. Mage (staff)
+ * attacks are handled by [StaffListener] via [StaffAttackEvent]. Archer (bow) attacks are handled
+ * by [BowListener] via [EntityShootBowEvent].
  */
 @Singleton
 class DamageListener
@@ -73,7 +72,9 @@ constructor(
 
         if (gameItem.weaponTemplate.level > attacker.level) {
             attacker.playSound(attacker.location, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f)
-            attacker.sendMessage(Component.text("Your level is too low to wield this!", NamedTextColor.RED))
+            attacker.sendMessage(
+                Component.text("Your level is too low to wield this!", NamedTextColor.RED)
+            )
             return
         }
 
@@ -101,6 +102,12 @@ constructor(
         Bukkit.getPluginManager().callEvent(attackEvent)
         if (attackEvent.isCancelled) return
 
-        damageHandler.dealPhysicalDamage(randomNum, victim, attacker, isBasicAttack = true, isRanged = false)
+        damageHandler.dealPhysicalDamage(
+            randomNum,
+            victim,
+            attacker,
+            isBasicAttack = true,
+            isRanged = false,
+        )
     }
 }

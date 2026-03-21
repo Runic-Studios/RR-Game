@@ -21,8 +21,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.event.entity.EntityEnterLoveModeEvent
 import org.bukkit.event.entity.EntityInteractEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
-import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.inventory.ClickType
+import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent
 import org.bukkit.event.player.PlayerBedEnterEvent
@@ -34,28 +34,27 @@ import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.plugin.Plugin
 
-private val BLOCKED_INTERACT_TYPES = setOf(
-    Material.BELL,
-    Material.JUKEBOX,
-    Material.NOTE_BLOCK,
-    Material.LODESTONE,
-    Material.TRAPPED_CHEST,
-    Material.CHEST,
-    Material.ENDER_CHEST,
-    Material.DISPENSER,
-    Material.DROPPER,
-    Material.RESPAWN_ANCHOR,
-    Material.REDSTONE_ORE,
-)
+private val BLOCKED_INTERACT_TYPES =
+    setOf(
+        Material.BELL,
+        Material.JUKEBOX,
+        Material.NOTE_BLOCK,
+        Material.LODESTONE,
+        Material.TRAPPED_CHEST,
+        Material.CHEST,
+        Material.ENDER_CHEST,
+        Material.DISPENSER,
+        Material.DROPPER,
+        Material.RESPAWN_ANCHOR,
+        Material.REDSTONE_ORE,
+    )
 
 /**
  * Consolidates all "cancel vanilla feature" restrictions that require no external game logic.
  * Covers block interaction, crafting, inventory actions, creature spawning, and entity feeding.
  */
 @Singleton
-class VanillaRestrictionsListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class VanillaRestrictionsListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
@@ -127,8 +126,9 @@ constructor(private val plugin: Plugin) : Listener {
         val blockType = block.type
 
         // Prevent farmland trampling
-        if (event.action == Action.PHYSICAL
-            && (blockType == Material.FARMLAND || blockType == Material.LEGACY_SOIL)
+        if (
+            event.action == Action.PHYSICAL &&
+                (blockType == Material.FARMLAND || blockType == Material.LEGACY_SOIL)
         ) {
             event.isCancelled = true
             return
@@ -154,8 +154,9 @@ constructor(private val plugin: Plugin) : Listener {
             }
 
             // Prevent pumpkin shearing
-            if (blockType == Material.PUMPKIN
-                && player.inventory.itemInMainHand.type == Material.SHEARS
+            if (
+                blockType == Material.PUMPKIN &&
+                    player.inventory.itemInMainHand.type == Material.SHEARS
             ) {
                 event.isCancelled = true
                 return
@@ -242,8 +243,8 @@ constructor(private val plugin: Plugin) : Listener {
     // --- Entity Interactions ---
 
     /**
-     * Prevents mobs from trampling farmland and similar blocks.
-     * Player physical interactions are handled by [onPlayerInteract].
+     * Prevents mobs from trampling farmland and similar blocks. Player physical interactions are
+     * handled by [onPlayerInteract].
      */
     @EventHandler(priority = EventPriority.NORMAL)
     fun onMobTrample(event: EntityInteractEvent) {
@@ -263,13 +264,14 @@ constructor(private val plugin: Plugin) : Listener {
         }
         if (event.rightClicked is Horse) {
             val item = event.player.inventory.itemInMainHand
-            if (item.type == Material.APPLE
-                || item.type == Material.GOLDEN_APPLE
-                || item.type == Material.ENCHANTED_GOLDEN_APPLE
-                || item.type == Material.GOLDEN_CARROT
-                || item.type == Material.SUGAR
-                || item.type == Material.WHEAT
-                || item.type == Material.HAY_BLOCK
+            if (
+                item.type == Material.APPLE ||
+                    item.type == Material.GOLDEN_APPLE ||
+                    item.type == Material.ENCHANTED_GOLDEN_APPLE ||
+                    item.type == Material.GOLDEN_CARROT ||
+                    item.type == Material.SUGAR ||
+                    item.type == Material.WHEAT ||
+                    item.type == Material.HAY_BLOCK
             ) {
                 event.isCancelled = true
             }

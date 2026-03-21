@@ -12,15 +12,13 @@ import org.bukkit.plugin.Plugin
 /**
  * Prevents fall damage for MythicMobs entities in the "herb" faction.
  *
- * Herb-faction mobs are passive resource nodes that should not take fall damage when
- * spawned or moved by world mechanics.
+ * Herb-faction mobs are passive resource nodes that should not take fall damage when spawned or
+ * moved by world mechanics.
  *
  * TODO: Verify that the faction name is exactly "herb" in the MythicMobs configuration.
  */
 @Singleton
-class HerbFallDamageListener
-@Inject
-constructor(private val plugin: Plugin) : Listener {
+class HerbFallDamageListener @Inject constructor(private val plugin: Plugin) : Listener {
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
