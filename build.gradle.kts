@@ -10,7 +10,7 @@ plugins {
 
 group = "com.runicrealms.game.plugin"
 
-version = "0.1.2"
+version = "0.1.4"
 
 repositories { mavenCentral() }
 
