@@ -9,6 +9,8 @@ import com.google.inject.Singleton
 import com.runicrealms.game.common.util.colorFormat
 import com.runicrealms.game.common.util.toLoreComponents
 import com.runicrealms.game.data.UserDataRegistry
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.TooltipDisplay
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.delay
@@ -143,7 +145,19 @@ constructor(
             Material.IRON_PICKAXE,
             "&eGathering Skills",
             "\n&6&lCLICK\n&7To view your gathering skills!\n&7They are account-wide!",
-        )
+        ).apply {
+            // HIDE_ATTRIBUTES often does not survive ProtocolLib SET_SLOT for tools; hide defaults explicitly.
+            setData(
+                DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay()
+                    .addHiddenComponents(
+                        DataComponentTypes.ATTRIBUTE_MODIFIERS,
+                        DataComponentTypes.TOOL,
+                        DataComponentTypes.WEAPON,
+                    )
+                    .build(),
+            )
+        }
 
     private fun donorPerksIcon(): ItemStack =
         buildIconItem(
