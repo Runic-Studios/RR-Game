@@ -93,29 +93,30 @@ object SlashEffect {
         while (if (leftOrRight) i < 1.0 else i > -1.0) {
             val fi = i
             val fd = direction
-            Bukkit.getScheduler().runTaskLater(
-                plugin,
-                Runnable {
-                    val dir = loc.direction.clone().multiply(2.0)
-                    dir.rotateAroundY(fi)
-                    val spawnLoc = loc.clone().add(dir).add(0.0, fi / 2.0 * fd, 0.0)
-                    if (dustOptions != null) {
-                        spawnLoc.world?.spawnParticle(
-                            Particle.DUST,
-                            spawnLoc,
-                            0,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.0,
-                            dustOptions,
-                        )
-                    } else {
-                        spawnLoc.world?.spawnParticle(particle, spawnLoc, 0, 0.0, 0.0, 0.0, 0.0)
-                    }
-                },
-                timer.toLong(),
-            )
+            Bukkit.getScheduler()
+                .runTaskLater(
+                    plugin,
+                    Runnable {
+                        val dir = loc.direction.clone().multiply(2.0)
+                        dir.rotateAroundY(fi)
+                        val spawnLoc = loc.clone().add(dir).add(0.0, fi / 2.0 * fd, 0.0)
+                        if (dustOptions != null) {
+                            spawnLoc.world?.spawnParticle(
+                                Particle.DUST,
+                                spawnLoc,
+                                0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                dustOptions,
+                            )
+                        } else {
+                            spawnLoc.world?.spawnParticle(particle, spawnLoc, 0, 0.0, 0.0, 0.0, 0.0)
+                        }
+                    },
+                    timer.toLong(),
+                )
             count++
             if (count > 10) {
                 timer++

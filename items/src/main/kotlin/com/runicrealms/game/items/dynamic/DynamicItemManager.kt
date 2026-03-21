@@ -88,8 +88,7 @@ constructor(
                 LegacyComponentSerializer.legacySection().serialize(displayNameComponent)
             val replacement = generateReplacement(displayName, viewer, gameItem, itemStack)
             if (replacement != null) {
-                val newComponent =
-                    LegacyComponentSerializer.legacy('&').deserialize(replacement)
+                val newComponent = LegacyComponentSerializer.legacy('&').deserialize(replacement)
                 // So this is a really really really annoying workaround because the adventure API
                 // is sometimes
                 // really hard to work with TODO fix

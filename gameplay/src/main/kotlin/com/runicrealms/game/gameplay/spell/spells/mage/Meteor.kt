@@ -51,7 +51,13 @@ class Meteor(deps: SpellDependencies) :
         player.world.playSound(player.location, Sound.ENTITY_TNT_PRIMED, 0.5f, 1.0f)
 
         // Draw a vertical line of particles from spawn point downward to indicate impact zone
-        VectorUtil.drawLine(player, Particle.FLAME, spawnLoc, target.clone().subtract(0.0, 20.0, 0.0), 2.5)
+        VectorUtil.drawLine(
+            player,
+            Particle.FLAME,
+            spawnLoc,
+            target.clone().subtract(0.0, 20.0, 0.0),
+            2.5,
+        )
 
         val velocity = Vector(0.0, -METEOR_SPEED, 0.0)
         val fireball = player.world.spawn(spawnLoc, LargeFireball::class.java)
@@ -105,7 +111,8 @@ class Meteor(deps: SpellDependencies) :
         val loc = fireball.location
 
         // Impact effects matching old system
-        HorizontalCircleFrame(radius, semiCircle = false).playParticle(caster, Particle.FLAME, loc, 0.3)
+        HorizontalCircleFrame(radius, semiCircle = false)
+            .playParticle(caster, Particle.FLAME, loc, 0.3)
         loc.world.spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1, 0.0, 0.0, 0.0, 0.0)
         loc.world.spawnParticle(Particle.LAVA, loc, 30, radius, 0.5, radius)
         loc.world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 0.5f)

@@ -14,6 +14,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.AttributeSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.ShieldingSpell
 import java.util.UUID
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -37,6 +38,8 @@ class Shatter(deps: SpellDependencies) :
     override var attributeBaseValue = BASE_VALUE
     override var attributeMultiplier = MULTIPLIER
     override var attribute = STAT_NAME
+    var maxStacks = MAX_STACKS
+    var stackDuration = STACK_DURATION
     override var cooldown = 0.0
     override var manaCost = 0
     override var description =
@@ -80,8 +83,8 @@ class Shatter(deps: SpellDependencies) :
         } else {
             IceBarrierEffect(
                     caster = event.caster,
-                    duration = STACK_DURATION,
-                    maxStacks = MAX_STACKS,
+                    duration = stackDuration,
+                    maxStacks = maxStacks,
                     spellEffectAPI = deps.spellEffectAPI,
                 )
                 .initialize()
@@ -107,6 +110,13 @@ class Shatter(deps: SpellDependencies) :
         if (iceBarrierOpt.isPresent) {
             (iceBarrierOpt.get() as IceBarrierEffect).clearStacks()
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        // Config has a typo: "max-atacks" instead of "max-attacks"
+        maxStacks = loadInt(config, "max-atacks", maxStacks)
+        stackDuration = loadDouble(config, "stack-duration", stackDuration)
     }
 
     companion object {

@@ -6,7 +6,8 @@ import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DistanceSpell
 import java.util.UUID
-import org.bukkit.ChatColor
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -39,7 +40,7 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
         try {
             iterator = BlockIterator(player, distance.toInt())
         } catch (exception: IllegalStateException) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot blink here!")
+            player.sendMessage(Component.text("You cannot blink here!", NamedTextColor.RED))
             return
         }
 
@@ -47,8 +48,10 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
             val currentBlock = iterator.next()
             val currentType = currentBlock.type
 
-            if (currentType == Material.BARRIER ||
-                    currentBlock.getRelative(BlockFace.UP).type == Material.BARRIER) {
+            if (
+                currentType == Material.BARRIER ||
+                    currentBlock.getRelative(BlockFace.UP).type == Material.BARRIER
+            ) {
                 break
             }
 
@@ -62,7 +65,7 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
         }
 
         if (validFinalBlock == null) {
-            player.sendMessage(ChatColor.RED.toString() + "You cannot blink here!")
+            player.sendMessage(Component.text("You cannot blink here!", NamedTextColor.RED))
             return
         }
 
@@ -71,14 +74,29 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
         teleportLoc.yaw = loc.yaw
 
         // particles at origin and destination
-        player.world.spawnParticle(Particle.PORTAL, loc.clone().add(0.0, 1.0, 0.0), 10, 0.5, 0.5, 0.5)
-        player.world.spawnParticle(Particle.PORTAL, teleportLoc.clone().add(0.0, 1.0, 0.0), 10, 0.5, 0.5, 0.5)
+        player.world.spawnParticle(
+            Particle.PORTAL,
+            loc.clone().add(0.0, 1.0, 0.0),
+            10,
+            0.5,
+            0.5,
+            0.5,
+        )
+        player.world.spawnParticle(
+            Particle.PORTAL,
+            teleportLoc.clone().add(0.0, 1.0, 0.0),
+            10,
+            0.5,
+            0.5,
+            0.5,
+        )
         player.world.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5f, 1.2f)
 
         blinkers.add(player.uniqueId)
         player.teleport(teleportLoc)
 
-        val velocity = player.location.direction.add(Vector(0.0, 0.5, 0.0)).normalize().multiply(0.5)
+        val velocity =
+            player.location.direction.add(Vector(0.0, 0.5, 0.0)).normalize().multiply(0.5)
         player.velocity = velocity
 
         deps.plugin.server.scheduler.runTaskLater(

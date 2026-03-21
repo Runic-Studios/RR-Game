@@ -8,6 +8,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.components.AttributeSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -83,6 +84,11 @@ class GiftsOfTheGrove(deps: SpellDependencies) :
             return
 
         spellManager.reduceCooldown(event.caster, Remedy.SPELL_NAME, duration)
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        percent = loadDouble(config, "percent", percent)
     }
 
     companion object {

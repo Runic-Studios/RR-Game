@@ -14,6 +14,7 @@ import com.runicrealms.game.gameplay.spell.spellutil.particles.HelixParticleFram
 import java.util.UUID
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -38,6 +39,11 @@ class PrimalArcanum(deps: SpellDependencies) :
         "Shield yourself and up to $MAX_ALLIES allies within $BASE_RADIUS blocks. " +
             "For ${BASE_DURATION}s, basic attacks grant shield and mana."
 
+    var manaPerSlash = MANA_PER_SLASH
+    var maxAllies = MAX_ALLIES
+    var shieldPerSlash = SHIELD_PER_SLASH
+    var shieldPerSlashPerLevel = SHIELD_PER_SLASH_PER_LEVEL
+
     companion object {
         const val SPELL_NAME = "Primal Arcanum"
         const val BASE_DURATION = 10.0
@@ -46,12 +52,19 @@ class PrimalArcanum(deps: SpellDependencies) :
         const val SHIELD_PER_LEVEL = 0.5
         const val COOLDOWN = 14.0
         const val MANA_COST = 30
-        // From PrimalArcanum.yml: mana-per-slash: 4
         const val MANA_PER_SLASH = 4
         const val MAX_ALLIES = 3
         const val SHIELD_PER_SLASH = 5.0
-        // From PrimalArcanum.yml: shield-per-slash-per-level: 0.5
         const val SHIELD_PER_SLASH_PER_LEVEL = 0.5
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        manaPerSlash = loadInt(config, "mana-per-slash", manaPerSlash)
+        maxAllies = loadInt(config, "max-allies", maxAllies)
+        shieldPerSlash = loadDouble(config, "shield-per-slash", shieldPerSlash)
+        shieldPerSlashPerLevel =
+            loadDouble(config, "shield-per-slash-per-level", shieldPerSlashPerLevel)
     }
 
     override fun executeSpell(player: Player, type: SpellItemType) {
@@ -65,7 +78,7 @@ class PrimalArcanum(deps: SpellDependencies) :
 
         var count = 1
         for (entity in player.world.getNearbyEntities(player.location, radius, radius, radius)) {
-            if (count > MAX_ALLIES) break
+            if (count > maxAllies) break
             if (entity !is Player || entity == player) continue
             if (!isValidAlly(player, entity)) continue
             shieldPlayer(player, entity, shieldAmount)
@@ -87,7 +100,7 @@ class PrimalArcanum(deps: SpellDependencies) :
         val uuid: UUID = player.uniqueId
         if (!spellManager.isShielded(player)) return
         if (getSpellEffect(uuid, uuid, SpellEffectType.ARCANUM).isEmpty) return
-        shieldPlayer(player, player, SHIELD_PER_SLASH)
-        spellManager.setMana(uuid, spellManager.getMana(uuid) + MANA_PER_SLASH)
+        shieldPlayer(player, player, shieldPerSlash)
+        spellManager.setMana(uuid, spellManager.getMana(uuid) + manaPerSlash)
     }
 }

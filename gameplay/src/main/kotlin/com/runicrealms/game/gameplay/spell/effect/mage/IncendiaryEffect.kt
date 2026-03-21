@@ -21,7 +21,8 @@ class IncendiaryEffect(
     override val isBuff = true
 
     private var nextTick = 0
-    // Old: HelixParticleFrame(radius=1.0, height=30, frequency=20.0) with default spacing 15 -> ~36 particles
+    // Old: HelixParticleFrame(radius=1.0, height=30, frequency=20.0) with default spacing 15 -> ~36
+    // particles
     // New equivalent: height=2.0, radius=1.0, frequency=20.0, spacing=0.1 -> 36 particles
     private val helix = HelixParticleFrame(height = 2.0, radius = 1.0, frequency = 20.0)
 

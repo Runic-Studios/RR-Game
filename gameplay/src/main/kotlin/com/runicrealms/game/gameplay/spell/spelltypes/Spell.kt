@@ -235,27 +235,70 @@ abstract class Spell(
             return
         }
         val config = YamlConfiguration.loadConfiguration(file)
-        cooldown = config.getDouble("cooldown", cooldown)
-        manaCost = config.getInt("mana", manaCost)
+        cooldown = loadDouble(config, "cooldown", cooldown)
+        manaCost = loadInt(config, "mana", manaCost)
         loadSpellSpecificData(config)
     }
 
     /**
-     * Dispatches config loading to each implemented component interface. Spells with non-standard
-     * YAML key names override this, call super, then parse their custom keys (see Java Ambush.java
-     * for the pattern).
+     * Loads component fields and any spell-specific custom keys from the YAML config. Spells with
+     * custom keys override this, call super, then load their own fields using [loadDouble],
+     * [loadInt], or [loadString].
      */
     protected open fun loadSpellSpecificData(config: FileConfiguration) {
-        if (this is AttributeSpell) loadAttributeData(config)
-        if (this is DistanceSpell) loadDistanceData(config)
-        if (this is DurationSpell) loadDurationData(config)
-        if (this is HealingSpell) loadHealingData(config)
-        if (this is MagicDamageSpell) loadMagicData(config)
-        if (this is PhysicalDamageSpell) loadPhysicalData(config)
-        if (this is RadiusSpell) loadRadiusData(config)
-        if (this is ShieldingSpell) loadShieldingData(config)
-        if (this is WarmupSpell) loadWarmupData(config)
+        if (this is AttributeSpell) {
+            attribute = loadString(config, "attribute", attribute)
+            attributeBaseValue = loadDouble(config, "attribute-base-value", attributeBaseValue)
+            attributeMultiplier = loadDouble(config, "attribute-multiplier", attributeMultiplier)
+        }
+        if (this is DistanceSpell) distance = loadDouble(config, "distance", distance)
+        if (this is DurationSpell) duration = loadDouble(config, "duration", duration)
+        if (this is HealingSpell) {
+            healAmount = loadDouble(config, "heal", healAmount)
+            healPerLevel = loadDouble(config, "heal-per-level", healPerLevel)
+        }
+        if (this is MagicDamageSpell) {
+            magicDamage = loadDouble(config, "magic-damage", magicDamage)
+            magicDamagePerLevel = loadDouble(config, "magic-damage-per-level", magicDamagePerLevel)
+        }
+        if (this is PhysicalDamageSpell) {
+            physicalDamage = loadDouble(config, "physical-damage", physicalDamage)
+            physicalDamagePerLevel =
+                loadDouble(config, "physical-damage-per-level", physicalDamagePerLevel)
+        }
+        if (this is RadiusSpell) radius = loadDouble(config, "radius", radius)
+        if (this is ShieldingSpell) {
+            shieldAmount = loadDouble(config, "shield", shieldAmount)
+            shieldPerLevel = loadDouble(config, "shield-per-level", shieldPerLevel)
+        }
+        if (this is WarmupSpell) warmupSeconds = loadDouble(config, "warmup", warmupSeconds)
     }
+
+    // --- Config load helpers ---
+
+    /** Returns the Double value for [key], or [default] with a warning if the key is absent. */
+    protected fun loadDouble(config: FileConfiguration, key: String, default: Double): Double =
+        if (config.contains(key)) config.getDouble(key)
+        else {
+            logger.warn("[$name] Config key '$key' not found, using default: $default")
+            default
+        }
+
+    /** Returns the Int value for [key], or [default] with a warning if the key is absent. */
+    protected fun loadInt(config: FileConfiguration, key: String, default: Int): Int =
+        if (config.contains(key)) config.getInt(key)
+        else {
+            logger.warn("[$name] Config key '$key' not found, using default: $default")
+            default
+        }
+
+    /** Returns the String value for [key], or [default] with a warning if the key is absent. */
+    protected fun loadString(config: FileConfiguration, key: String, default: String): String =
+        if (config.contains(key)) config.getString(key) ?: default
+        else {
+            logger.warn("[$name] Config key '$key' not found, using default: $default")
+            default
+        }
 
     /**
      * Rotates a vector around the Y axis by [degrees]. Kept as a protected helper matching the old

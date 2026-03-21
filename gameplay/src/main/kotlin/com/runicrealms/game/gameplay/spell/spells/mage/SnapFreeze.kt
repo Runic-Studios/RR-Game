@@ -15,6 +15,7 @@ import java.util.UUID
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -30,6 +31,7 @@ class SnapFreeze(deps: SpellDependencies) :
     override var duration = BASE_DURATION
     override var magicDamage = BASE_DAMAGE
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
+    var stunDuration = STUN_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
     override var description =
@@ -84,18 +86,18 @@ class SnapFreeze(deps: SpellDependencies) :
                 getSpellEffect(player.uniqueId, entity.uniqueId, SpellEffectType.CHILLED)
             if (chilledOpt.isPresent) {
                 (chilledOpt.get() as ChilledEffect).cancel()
-                addStatusEffect(
-                    entity,
-                    RunicStatusEffect.STUN,
-                    STUN_DURATION,
-                    displayMessage = true,
-                )
+                addStatusEffect(entity, RunicStatusEffect.STUN, stunDuration, displayMessage = true)
             } else {
                 addStatusEffect(entity, RunicStatusEffect.ROOT, duration, displayMessage = true)
             }
 
             damageMap[player.uniqueId]?.add(entity.uniqueId)
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        stunDuration = loadDouble(config, "stun-duration", stunDuration)
     }
 
     companion object {

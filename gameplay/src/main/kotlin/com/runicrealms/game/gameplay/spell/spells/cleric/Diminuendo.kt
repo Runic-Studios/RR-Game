@@ -18,6 +18,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerQuitEvent
@@ -126,6 +127,12 @@ class Diminuendo(deps: SpellDependencies) :
 
     private fun isAffected(entityId: UUID): Boolean {
         return affectedEnemiesMap.values.any { it.contains(entityId) }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        attackSpeedReduction = loadDouble(config, "attack-speed-reduction", attackSpeedReduction)
+        mobDamageReduction = loadDouble(config, "mob-damage-reduction", mobDamageReduction)
     }
 
     companion object {

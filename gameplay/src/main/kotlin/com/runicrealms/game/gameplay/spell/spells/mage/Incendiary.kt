@@ -13,6 +13,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpel
 import com.runicrealms.game.gameplay.spell.spellutil.particles.HorizontalCircleFrame
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -30,6 +31,9 @@ class Incendiary(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var distance = BASE_DISTANCE
     override var duration = BASE_DURATION
+    var count = 5
+    var durationOfDamage = 4.0
+    var period = 2.0
     override var cooldown = 0.0
     override var manaCost = 0
     override var description =
@@ -89,12 +93,7 @@ class Incendiary(deps: SpellDependencies) :
                 point.world.playSound(point, Sound.ITEM_FIRECHARGE_USE, 0.25f, 2.0f)
 
                 for (entity in
-                    point.world.getNearbyEntities(
-                        point,
-                        BEAM_RADIUS,
-                        BEAM_RADIUS,
-                        BEAM_RADIUS,
-                    )) {
+                    point.world.getNearbyEntities(point, BEAM_RADIUS, BEAM_RADIUS, BEAM_RADIUS)) {
                     if (entity !is LivingEntity || entity == player || entity in hitThisWave)
                         continue
                     if (!isValidEnemy(player, entity)) continue
@@ -112,6 +111,13 @@ class Incendiary(deps: SpellDependencies) :
             0L,
             1L,
         )
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        count = loadInt(config, "count", count)
+        durationOfDamage = loadDouble(config, "duration-of-damage", durationOfDamage)
+        period = loadDouble(config, "period", period)
     }
 
     companion object {

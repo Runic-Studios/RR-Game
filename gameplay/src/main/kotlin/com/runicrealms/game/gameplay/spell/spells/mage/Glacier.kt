@@ -9,6 +9,7 @@ import com.runicrealms.game.gameplay.spell.event.PhysicalDamageEvent
 import com.runicrealms.game.gameplay.spell.spelltypes.Spell
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -22,6 +23,7 @@ class Glacier(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps)
     override var duration = SLOW_DURATION
     override var cooldown = 0.0
     override var manaCost = 0
+    var maxStacks = MAX_STACKS
     override var description = "Passive: Increases Ice Barrier max stacks to $MAX_STACKS."
 
     init {
@@ -54,6 +56,11 @@ class Glacier(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps)
         if (barrier.stacks.get() >= barrier.getMaxStacks()) {
             // Mobs can't be slowed via RunicStatusEffect, so we skip that
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        maxStacks = loadInt(config, "max-stacks", maxStacks)
     }
 
     companion object {

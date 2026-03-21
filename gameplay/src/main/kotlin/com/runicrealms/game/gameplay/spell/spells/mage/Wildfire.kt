@@ -6,6 +6,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.Spell
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.RadiusSpell
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -22,6 +23,7 @@ class Wildfire(deps: SpellDependencies) :
 
     override var radius = BASE_RADIUS
     override var duration = COOLDOWN_REDUCTION
+    var maxTargets = MAX_TARGETS
     override var cooldown = 0.0
     override var manaCost = 0
     override var description =
@@ -51,11 +53,16 @@ class Wildfire(deps: SpellDependencies) :
             if (entity !is LivingEntity) continue
             if (!isValidEnemy(player, entity)) continue
             count++
-            if (count > MAX_TARGETS) break
+            if (count > maxTargets) break
 
             deps.damageHandler.dealMagicDamage(event.amount, entity, player, this)
             spellManager.reduceCooldown(player, Meteor.SPELL_NAME, duration)
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        maxTargets = loadInt(config, "max-targets", maxTargets)
     }
 
     companion object {

@@ -14,6 +14,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Trident
@@ -35,6 +36,7 @@ class Harpoon(deps: SpellDependencies) :
     override var physicalDamage = BASE_DAMAGE
     override var physicalDamagePerLevel = DAMAGE_PER_LEVEL
     override var duration = DURATION
+    var tridentSpeed = TRIDENT_SPEED
     override var description =
         "You launch a projectile harpoon of the sea! Upon hitting an enemy, " +
             "the trident deals ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical\u2694 damage " +
@@ -46,7 +48,7 @@ class Harpoon(deps: SpellDependencies) :
     override fun executeSpell(player: Player, type: SpellItemType) {
         val trident = player.launchProjectile(Trident::class.java)
         trident.damage = 0.0
-        trident.velocity = player.location.direction.normalize().multiply(TRIDENT_SPEED)
+        trident.velocity = player.location.direction.normalize().multiply(tridentSpeed)
         trident.shooter = player
         tridentMap[player.uniqueId] = trident
 
@@ -145,6 +147,11 @@ class Harpoon(deps: SpellDependencies) :
 
             Bukkit.getPluginManager().callEvent(HarpoonHitEvent(shooter, victim))
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        tridentSpeed = loadDouble(config, "trident-speed", tridentSpeed)
     }
 
     companion object {

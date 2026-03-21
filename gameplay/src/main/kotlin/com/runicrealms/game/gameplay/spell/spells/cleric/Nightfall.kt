@@ -17,6 +17,7 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.World
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
@@ -124,6 +125,12 @@ class Nightfall(deps: SpellDependencies) :
             )
             distanceStep += 0.5
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        durationInvulnerable = loadDouble(config, "duration-invulnerable", durationInvulnerable)
+        knockupMultiplier = loadDouble(config, "knockup-multiplier", knockupMultiplier)
     }
 
     companion object {

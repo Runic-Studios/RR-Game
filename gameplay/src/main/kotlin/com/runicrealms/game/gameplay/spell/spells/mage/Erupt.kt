@@ -12,6 +12,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpel
 import com.runicrealms.game.gameplay.spell.spelltypes.components.RadiusSpell
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -97,6 +98,14 @@ class Erupt(deps: SpellDependencies) :
                 MOB_DAMAGE_CAP.toDouble(),
             )
         deps.damageHandler.dealMagicDamage(bonusDamage.toInt(), victim, event.caster, this)
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        knockupMultiplier = loadDouble(config, "knockup-multiplier", knockupMultiplier)
+        // Config stores as a decimal fraction (e.g. 0.05 = 5%); code stores as a percent.
+        val rawMaxHealth = loadDouble(config, "max-health-damage", maxHealthPercent / 100.0)
+        maxHealthPercent = rawMaxHealth * 100.0
     }
 
     companion object {

@@ -12,6 +12,7 @@ import com.runicrealms.game.gameplay.spell.spellutil.particles.EntityTrail
 import java.util.UUID
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityDamageByEntityEvent
@@ -31,8 +32,9 @@ class Ambush(deps: SpellDependencies) :
 
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var duration = BLIND_DURATION
+    override var duration = 3.0
     override var warmupSeconds = WARMUP
+    var speedDuration = 2.0
     override var description =
         "Sneaking without casting spells for at least ${warmupSeconds}s causes your next ranged " +
             "basic attack (if it lands) to ambush its target. Ambush attacks critically strike " +
@@ -127,11 +129,17 @@ class Ambush(deps: SpellDependencies) :
         }
     }
 
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        // Config stores blind duration under "blind-duration", not the standard "duration" key.
+        duration = loadDouble(config, "blind-duration", duration)
+        speedDuration = loadDouble(config, "speed-duration", speedDuration)
+    }
+
     companion object {
         const val SPELL_NAME = "Ambush"
         const val COOLDOWN = 30.0
         const val MANA_COST = 0
-        const val BLIND_DURATION = 3.0
         const val WARMUP = 3.0
         const val AMBUSH_ARROW_KEY = "ambush"
     }

@@ -11,6 +11,7 @@ import com.runicrealms.game.gameplay.spell.spellutil.particles.Circle
 import org.bukkit.Color
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -22,6 +23,7 @@ class Lightwell(deps: SpellDependencies) :
     override var healAmount = BASE_HEAL
     override var healPerLevel = HEAL_PER_LEVEL
     override var radius = BASE_RADIUS
+    var blindDuration = 0.0
     override var cooldown = 0.0
     override var manaCost = 0
     override var description =
@@ -78,6 +80,11 @@ class Lightwell(deps: SpellDependencies) :
             0L,
             20L,
         )
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        blindDuration = loadDouble(config, "blind-duration", blindDuration)
     }
 
     companion object {
