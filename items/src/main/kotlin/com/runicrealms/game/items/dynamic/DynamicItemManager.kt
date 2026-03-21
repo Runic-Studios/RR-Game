@@ -89,7 +89,7 @@ constructor(
             val replacement = generateReplacement(displayName, viewer, gameItem, itemStack)
             if (replacement != null) {
                 val newComponent =
-                    LegacyComponentSerializer.legacySection().deserialize(replacement)
+                    LegacyComponentSerializer.legacy('&').deserialize(replacement)
                 // So this is a really really really annoying workaround because the adventure API
                 // is sometimes
                 // really hard to work with TODO fix
@@ -112,7 +112,7 @@ constructor(
                 if (replacement != null) {
                     changed = true
                     val newComponent: Component =
-                        LegacyComponentSerializer.legacySection().deserialize(replacement)
+                        LegacyComponentSerializer.legacy('&').deserialize(replacement)
                     // So this is a really really really annoying workaround because the adventure
                     // API is sometimes
                     // really hard to work with TODO fix
