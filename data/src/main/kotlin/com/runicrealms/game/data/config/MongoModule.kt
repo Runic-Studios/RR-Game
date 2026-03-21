@@ -3,6 +3,7 @@ package com.runicrealms.game.data.config
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import com.google.inject.name.Names
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
@@ -13,7 +14,9 @@ import com.runicrealms.game.data.model.BsonCodecs
 import com.runicrealms.game.data.model.ItemTypeData
 import com.runicrealms.game.data.model.PlayerDocument
 import com.runicrealms.game.data.repository.PlayerRepository
+import kotlinx.coroutines.runBlocking
 import org.bson.BsonDocument
+import org.bson.Document
 import org.bson.UuidRepresentation
 import org.bson.codecs.configuration.CodecRegistry
 
@@ -45,9 +48,7 @@ class MongoModule(
 ) : AbstractModule() {
 
     override fun configure() {
-        bind(String::class.java)
-            .annotatedWith(com.google.inject.name.Names.named("serverId"))
-            .toInstance(serverId)
+        bind(String::class.java).annotatedWith(Names.named("serverId")).toInstance(serverId)
     }
 
     @Provides
@@ -95,7 +96,9 @@ class MongoModule(
     @Provides
     @Singleton
     fun providePlayerLockRepository(database: MongoDatabase): PlayerLockRepository {
-        val collection = database.getCollection<org.bson.Document>("locks")
-        return PlayerLockRepository(collection)
+        val collection = database.getCollection<Document>("locks")
+        val repository = PlayerLockRepository(collection)
+        runBlocking { repository.ensureTtlIndex() }
+        return repository
     }
 }

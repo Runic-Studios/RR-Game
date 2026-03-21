@@ -156,5 +156,9 @@ enum class SubClassType(
                 }
             }
         }
+
+        /** Returns the subclass for [classType] at [position] (1/2/3), or null if not found. */
+        fun forClassAndPosition(classType: ClassType, position: Int): SubClassType? =
+            entries.firstOrNull { it.classType == classType && it.position == position }
     }
 }

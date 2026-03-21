@@ -3,12 +3,11 @@ package com.runicrealms.game.items
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
 import com.runicrealms.game.common.event.ArmorEquipEvent
-import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterJoinEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.items.character.CharacterEquipmentCache
 import com.runicrealms.game.items.character.CharacterEquipmentCacheRegistry
-import com.runicrealms.game.items.event.GameStatUpdateEvent
+import io.papermc.paper.event.entity.EntityEquipmentChangedEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import org.bukkit.Bukkit
@@ -21,8 +20,7 @@ import org.bukkit.plugin.Plugin
 class PlayerItemManager
 @Inject
 constructor(
-    plugin: Plugin,
-    private val userDataRegistry: UserDataRegistry,
+    private val plugin: Plugin,
     private val equipmentFactory: CharacterEquipmentCache.Factory,
 ) : Listener, CharacterEquipmentCacheRegistry {
 
@@ -43,30 +41,29 @@ constructor(
         cachedCharacterStats.remove(event.character.bukkitPlayer.uniqueId)
     }
 
-    @EventHandler(
-        priority = EventPriority.HIGHEST
-    ) // Fire after other armor equip events to allow them to cancel it
+    /**
+     * Paper's PlayerArmorChangeEvent fires AFTER the armor slot is committed to the inventory, so
+     * reading inventory.helmet/chestplate/etc. Returns the correct new item immediately.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onArmorChange(event: EntityEquipmentChangedEvent) {
+        if (event.entity !is Player) return
+        val holder = cachedCharacterStats[event.entity.uniqueId] ?: return
+        holder.updateAllItems(onLogin = false, callEvent = true)
+    }
+
+    /**
+     * PlayerArmorChangeEvent does not cover the OFF_HAND slot, so we still listen to
+     * ArmorEquipEvent for that case. A one-tick Bukkit scheduler delay ensures the off-hand slot is
+     * committed before we read it.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onArmorEquipEvent(event: ArmorEquipEvent) {
-        // Sync context
-        val player: Player = event.player
-        val character = userDataRegistry.getCharacter(player.uniqueId) ?: return
-        val uuid = player.uniqueId
-        if (!cachedCharacterStats.containsKey(uuid)) return
         if (event.isCancelled) return
-        val holder = cachedCharacterStats[uuid] ?: return
-        when (event.type) {
-            ArmorEquipEvent.ArmorType.HELMET ->
-                holder.updateItems(false, CharacterEquipmentCache.StatHolderType.HELMET)
-            ArmorEquipEvent.ArmorType.CHESTPLATE ->
-                holder.updateItems(false, CharacterEquipmentCache.StatHolderType.CHESTPLATE)
-            ArmorEquipEvent.ArmorType.LEGGINGS ->
-                holder.updateItems(false, CharacterEquipmentCache.StatHolderType.LEGGINGS)
-            ArmorEquipEvent.ArmorType.BOOTS ->
-                holder.updateItems(false, CharacterEquipmentCache.StatHolderType.BOOTS)
-            ArmorEquipEvent.ArmorType.OFFHAND ->
-                holder.updateItems(false, CharacterEquipmentCache.StatHolderType.OFFHAND)
+        if (event.type != ArmorEquipEvent.ArmorType.OFFHAND) return
+        val holder = cachedCharacterStats[event.player.uniqueId] ?: return
+        Bukkit.getScheduler().runTask(plugin) { _ ->
+            holder.updateAllItems(onLogin = false, callEvent = true)
         }
-        val statUpdateEvent = GameStatUpdateEvent(character, holder)
-        Bukkit.getPluginManager().callEvent(statUpdateEvent)
     }
 }

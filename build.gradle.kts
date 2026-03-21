@@ -10,7 +10,7 @@ plugins {
 
 group = "com.runicrealms.game.plugin"
 
-version = "0.1.0"
+version = "0.1.2"
 
 repositories { mavenCentral() }
 
@@ -22,6 +22,8 @@ subprojects {
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://repo.dmulloy2.net/repository/public/")
         maven("https://repo.aikar.co/content/groups/aikar/")
+        maven("https://repo.fancyinnovations.com/releases")
+        maven("https://mvn.lumine.io/repository/maven-public/")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -67,6 +69,9 @@ subprojects {
         compileOnly(rootProject.libs.velagones.paper)
         compileOnly(rootProject.libs.nbtapi)
         compileOnly(rootProject.libs.protocollib)
+        compileOnly(rootProject.libs.fancyHolograms)
+        compileOnly(rootProject.libs.mythicMobs)
+        compileOnly(rootProject.libs.modelEngine)
     }
 }
 

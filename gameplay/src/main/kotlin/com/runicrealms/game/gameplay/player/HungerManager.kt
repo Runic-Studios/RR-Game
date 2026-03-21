@@ -18,6 +18,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.plugin.Plugin
@@ -52,6 +53,18 @@ constructor(
             event.player.sendMessage(
                 Component.text("I can't eat that!", Style.style(NamedTextColor.RED))
             )
+        }
+    }
+
+    /** Cancels vanilla satiation-based health regen so our custom regen loop is the only source. */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onVanillaRegen(event: EntityRegainHealthEvent) {
+        if (event.entity !is Player) return
+        if (
+            event.regainReason == EntityRegainHealthEvent.RegainReason.SATIATED ||
+                event.regainReason == EntityRegainHealthEvent.RegainReason.EATING
+        ) {
+            event.isCancelled = true
         }
     }
 
