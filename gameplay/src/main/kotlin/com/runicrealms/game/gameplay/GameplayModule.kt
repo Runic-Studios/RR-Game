@@ -38,6 +38,8 @@ import com.runicrealms.game.gameplay.player.charselect.CharacterSelectHelper
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectManager
 import com.runicrealms.game.gameplay.player.charselect.CharacterSelectMenu
 import com.runicrealms.game.gameplay.player.death.DeathListener
+import com.runicrealms.game.gameplay.player.ui.PlayerMenuManager
+import com.runicrealms.game.gameplay.player.ui.StatsMenu
 import com.runicrealms.game.gameplay.player.death.DeathTriggerListener
 import com.runicrealms.game.gameplay.player.death.GravestoneManager
 import com.runicrealms.game.gameplay.player.stat.StatListener
@@ -126,6 +128,10 @@ class GameplayModule : AbstractModule() {
         addFactory(CharacterSelectMenu::class, CharacterSelectMenu.Factory::class)
         addFactory(CharacterAddMenu::class, CharacterAddMenu.Factory::class)
         addFactory(CharacterDeleteMenu::class, CharacterDeleteMenu.Factory::class)
+
+        // Player menu
+        bind(PlayerMenuManager::class.java).asEagerSingleton()
+        addFactory(StatsMenu::class, StatsMenu.Factory::class)
 
         // --- Spell system ---
 
