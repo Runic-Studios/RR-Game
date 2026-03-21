@@ -183,8 +183,7 @@ constructor(
 
         // Apply base stat bonus if this perk grants stats
         if (perk is PerkBaseStat) {
-            val amount = perk.bonusAmount * perk.currentlyAllocatedPoints
-            statManagerProvider.get().addBaseStatBonus(uuid, perk.stat, amount)
+            statManagerProvider.get().addBaseStatBonus(uuid, perk.stat, perk.bonusAmount)
         }
 
         // Rebuild passives

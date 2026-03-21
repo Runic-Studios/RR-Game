@@ -3,6 +3,7 @@ package com.runicrealms.game.gameplay.player.stat
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.runicrealms.game.common.ClassType
 import com.runicrealms.game.common.StatType
 import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
@@ -78,10 +79,8 @@ constructor(
 
         plugin.launch {
             try {
-                val (skills, subClassType) =
-                    character.withCharacterData { Pair(skills, traits.subClassType) }
-
-                val subClass = subClassType ?: return@launch
+                val (skills, classType) =
+                    character.withCharacterData { Pair(skills, traits.classType) }
 
                 val pointsPerPosition =
                     mapOf(
@@ -91,13 +90,14 @@ constructor(
                     )
 
                 for ((position, allocatedPoints) in pointsPerPosition) {
+                    val positionSubClass =
+                        SubClassType.forClassAndPosition(classType, position.value) ?: continue
                     val treeData = SkillTreeData(position, allocatedPoints)
-                    treeData.loadPerksFromSubClass(subClass)
+                    treeData.loadPerksFromSubClass(positionSubClass)
                     for (perk in treeData.perks) {
                         if (perk !is PerkBaseStat) continue
-                        if (perk.currentlyAllocatedPoints < perk.cost) continue
-                        val amount = perk.bonusAmount * perk.currentlyAllocatedPoints
-                        statMap.merge(perk.stat, amount, Int::plus)
+                        if (perk.currentlyAllocatedPoints <= 0) continue
+                        statMap.merge(perk.stat, perk.bonusAmount * perk.currentlyAllocatedPoints, Int::plus)
                     }
                 }
             } catch (exception: Exception) {
