@@ -14,7 +14,11 @@ follow. When in doubt, refer here first.
   - Avoid single letter variable names, unless in writing in Go.
 - Do not quote this AGENTS.md file in comments when making changes, just follow the rules without quoting.
 - Avoid using emdashes (—) and instead favour colons or parenthesis
-
+- You should NOT use inline fully qualified name imports unless strictly necessary and instead favour
+  writing import lines. 
+  - If you have accidentally written FQNs, you can use the following regex (case sensitive) for searching for bad FQN imports:
+  `^(?!\s*(?:import|package)\b).*?\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\.[A-Z][A-Za-z0-9_]*(?:\.[A-Z][A-Za-z0-9_]*)*\b`
+  - FQN imports are okay in javadocs if they are necessary (class wasn't imported)
 ---
 
 ## 2. Database Error Handling: Fail Loud
@@ -141,7 +145,64 @@ gameCharacter.withSyncCharacterData {
 Do **not** access `gameSession` or `gameSession.document` from outside the `data` module.
 Do **not** use `.copy(...)` chains to build updated objects; assign fields directly instead.
 
-### 6. Logging
+---
+
+## 6. Holograms: FancyHolograms (replaces HolographicDisplays)
+
+The project uses **FancyHolograms** (`de.oliver.fancyholograms`) as the hologram library.
+HolographicDisplays is no longer available. Use the pattern below for all hologram creation.
+
+### Creating a non-persistent text hologram
+
+```kotlin
+import de.oliver.fancyholograms.api.FancyHologramsPlugin
+import de.oliver.fancyholograms.api.data.TextHologramData
+
+// Unique name required - two holograms with the same name will conflict
+val hologramName = "my_effect_${playerUuid}_${targetUuid}"
+val hologramData = TextHologramData(hologramName, location)
+hologramData.isPersistent = false  // ALWAYS false for runtime/effect holograms
+hologramData.text = listOf("<gold>Effect x3</gold>")
+
+val hologramManager = FancyHologramsPlugin.get().hologramManager
+val hologram = hologramManager.create(hologramData)
+hologramManager.addHologram(hologram)
+hologram.refreshForPlayersInRange()
+```
+
+### Updating a hologram's text
+
+```kotlin
+hologram.hologramData.text = listOf("<red>New Text</red>")
+hologram.refreshForPlayersInRange()
+```
+
+### Removing a hologram
+
+```kotlin
+hologramManager.removeHologram(hologram)
+```
+
+### Migration notes (from HolographicDisplays)
+
+| HolographicDisplays | FancyHolograms equivalent |
+|---|---|
+| `HologramsAPI.createHologram(loc)` | `hologramManager.create(TextHologramData(name, loc))` + `hologramManager.addHologram(hologram)` |
+| `hologram.appendTextLine(text)` | `hologramData.text = listOf(text)` (full list replace) |
+| `hologram.delete()` | `hologramManager.removeHologram(hologram)` |
+| `hologram.teleport(loc)` | `hologramData.location = loc; hologram.refreshForPlayersInRange()` |
+| Per-player visibility | TODO: Not yet implemented - see StackHologram.kt. Requires `hologram.setVisibleByDefault(false)` + `hologram.addViewer(player)` on each player, but FancyHolograms API differs. |
+
+### Key constraints
+
+- **Names must be globally unique**: Use UUIDs or compound keys (e.g. `"stacks_BLEED_<casterUuid>_<recipientUuid>"`).
+- **Always set `isPersistent = false`** for runtime holograms that should not survive server restarts.
+- FancyHolograms text supports MiniMessage format (`<red>`, `<gold>`, `<bold>`, etc.).
+- Adventure `Component` is NOT directly supported as a line - convert to MiniMessage string first.
+
+---
+
+## 7. Logging
 
 - All logging within this plugin should be done through a logger created by a LoggerFactory
   whose name corresponds to the gradle module the class is located in.

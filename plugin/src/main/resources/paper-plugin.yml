@@ -1,6 +1,6 @@
 main: com.runicrealms.game.plugin.GamePlugin
 name: Game
-version: '0.1.0'
+version: '0.1.2'
 api-version: 1.21.4
 dependencies:
   server:
@@ -16,4 +16,11 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
-
+    FancyHolograms:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    MythicMobs:
+      load: BEFORE
+      required: true
+      join-classpath: true

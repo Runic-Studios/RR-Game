@@ -22,13 +22,16 @@ import com.runicrealms.game.data.model.CharacterTraits
 import com.runicrealms.game.data.repository.PlayerRepository
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -190,9 +193,28 @@ constructor(
      * document load fails.
      */
     private suspend fun createSession(bukkitPlayer: Player): Result<GameSession> {
-        // Acquire the distributed lock
-        // This prevents two servers from simultaneously writing the same player.
-        val lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+        // Acquire the distributed lock, retrying if another server still holds it.
+        // Players switching servers quickly may arrive here before the previous server has released
+        // the lock, so we wait up to 5 seconds for it to be freed.
+        var lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+        if (lockResult.isFailure) {
+            logger.warn(
+                "Lock is held for player ${bukkitPlayer.name} (${bukkitPlayer.uniqueId}) by " +
+                    "another server - retrying up to 5 times"
+            )
+            for (attempt in 1..5) {
+                // Async dispatcher - delay suspends the coroutine without blocking the MC thread
+                delay(1_000L)
+                lockResult = lockRepository.acquireOrRenew(bukkitPlayer.uniqueId, serverId)
+                if (lockResult.isSuccess) {
+                    logger.info("Lock acquired for ${bukkitPlayer.name} after $attempt attempt(s)")
+                    break
+                }
+                logger.warn(
+                    "Lock still held for player ${bukkitPlayer.name} after attempt $attempt/5"
+                )
+            }
+        }
         if (lockResult.isFailure) {
             return Result.failure(
                 IllegalStateException(
@@ -458,5 +480,89 @@ constructor(
         return session.document.characters
             .mapValues { (_, charData) -> charData.traits }
             .mapKeys { (key, _) -> key.toInt() }
+    }
+
+    /**
+     * Kicks all online players, fires quit events to serialise their state, then synchronously
+     * saves all sessions and releases all distributed locks.
+     *
+     * Called from [com.runicrealms.game.plugin.GamePlugin.onDisable] to ensure a clean shutdown.
+     * During normal play, [onPlayerQuit] handles teardown per-player via a coroutine. However, when
+     * the server stops, Bukkit fires [PlayerQuitEvent] for every online player but MCCoroutine
+     * cancels the plugin's coroutine scope before those async handlers finish, leaving locks
+     * unreleased and quit-event state serialisation (location, inventory, etc.) incomplete. This
+     * method runs synchronously (via [runBlocking]) so everything is guaranteed to complete before
+     * [onDisable] returns.
+     *
+     * Each session is removed from [sessions] before kicking the player, so any [endSession]
+     * coroutine launched from the resulting [PlayerQuitEvent] will find no session and return
+     * early - there is no double-processing.
+     *
+     * Quit events are dispatched synchronously via [org.bukkit.plugin.PluginManager.callEvent]
+     * rather than [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] because MCCoroutine
+     * disposes the plugin's coroutine session before [onDisable] is called, making
+     * [com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent] unavailable. All current quit
+     * event handlers are non-suspending so synchronous dispatch is sufficient.
+     */
+    fun shutdown() {
+        val sessionIds = sessions.keys.toList()
+        if (sessionIds.isEmpty()) return
+        logger.info("Shutdown: saving ${sessionIds.size} active session(s)...")
+        runBlocking {
+            for (userId in sessionIds) {
+                // Remove from the sessions map first so any endSession() coroutine launched
+                // from the kick's PlayerQuitEvent finds no session and returns early.
+                val session = sessions.remove(userId) ?: continue
+
+                Bukkit.getPlayer(userId)
+                    ?.kick(Component.text("This server is shutting down", NamedTextColor.RED))
+
+                // Fire GameCharacterQuitEvent so handlers can serialise character state
+                // (location, inventory, etc.) back into the in-memory document before we save.
+                val activeSlot = session.activeCharacterSlot
+                if (activeSlot != null) {
+                    val character = players[userId] as? GameCharacter
+                    if (character != null) {
+                        Bukkit.getPluginManager()
+                            .callEvent(GameCharacterQuitEvent(character, isOnLogout = true))
+                    }
+                }
+
+                // Remove the player handle after events so handlers can still call
+                // getCharacter/getPlayer during event processing.
+                val player = players.remove(userId)
+                if (player != null) {
+                    Bukkit.getPluginManager().callEvent(GamePlayerQuitEvent(player))
+                }
+
+                // Cancel the periodic save loop. Cannot join: plugin.asyncDispatcher is disposed
+                // by the time shutdown() runs, so the saveJob coroutine is frozen and
+                // cancelAndJoin() would block forever. cancel() signals intent and we proceed;
+                // the dataLock.withLock below serialises our snapshot against any in-flight
+                // NonCancellable snapshot the loop may be taking on a still-active dispatcher.
+                session.saveJob.cancel()
+
+                // Use Dispatchers.IO directly: plugin.asyncDispatcher may be unavailable once
+                // MCCoroutine starts tearing down the plugin's coroutine session.
+                withContext(Dispatchers.IO) {
+                    val snapshot = session.dataLock.withLock { session.document.copy() }
+                    val saveResult = playerRepository.save(snapshot)
+                    if (saveResult.isFailure) {
+                        logger.error(
+                            "FATAL: shutdown save failed for player $userId",
+                            saveResult.exceptionOrNull()!!,
+                        )
+                    }
+                    val releaseResult = lockRepository.release(userId, serverId)
+                    if (releaseResult.isFailure) {
+                        logger.error(
+                            "FATAL: shutdown lock release failed for player $userId",
+                            releaseResult.exceptionOrNull()!!,
+                        )
+                    }
+                }
+            }
+        }
+        logger.info("Shutdown: all sessions saved and locks released")
     }
 }

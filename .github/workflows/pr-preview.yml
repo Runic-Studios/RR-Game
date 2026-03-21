@@ -2,7 +2,7 @@ name: PR Preview Build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     branches:
       - main
       - dev
@@ -14,7 +14,6 @@ env:
 
 jobs:
   build-preview:
-    if: github.event.action != 'closed'
     runs-on: rr-runner
     container:
       image: registry.runicrealms.com/agents/agent-java-21:latest
@@ -24,6 +23,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Compute short SHA and commit message
+        id: sha
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "sha7=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+          MSG=$(curl -sf -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}" \
+            | jq -r '.commit.message | split("\n")[0]')
+          echo "commit_message=$MSG" >> "$GITHUB_OUTPUT"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -37,9 +49,9 @@ jobs:
 
       - name: Build with Gradle
         env:
-          RUNIC_GIT_BRANCH: ${{ github.head_ref }}
-          RUNIC_GIT_SHA: ${{ github.sha }}
-          RUNIC_GIT_MESSAGE: ${{ github.event.pull_request.title }}
+          RUNIC_GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+          RUNIC_GIT_SHA: ${{ github.event.pull_request.head.sha }}
+          RUNIC_GIT_MESSAGE: ${{ steps.sha.outputs.commit_message }}
           RUNIC_BUILD_ID: ${{ github.run_id }}
         run: ./gradlew :plugin:shadowJar --no-daemon
 
@@ -47,7 +59,7 @@ jobs:
         uses: Runic-Studios/Realm-Actions/oras-push@main
         with:
           artifact_name: ${{ env.ARTIFACT_NAME }}
-          tag: pr-${{ github.event.number }}
+          tag: pr-${{ github.event.number }}-${{ steps.sha.outputs.sha7 }}
           file_path: 'plugin/build/libs/game-plugin-all.jar'
           registry: ${{ env.REGISTRY }}
           registry_project: ${{ env.REGISTRY_PROJECT }}
@@ -65,27 +77,7 @@ jobs:
               event_type: 'build-pr-preview',
               client_payload: {
                 pr_number: '${{ github.event.number }}',
-                rr_game_tag: 'pr-${{ github.event.number }}'
+                sha7: '${{ steps.sha.outputs.sha7 }}',
+                rr_game_tag: 'pr-${{ github.event.number }}-${{ steps.sha.outputs.sha7 }}'
               }
             });
-
-  cleanup-preview:
-    if: github.event.action == 'closed'
-    runs-on: rr-runner
-    container:
-      image: registry.runicrealms.com/agents/agent-base:latest
-      credentials:
-        username: ${{ secrets.HARBOR_USERNAME }}
-        password: ${{ secrets.HARBOR_PASSWORD }}
-    steps:
-      - name: Delete realm-paper PR image from Harbor
-        run: |
-          curl -X DELETE \
-            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
-            "https://registry.runicrealms.com/api/v2.0/projects/build/repositories/realm-paper/artifacts/pr-${{ github.event.number }}"
-
-      - name: Delete rr-game PR artifact from Harbor
-        run: |
-          curl -X DELETE \
-            -u "${{ secrets.HARBOR_USERNAME }}:${{ secrets.HARBOR_PASSWORD }}" \
-            "https://registry.runicrealms.com/api/v2.0/projects/library/repositories/rr-game/artifacts/pr-${{ github.event.number }}"

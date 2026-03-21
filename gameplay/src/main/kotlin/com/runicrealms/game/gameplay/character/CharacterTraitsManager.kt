@@ -2,20 +2,28 @@ package com.runicrealms.game.gameplay.character
 
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.google.inject.Inject
+import com.runicrealms.game.data.UserDataRegistry
 import com.runicrealms.game.data.event.GameCharacterLoadEvent
 import com.runicrealms.game.data.event.GameCharacterQuitEvent
 import com.runicrealms.game.data.extension.toBukkit
 import com.runicrealms.game.data.extension.toLocationData
+import com.runicrealms.game.gameplay.character.util.CharacterHealthHelper
 import com.runicrealms.game.gameplay.character.util.CharacterLevelHelper
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerLevelChangeEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.plugin.Plugin
 
 class CharacterTraitsManager
 @Inject
-constructor(plugin: Plugin, private val characterLevelHelper: CharacterLevelHelper) : Listener {
+constructor(
+    plugin: Plugin,
+    private val characterLevelHelper: CharacterLevelHelper,
+    private val characterHealthHelper: CharacterHealthHelper,
+    private val userDataRegistry: UserDataRegistry,
+) : Listener {
 
     init {
         Bukkit.getPluginManager().registerSuspendingEvents(this, plugin)
@@ -39,6 +47,14 @@ constructor(plugin: Plugin, private val characterLevelHelper: CharacterLevelHelp
             // Teleport to last known location
             player.teleport(traits.location.toBukkit(), PlayerTeleportEvent.TeleportCause.PLUGIN)
         }
+        // Level is now set; apply max health from level + equipment
+        characterHealthHelper.setCharacterMaxHealth(event.character)
+    }
+
+    @EventHandler
+    fun onLevelUp(event: PlayerLevelChangeEvent) {
+        val character = userDataRegistry.getCharacter(event.player.uniqueId) ?: return
+        characterHealthHelper.setCharacterMaxHealth(character)
     }
 
     @EventHandler

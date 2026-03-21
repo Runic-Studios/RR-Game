@@ -67,6 +67,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":gameplay"))
     implementation(project(":items"))
+    implementation(project(":tools"))
 }
 
 tasks.shadowJar {
