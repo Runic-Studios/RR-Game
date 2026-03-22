@@ -14,7 +14,8 @@ class PerkBaseStat(
     cost: Int,
     val stat: StatType,
     val bonusAmount: Int = DEFAULT_BONUS,
-) : Perk(perkId, cost, maxAllocatedPoints = 1) {
+    maxAllocatedPoints: Int = 1,
+) : Perk(perkId, cost, maxAllocatedPoints) {
 
     companion object {
         const val DEFAULT_BONUS = 2

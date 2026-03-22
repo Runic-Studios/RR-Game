@@ -168,6 +168,42 @@ constructor(
     fun getSpellData(uuid: UUID): SpellData? = spellDataMap[uuid]
 
     /**
+     * Resets all 3 skill trees for [uuid], zeroing out allocated points, re-initialising each
+     * tree's perk list to its default (un-purchased) state, clearing passives, and removing all
+     * base-stat bonuses that were granted by [PerkBaseStat] perks.
+     *
+     * Also immediately persists the zeroed allocated-point counts to the character document so that
+     * the in-memory snapshot is up-to-date before the next save-loop cycle.
+     *
+     * Returns true if the reset was performed, false if the player's trees were not loaded.
+     */
+    suspend fun resetSkillTrees(uuid: UUID): Boolean {
+        val trees = skillTreeMap[uuid] ?: return false
+        val character = userDataRegistry.getCharacter(uuid) ?: return false
+
+        val classType = character.withCharacterData { traits.classType }
+
+        for ((position, tree) in trees) {
+            tree.totalAllocatedPoints = 0
+            val positionSubClass = SubClassType.forClassAndPosition(classType, position.value)
+            if (positionSubClass != null) {
+                tree.loadPerksFromSubClass(positionSubClass)
+            }
+        }
+
+        passiveMap[uuid] = mutableSetOf()
+        statManagerProvider.get().clearBaseStatBonuses(uuid)
+
+        character.withCharacterData {
+            skills.positionOneAllocated = 0
+            skills.positionTwoAllocated = 0
+            skills.positionThreeAllocated = 0
+        }
+
+        return true
+    }
+
+    /**
      * Attempts to purchase [perk] in the [SkillTreePosition] for [uuid]. Validates skill points and
      * prerequisites.
      */
