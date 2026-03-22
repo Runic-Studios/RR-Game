@@ -147,11 +147,17 @@ constructor(
                 }
                 // resetSpells uses withSyncCharacterData (runBlocking) and must stay on main thread
                 resetSpells(player, spellData)
-                // resetSkillTrees is suspending; reopen menu only after it completes so the
-                // menu reflects the zeroed skill tree state
+                player.closeInventory()
+                // resetSkillTrees is suspending; send the confirmation message only after it
+                // completes so the player knows the reset has taken effect
                 plugin.launch {
                     skillTreeManager.resetSkillTrees(player.uniqueId)
-                    odalitaMenus.openMenu(this@SpellEditorMenu, player)
+                    player.sendMessage(
+                        Component.text(
+                            "Your skill trees have been reset!",
+                            NamedTextColor.LIGHT_PURPLE,
+                        )
+                    )
                 }
             },
         )
