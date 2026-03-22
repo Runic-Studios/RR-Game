@@ -35,9 +35,10 @@ class SnareTrap(deps: SpellDependencies) :
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
     var trapDuration = TRAP_DURATION
-    override var description =
-        "Lay a trap that arms after ${warmupSeconds}s and lasts ${trapDuration}s. " +
-            "The first enemy in ${radius} blocks takes physical damage and is rooted for ${duration}s."
+    override val description: String
+        get() =
+            "Lay a trap that arms after ${warmupSeconds}s and lasts ${trapDuration}s. " +
+                "The first enemy in ${radius} blocks takes physical damage and is rooted for ${duration}s."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

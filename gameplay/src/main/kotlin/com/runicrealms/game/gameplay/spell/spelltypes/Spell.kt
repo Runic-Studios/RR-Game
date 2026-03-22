@@ -61,7 +61,9 @@ abstract class Spell(
     override var cooldown: Double = 0.0
     override var manaCost: Int = 0
 
-    override var description: String = ""
+    override val description: String
+        get() = ""
+
     var isPassive: Boolean = false
     var displayCastMessage: Boolean = true
 
@@ -235,8 +237,10 @@ abstract class Spell(
             return
         }
         val config = YamlConfiguration.loadConfiguration(file)
-        cooldown = loadDouble(config, "cooldown", cooldown)
-        manaCost = loadInt(config, "mana", manaCost)
+        if (!isPassive) {
+            cooldown = loadDouble(config, "cooldown", cooldown)
+            manaCost = loadInt(config, "mana", manaCost)
+        }
         loadSpellSpecificData(config)
     }
 

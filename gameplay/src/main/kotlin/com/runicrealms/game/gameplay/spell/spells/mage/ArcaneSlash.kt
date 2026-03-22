@@ -27,8 +27,9 @@ class ArcaneSlash(deps: SpellDependencies) :
     override var shieldPerLevel = SHIELD_PER_LEVEL
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Slash in a line dealing $magicDamage magic damage. If an enemy is hit, gain a shield."
+    override val description: String
+        get() =
+            "Slash in a line dealing $magicDamage magic damage. If an enemy is hit, gain a shield."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         player.world.playSound(player.location, Sound.ENTITY_BLAZE_SHOOT, 0.5f, 2.0f)

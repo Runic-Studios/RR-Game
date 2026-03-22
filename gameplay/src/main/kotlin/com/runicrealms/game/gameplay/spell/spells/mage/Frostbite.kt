@@ -29,8 +29,8 @@ class Frostbite(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Strike enemies in a frost cone. Consumes Chilled for empowered damage."
+    override val description: String
+        get() = "Strike enemies in a frost cone. Consumes Chilled for empowered damage."
 
     private var empoweredDamage = EMPOWERED_DAMAGE
     private var empoweredDamagePerLevel = EMPOWERED_DAMAGE_PER_LEVEL

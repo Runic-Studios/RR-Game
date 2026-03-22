@@ -30,12 +30,13 @@ class Backstab(deps: SpellDependencies) :
     override var attributeBaseValue = BASE_VALUE
     override var attributeMultiplier = MULTIPLIER
     override var duration = DURATION
-    override var description =
-        "Basic attacking an enemy from behind causes &cbetrayed &7for ${duration}s! " +
-            "Subsequent attacks refresh the duration." +
-            "\n\n&2&lEFFECT &cBetrayed" +
-            "\n&cBetrayed &7enemies suffer ($attributeBaseValue + ${attributeMultiplier}x DEX)% " +
-            "extra physical\u2694 damage from your basic attacks!"
+    override val description: String
+        get() =
+            "Basic attacking an enemy from behind causes &cbetrayed &7for ${duration}s! " +
+                "Subsequent attacks refresh the duration." +
+                "\n\n&2&lEFFECT &cBetrayed" +
+                "\n&cBetrayed &7enemies suffer ($attributeBaseValue + ${attributeMultiplier}x DEX)% " +
+                "extra physical\u2694 damage from your basic attacks!"
 
     init {
         isPassive = true

@@ -23,8 +23,9 @@ class Tempo(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.CLERIC, deps)
 
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Whenever you cast a spell, your next basic attack restores $BASE_RESTORE mana to yourself and allies within $BASE_RADIUS blocks."
+    override val description: String
+        get() =
+            "Whenever you cast a spell, your next basic attack restores $BASE_RESTORE mana to yourself and allies within $BASE_RADIUS blocks."
 
     private val enhancedAttacks: MutableSet<UUID> = mutableSetOf()
 

@@ -22,7 +22,8 @@ class Combat(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ANY, deps) {
 
     override var cooldown = COMBAT_DURATION
     override var manaCost = 0
-    override var description = "Internal: manages combat timer display."
+    override val description: String
+        get() = "Internal: manages combat timer display."
 
     init {
         displayCastMessage = false

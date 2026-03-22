@@ -27,8 +27,9 @@ class AstralBlessing(deps: SpellDependencies) :
     override var shieldPerLevel = SHIELD_PER_LEVEL
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Enemies hit by Starlight are marked for $duration seconds. Allied basic attacks consume the mark and grant a shield."
+    override val description: String
+        get() =
+            "Enemies hit by Starlight are marked for $duration seconds. Allied basic attacks consume the mark and grant a shield."
 
     private val markMap: MutableMap<UUID, AstralMark> = mutableMapOf()
 

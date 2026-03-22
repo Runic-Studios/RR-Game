@@ -54,9 +54,10 @@ class Salvation(deps: SpellDependencies) :
     override var radius = RADIUS
     override var shieldAmount = BASE_SHIELD
     override var shieldPerLevel = SHIELD_PER_LEVEL
-    override var description =
-        "Conjure a bell up to $distance blocks away. It charges for ${duration}s. " +
-            "An ally can right-click the bell to detonate it, dealing AoE magic damage and granting shields."
+    override val description: String
+        get() =
+            "Conjure a bell up to $distance blocks away. It charges for ${duration}s. " +
+                "An ally can right-click the bell to detonate it, dealing AoE magic damage and granting shields."
 
     private val blockMap: MutableMap<Block, BellTask> = HashMap()
     private var maxDistance = MAX_DISTANCE

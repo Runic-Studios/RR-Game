@@ -26,8 +26,9 @@ class CosmicPrism(deps: SpellDependencies) :
     override var shieldPerLevel = SHIELD_PER_LEVEL
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Summon a prism for $BASE_DURATION seconds. Allies in $BASE_RADIUS blocks gain shielding every $BASE_PERIOD seconds."
+    override val description: String
+        get() =
+            "Summon a prism for $BASE_DURATION seconds. Allies in $BASE_RADIUS blocks gain shielding every $BASE_PERIOD seconds."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val castLocation = player.location.clone()

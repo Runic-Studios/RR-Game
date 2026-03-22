@@ -16,9 +16,10 @@ class Fade(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ARCHER, deps),
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
     override var duration = DURATION
-    override var description =
-        "You begin to flicker in and out of invisibility for the next ${duration}s! " +
-            "While invisible, you cannot cast spells."
+    override val description: String
+        get() =
+            "You begin to flicker in and out of invisibility for the next ${duration}s! " +
+                "While invisible, you cannot cast spells."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         var count = 1

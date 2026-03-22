@@ -45,8 +45,8 @@ class Blizzard(deps: SpellDependencies) :
     override var warmupSeconds = BASE_WARMUP
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Mark a location. After ${warmupSeconds}s, a blizzard rains for ${duration}s."
+    override val description: String
+        get() = "Mark a location. After ${warmupSeconds}s, a blizzard rains for ${duration}s."
 
     private val activeBlizzards: MutableMap<UUID, Location> = HashMap()
 

@@ -18,9 +18,10 @@ class RefreshingVolley(deps: SpellDependencies) :
     override var healAmount = HEAL
     override var healPerLevel = HEAL_PER_LEVEL
     override var distance = DISTANCE
-    override var description =
-        "While Rapid Fire is active, each ranged hit heals you and your closest 2 allies " +
-            "within ${distance} blocks for (${healAmount} + ${healPerLevel}x lvl)."
+    override val description: String
+        get() =
+            "While Rapid Fire is active, each ranged hit heals you and your closest 2 allies " +
+                "within ${distance} blocks for (${healAmount} + ${healPerLevel}x lvl)."
 
     init {
         isPassive = true

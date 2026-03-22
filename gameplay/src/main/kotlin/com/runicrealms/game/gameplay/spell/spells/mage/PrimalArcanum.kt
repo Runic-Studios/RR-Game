@@ -35,9 +35,10 @@ class PrimalArcanum(deps: SpellDependencies) :
     override var shieldPerLevel = SHIELD_PER_LEVEL
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Shield yourself and up to $MAX_ALLIES allies within $BASE_RADIUS blocks. " +
-            "For ${BASE_DURATION}s, basic attacks grant shield and mana."
+    override val description: String
+        get() =
+            "Shield yourself and up to $MAX_ALLIES allies within $BASE_RADIUS blocks. " +
+                "For ${BASE_DURATION}s, basic attacks grant shield and mana."
 
     var manaPerSlash = MANA_PER_SLASH
     var maxAllies = MAX_ALLIES

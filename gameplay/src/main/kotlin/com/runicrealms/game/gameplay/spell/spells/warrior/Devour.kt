@@ -36,9 +36,10 @@ class Devour(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
     private var percent = REDUCTION_PERCENT
-    override var description =
-        "Cleave in front of you, dealing ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage " +
-            "and reducing affected enemies' outgoing damage by ${(REDUCTION_PERCENT * 100).toInt()}% for ${duration}s."
+    override val description: String
+        get() =
+            "Cleave in front of you, dealing ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage " +
+                "and reducing affected enemies' outgoing damage by ${(REDUCTION_PERCENT * 100).toInt()}% for ${duration}s."
 
     private val debuffedEntities: MutableSet<UUID> = HashSet()
 

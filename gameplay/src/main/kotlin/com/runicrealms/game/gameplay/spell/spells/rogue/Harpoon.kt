@@ -37,11 +37,12 @@ class Harpoon(deps: SpellDependencies) :
     override var physicalDamagePerLevel = DAMAGE_PER_LEVEL
     override var duration = DURATION
     var tridentSpeed = TRIDENT_SPEED
-    override var description =
-        "You launch a projectile harpoon of the sea! Upon hitting an enemy, " +
-            "the trident deals ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical\u2694 damage " +
-            "and pulls its target towards you, slowing them for ${duration}s! " +
-            "If an ally is hit, you are instead teleported to their location."
+    override val description: String
+        get() =
+            "You launch a projectile harpoon of the sea! Upon hitting an enemy, " +
+                "the trident deals ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical\u2694 damage " +
+                "and pulls its target towards you, slowing them for ${duration}s! " +
+                "If an ally is hit, you are instead teleported to their location."
 
     private val tridentMap: MutableMap<UUID, Trident> = HashMap()
 

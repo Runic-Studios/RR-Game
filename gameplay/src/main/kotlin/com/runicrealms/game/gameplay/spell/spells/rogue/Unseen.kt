@@ -26,10 +26,11 @@ class Unseen(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ROGUE, deps)
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
     override var duration = DURATION
-    override var description =
-        "For ${duration}s, you vanish completely and gain &8shrouded&7. " +
-            "Dealing or taking damage from players ends the effect early. " +
-            "While shrouded, you are immune to monster damage."
+    override val description: String
+        get() =
+            "For ${duration}s, you vanish completely and gain &8shrouded&7. " +
+                "Dealing or taking damage from players ends the effect early. " +
+                "While shrouded, you are immune to monster damage."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         player.world.playSound(player.location, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.5f, 0.5f)

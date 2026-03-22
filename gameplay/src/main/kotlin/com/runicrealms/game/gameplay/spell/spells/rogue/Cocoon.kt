@@ -41,13 +41,14 @@ class Cocoon(deps: SpellDependencies) :
     private var damageCap = DAMAGE_CAP
     private var maxStacks = MAX_STACKS
     private var stackDuration = STACK_DURATION
-    override var description =
-        "You launch a short-range string of web that deals ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
-            "physical⚔ damage to the first enemy hit within $distance blocks, then slows and applies " +
-            "&9sundered &7for ${duration}s." +
-            "\n\n&2&lEFFECT &9Sundered" +
-            "\n&9Sundered &7enemies suffer an additional ($attributeBaseValue + ${attributeMultiplier}x DEX)% " +
-            "physical damage from all sources. Stacks to $MAX_STACKS and each stack expires after $STACK_DURATION s."
+    override val description: String
+        get() =
+            "You launch a short-range string of web that deals ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
+                "physical⚔ damage to the first enemy hit within $distance blocks, then slows and applies " +
+                "&9sundered &7for ${duration}s." +
+                "\n\n&2&lEFFECT &9Sundered" +
+                "\n&9Sundered &7enemies suffer an additional ($attributeBaseValue + ${attributeMultiplier}x DEX)% " +
+                "physical damage from all sources. Stacks to $MAX_STACKS and each stack expires after $STACK_DURATION s."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

@@ -26,9 +26,10 @@ class Wildfire(deps: SpellDependencies) :
     var maxTargets = MAX_TARGETS
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: Fireball deals its damage to up to $MAX_TARGETS enemies within $BASE_RADIUS blocks. " +
-            "Each enemy hit reduces Meteor's cooldown by ${COOLDOWN_REDUCTION}s."
+    override val description: String
+        get() =
+            "Passive: Fireball deals its damage to up to $maxTargets enemies within $radius blocks. " +
+                "Each enemy hit reduces Meteor's cooldown by ${duration}s."
 
     init {
         isPassive = true

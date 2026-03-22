@@ -23,9 +23,10 @@ class PiercingArrow(deps: SpellDependencies) :
     override var distance = DISTANCE
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
-    override var description =
-        "Launch an arrow up to ${distance} blocks that pierces enemies, " +
-            "dealing (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage."
+    override val description: String
+        get() =
+            "Launch an arrow up to ${distance} blocks that pierces enemies, " +
+                "dealing (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage."
 
     private val hitEntityMap: MutableMap<UUID, MutableSet<UUID>> = HashMap()
 

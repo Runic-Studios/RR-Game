@@ -24,8 +24,8 @@ class Powerslide(deps: SpellDependencies) :
     override var duration = BASE_DEBUFF_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Slide forward $distance blocks, damaging enemies hit and silencing them."
+    override val description: String
+        get() = "Slide forward $distance blocks, damaging enemies hit and silencing them."
 
     var cooldownReduction = BASE_COOLDOWN_REDUCTION
 

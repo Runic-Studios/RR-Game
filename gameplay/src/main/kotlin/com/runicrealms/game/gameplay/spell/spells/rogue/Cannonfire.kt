@@ -32,10 +32,11 @@ class Cannonfire(deps: SpellDependencies) :
     override var duration = DURATION
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
-    override var description =
-        "You fire a flurry of $TOTAL_PELLETS shrapnel fragments. On hit, each deals " +
-            "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage, slows for " +
-            "${duration}s, and launches the target back."
+    override val description: String
+        get() =
+            "You fire a flurry of $TOTAL_PELLETS shrapnel fragments. On hit, each deals " +
+                "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage, slows for " +
+                "${duration}s, and launches the target back."
 
     private var knockbackMultiplier = KNOCKBACK_MULTIPLIER
     private val hasBeenHit: MutableMap<UUID, MutableSet<UUID>> = HashMap()

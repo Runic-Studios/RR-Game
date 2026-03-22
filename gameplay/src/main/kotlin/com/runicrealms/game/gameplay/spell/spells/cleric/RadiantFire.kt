@@ -23,8 +23,8 @@ class RadiantFire(deps: SpellDependencies) :
     override var duration = BASE_STACK_DURATION
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Landing Sear grants Radiant Fire stacks. Healing spells are stronger per stack."
+    override val description: String
+        get() = "Landing Sear grants Radiant Fire stacks. Healing spells are stronger per stack."
 
     var maxStacks = BASE_MAX_STACKS
     var stackThreshold = BASE_STACK_THRESHOLD

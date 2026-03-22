@@ -35,10 +35,11 @@ class Ambush(deps: SpellDependencies) :
     override var duration = 3.0
     override var warmupSeconds = WARMUP
     var speedDuration = 2.0
-    override var description =
-        "Sneaking without casting spells for at least ${warmupSeconds}s causes your next ranged " +
-            "basic attack (if it lands) to ambush its target. Ambush attacks critically strike " +
-            "and blind your opponent for ${duration}s. Cannot occur more than once every ${cooldown}s."
+    override val description: String
+        get() =
+            "Sneaking without casting spells for at least ${warmupSeconds}s causes your next ranged " +
+                "basic attack (if it lands) to ambush its target. Ambush attacks critically strike " +
+                "and blind your opponent for ${duration}s. Cannot occur more than once every ${cooldown}s."
 
     private val ambushPlayers: MutableSet<UUID> = mutableSetOf()
     private val cooldownPlayers: MutableSet<UUID> = mutableSetOf()

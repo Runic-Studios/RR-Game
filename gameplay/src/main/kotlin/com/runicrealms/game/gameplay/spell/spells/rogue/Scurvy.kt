@@ -30,10 +30,11 @@ class Scurvy(deps: SpellDependencies) :
     override var duration = DURATION
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
-    override var description =
-        "Your first basic attack after casting &aDash &7is laden with disease. " +
-            "The target receives nausea for ${duration}s. Against mobs, you deal " +
-            "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) extra physical⚔ damage."
+    override val description: String
+        get() =
+            "Your first basic attack after casting &aDash &7is laden with disease. " +
+                "The target receives nausea for ${duration}s. Against mobs, you deal " +
+                "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) extra physical⚔ damage."
 
     private val buffed: MutableSet<UUID> = HashSet()
 

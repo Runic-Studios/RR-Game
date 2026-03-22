@@ -37,8 +37,8 @@ class Meteor(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Call down a meteor that deals $magicDamage magic damage in a $radius block radius."
+    override val description: String
+        get() = "Call down a meteor that deals $magicDamage magic damage in a $radius block radius."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val target =

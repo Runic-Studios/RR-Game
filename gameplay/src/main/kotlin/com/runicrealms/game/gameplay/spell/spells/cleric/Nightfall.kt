@@ -32,8 +32,9 @@ class Nightfall(deps: SpellDependencies) :
     override var warmupSeconds = BASE_WARMUP
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Slow yourself for $warmupSeconds seconds, then unleash lunar magic that launches enemies and protects allies."
+    override val description: String
+        get() =
+            "Slow yourself for $warmupSeconds seconds, then unleash lunar magic that launches enemies and protects allies."
 
     var durationInvulnerable = BASE_INVULN_DURATION
     var knockupMultiplier = BASE_KNOCKUP

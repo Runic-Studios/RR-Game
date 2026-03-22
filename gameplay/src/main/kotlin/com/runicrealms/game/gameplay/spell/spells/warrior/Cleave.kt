@@ -34,9 +34,10 @@ class Cleave(deps: SpellDependencies) :
     override var physicalDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
     private var tick = TICK_SECONDS
-    override var description =
-        "Brutally slash around yourself, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
-            "physical⚔ damage every ${TICK_SECONDS}s for ${duration}s. The final slash applies &cbleed&7."
+    override val description: String
+        get() =
+            "Brutally slash around yourself, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
+                "physical⚔ damage every ${TICK_SECONDS}s for ${duration}s. The final slash applies &cbleed&7."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

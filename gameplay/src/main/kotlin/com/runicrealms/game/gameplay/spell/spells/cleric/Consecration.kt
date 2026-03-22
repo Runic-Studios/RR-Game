@@ -24,8 +24,9 @@ class Consecration(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Conjure holy ground for $duration seconds, slowing and damaging enemies each second."
+    override val description: String
+        get() =
+            "Conjure holy ground for $duration seconds, slowing and damaging enemies each second."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val castLocation = player.location.clone()

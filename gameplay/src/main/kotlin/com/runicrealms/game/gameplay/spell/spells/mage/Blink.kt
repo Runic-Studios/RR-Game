@@ -28,7 +28,8 @@ class Blink(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps), 
     override var distance = BASE_DISTANCE
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description = "Blink forward up to $distance blocks."
+    override val description: String
+        get() = "Blink forward up to $distance blocks."
 
     private val blinkers: MutableSet<UUID> = mutableSetOf()
 

@@ -29,10 +29,11 @@ class Hereticize(deps: SpellDependencies) :
     override var duration = DURATION
     override var magicDamage = MAGIC_DAMAGE
     override var magicDamagePerLevel = MAGIC_DAMAGE_PER_LEVEL
-    override var description =
-        "Anytime a &7&obranded &7enemy uses an ability, your active ability cooldowns are " +
-            "reduced by ${duration}s. &7&oBranded &7enemies also take an additional " +
-            "($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage when hit by your basic attacks."
+    override val description: String
+        get() =
+            "Anytime a &7&obranded &7enemy uses an ability, your active ability cooldowns are " +
+                "reduced by ${duration}s. &7&oBranded &7enemies also take an additional " +
+                "($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage when hit by your basic attacks."
 
     // Internal map-based state (SPELL_MIGRATION.md): caster -> branded victim
     private val brandedEnemies: ConcurrentHashMap<UUID, UUID> = SilverBolt.getBrandedEnemiesMap()

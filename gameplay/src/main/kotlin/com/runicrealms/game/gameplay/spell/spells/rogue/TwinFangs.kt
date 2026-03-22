@@ -26,9 +26,10 @@ class TwinFangs(deps: SpellDependencies) :
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
     private var damageCap = DAMAGE_CAP
     private var percent = EXECUTE_PERCENT
-    override var description =
-        "You lash out with two fangs up to $distance blocks in front of you. Each fang deals " +
-            "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage plus ${(EXECUTE_PERCENT * 100).toInt()}% execute damage."
+    override val description: String
+        get() =
+            "You lash out with two fangs up to $distance blocks in front of you. Each fang deals " +
+                "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage plus ${(EXECUTE_PERCENT * 100).toInt()}% execute damage."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

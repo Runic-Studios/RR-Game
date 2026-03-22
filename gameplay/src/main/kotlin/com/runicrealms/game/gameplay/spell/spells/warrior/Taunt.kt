@@ -16,7 +16,8 @@ import org.bukkit.event.EventHandler
 class Taunt(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.WARRIOR, deps) {
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description = "Basic attacks passively generate threat against monsters."
+    override val description: String
+        get() = "Basic attacks passively generate threat against monsters."
 
     init {
         isPassive = true

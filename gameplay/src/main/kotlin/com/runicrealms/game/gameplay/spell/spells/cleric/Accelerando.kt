@@ -37,8 +37,9 @@ class Accelerando(deps: SpellDependencies) :
     override var attributeMultiplier = BASE_MULTIPLIER
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Whenever you cast a cleric battle spell, nearby allies gain Speed II and damage reduction for $duration seconds."
+    override val description: String
+        get() =
+            "Whenever you cast a cleric battle spell, nearby allies gain Speed II and damage reduction for $duration seconds."
 
     private val damageReductionData: MutableMap<UUID, ReductionData> = mutableMapOf()
 

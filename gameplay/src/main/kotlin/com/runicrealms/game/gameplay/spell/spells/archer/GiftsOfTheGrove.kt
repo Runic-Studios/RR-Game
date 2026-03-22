@@ -22,11 +22,12 @@ class GiftsOfTheGrove(deps: SpellDependencies) :
     override var attributeMultiplier = ATTRIBUTE_MULTIPLIER
     override var duration = DURATION
     var percent = PERCENT
-    override var description =
-        "While inside your Sacred Grove, your healing is increased by " +
-            "(${attributeBaseValue} + ${attributeMultiplier}x attribute)%! " +
-            "When you hit an enemy while inside the grove, Remedy cooldown is reduced by ${duration}s. " +
-            "If you are in the grove when it expires, one final pulse heals allies for ${(percent * 100).toInt()}%."
+    override val description: String
+        get() =
+            "While inside your Sacred Grove, your healing is increased by " +
+                "(${attributeBaseValue} + ${attributeMultiplier}x attribute)%! " +
+                "When you hit an enemy while inside the grove, Remedy cooldown is reduced by ${duration}s. " +
+                "If you are in the grove when it expires, one final pulse heals allies for ${(percent * 100).toInt()}%."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         // Passive spell.

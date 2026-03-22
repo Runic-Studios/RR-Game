@@ -32,8 +32,9 @@ class Sear(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Fire a beam of light. The first enemy hit is atoned and detonates when damaged by another source."
+    override val description: String
+        get() =
+            "Fire a beam of light. The first enemy hit is atoned and detonates when damaged by another source."
 
     private val atoningEntitiesMap: MutableMap<UUID, BukkitTask> = ConcurrentHashMap()
     private val atonementCasters: MutableMap<UUID, UUID> = ConcurrentHashMap()

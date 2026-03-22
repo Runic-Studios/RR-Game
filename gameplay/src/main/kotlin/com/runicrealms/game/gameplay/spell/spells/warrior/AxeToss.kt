@@ -33,9 +33,10 @@ class AxeToss(deps: SpellDependencies) :
     override var duration = SLOW_DURATION
     override var physicalDamage = BASE_DAMAGE
     override var physicalDamagePerLevel = DAMAGE_PER_LEVEL
-    override var description =
-        "Throw your weapon, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage " +
-            "and applying &cbleed&7. If the enemy is already bleeding, they are slowed for ${duration}s."
+    override val description: String
+        get() =
+            "Throw your weapon, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage " +
+                "and applying &cbleed&7. If the enemy is already bleeding, they are slowed for ${duration}s."
 
     private val hasBeenHit: MutableMap<UUID, UUID> = HashMap()
 

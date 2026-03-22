@@ -42,9 +42,10 @@ class Shatter(deps: SpellDependencies) :
     var stackDuration = STACK_DURATION
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: Basic attacks on Chilled enemies shatter ice, dealing " +
-            "($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) magic damage and gaining an Ice Barrier stack."
+    override val description: String
+        get() =
+            "Passive: Basic attacks on Chilled enemies shatter ice, dealing " +
+                "($magicDamage + ${magicDamagePerLevel}x lvl) magic damage and gaining an Ice Barrier stack."
 
     init {
         isPassive = true

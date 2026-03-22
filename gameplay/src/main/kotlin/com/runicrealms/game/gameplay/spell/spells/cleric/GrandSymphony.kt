@@ -37,8 +37,8 @@ class GrandSymphony(deps: SpellDependencies) :
     override var duration = BASE_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Pulse magic every second for $duration seconds, damaging and debuffing enemies."
+    override val description: String
+        get() = "Pulse magic every second for $duration seconds, damaging and debuffing enemies."
 
     var debuffDuration = BASE_DEBUFF_DURATION
     var debuffRatio = BASE_DEBUFF_RATIO

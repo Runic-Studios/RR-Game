@@ -35,10 +35,11 @@ class Jolt(deps: SpellDependencies) :
     override var distance = DISTANCE
     override var warmupSeconds = WARMUP
     var damageInterval = DAMAGE_INTERVAL
-    override var description =
-        "Fire a bolt of lightning up to ${distance} blocks away! " +
-            "If it hits an enemy, summon a storm in ${radius} blocks dealing " +
-            "(${magicDamage} + ${magicDamagePerLevel}x lvl) magic damage every ${damageInterval}s for ${duration}s."
+    override val description: String
+        get() =
+            "Fire a bolt of lightning up to ${distance} blocks away! " +
+                "If it hits an enemy, summon a storm in ${radius} blocks dealing " +
+                "(${magicDamage} + ${magicDamagePerLevel}x lvl) magic damage every ${damageInterval}s for ${duration}s."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

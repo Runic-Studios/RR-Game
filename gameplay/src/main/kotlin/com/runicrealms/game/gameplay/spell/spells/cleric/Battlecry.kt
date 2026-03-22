@@ -39,8 +39,9 @@ class Battlecry(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Shout in a $radius block radius, damaging enemies and empowering allies with Song of War."
+    override val description: String
+        get() =
+            "Shout in a $radius block radius, damaging enemies and empowering allies with Song of War."
 
     var knockback = BASE_KNOCKBACK
     var attackRadius = 4.0

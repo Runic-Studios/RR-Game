@@ -30,8 +30,9 @@ class Diminuendo(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Place a jukebox for $duration seconds. Enemies inside $radius blocks attack slower and mobs deal reduced damage."
+    override val description: String
+        get() =
+            "Place a jukebox for $duration seconds. Enemies inside $radius blocks attack slower and mobs deal reduced damage."
 
     var attackSpeedReduction = BASE_ATTACK_SPEED_REDUCTION
     var mobDamageReduction = BASE_MOB_DAMAGE_REDUCTION

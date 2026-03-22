@@ -26,8 +26,9 @@ class Lightwell(deps: SpellDependencies) :
     var blindDuration = 0.0
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Sacred Spring leaves a lightwell for $duration seconds, healing allies each second."
+    override val description: String
+        get() =
+            "Sacred Spring leaves a lightwell for $duration seconds, healing allies each second."
 
     init {
         isPassive = true

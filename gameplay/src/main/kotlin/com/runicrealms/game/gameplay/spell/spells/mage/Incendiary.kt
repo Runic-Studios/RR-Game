@@ -36,8 +36,8 @@ class Incendiary(deps: SpellDependencies) :
     var period = 2.0
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: After a fire spell, your next staff attack fires a fire wave."
+    override val description: String
+        get() = "Passive: After a fire spell, your next staff attack fires a fire wave."
 
     init {
         isPassive = true

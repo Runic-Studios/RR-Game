@@ -28,10 +28,11 @@ class Overcharge(deps: SpellDependencies) :
     var maxStacks = MAX_STACKS
     var stackDuration = STACK_DURATION
     var stacksPerIncrement = STACKS_PER_INCREMENT
-    override var description =
-        "Thunder Arrow/Jolt marks enemies with static for ${markedDuration}s. " +
-            "Ranged basic attacks against marked enemies consume the mark, restore ${manaToRestore} mana, " +
-            "and grant Charged stacks. Charged increases attack speed by ${(percent * 100).toInt()}% per stack."
+    override val description: String
+        get() =
+            "Thunder Arrow/Jolt marks enemies with static for ${markedDuration}s. " +
+                "Ranged basic attacks against marked enemies consume the mark, restore ${manaToRestore} mana, " +
+                "and grant Charged stacks. Charged increases attack speed by ${(percent * 100).toInt()}% per stack."
 
     init {
         isPassive = true

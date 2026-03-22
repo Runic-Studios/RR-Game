@@ -26,7 +26,8 @@ class Potion(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ANY, deps) {
 
     override var cooldown = POTION_COOLDOWN
     override var manaCost = 0
-    override var description = "Internal: manages potion cooldown display."
+    override val description: String
+        get() = "Internal: manages potion cooldown display."
 
     init {
         displayCastMessage = false

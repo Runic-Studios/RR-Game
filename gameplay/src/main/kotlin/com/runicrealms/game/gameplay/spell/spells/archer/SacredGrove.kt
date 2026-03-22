@@ -37,9 +37,10 @@ class SacredGrove(deps: SpellDependencies) :
     override var healPerLevel = HEAL_PER_LEVEL
     override var radius = RADIUS
     override var warmupSeconds = WARMUP
-    override var description =
-        "Place an enchanted flower that grows for ${warmupSeconds}s, then heals allies " +
-            "within ${radius} blocks for (${healAmount} + ${healPerLevel}x lvl) each second for ${duration}s."
+    override val description: String
+        get() =
+            "Place an enchanted flower that grows for ${warmupSeconds}s, then heals allies " +
+                "within ${radius} blocks for (${healAmount} + ${healPerLevel}x lvl) each second for ${duration}s."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val location = player.location.block.location.clone().add(0.5, 0.0, 0.5)

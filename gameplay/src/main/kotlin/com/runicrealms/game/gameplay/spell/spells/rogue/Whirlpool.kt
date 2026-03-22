@@ -43,11 +43,12 @@ class Whirlpool(deps: SpellDependencies) :
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
     override var radius = RADIUS
-    override var description =
-        "You fire a stream of water, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
-            "physical⚔ damage to the first enemy hit. On hit, a whirlpool forms at the target's location, " +
-            "pulling enemies inward and dealing ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage per second " +
-            "for ${duration}s."
+    override val description: String
+        get() =
+            "You fire a stream of water, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
+                "physical⚔ damage to the first enemy hit. On hit, a whirlpool forms at the target's location, " +
+                "pulling enemies inward and dealing ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage per second " +
+                "for ${duration}s."
 
     private var multiplier = PULL_MULTIPLIER
     private val whirlpools: MutableSet<Location> = CopyOnWriteArraySet()

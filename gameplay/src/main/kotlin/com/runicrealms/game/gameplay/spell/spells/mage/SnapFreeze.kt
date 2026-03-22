@@ -34,9 +34,10 @@ class SnapFreeze(deps: SpellDependencies) :
     var stunDuration = STUN_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Cast a frost wave up to $BASE_DISTANCE blocks. Enemies take ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
-            "magic damage and are rooted for ${BASE_DURATION}s. Chilled enemies are stunned for ${STUN_DURATION}s instead."
+    override val description: String
+        get() =
+            "Cast a frost wave up to $BASE_DISTANCE blocks. Enemies take ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
+                "magic damage and are rooted for ${BASE_DURATION}s. Chilled enemies are stunned for ${STUN_DURATION}s instead."
 
     /** Prevents hitting the same entity twice in one cast. UUID -> set of already-hit UUIDs. */
     private val damageMap: MutableMap<UUID, MutableSet<UUID>> = HashMap()

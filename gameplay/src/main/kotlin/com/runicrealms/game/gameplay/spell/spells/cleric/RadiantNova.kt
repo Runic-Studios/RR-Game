@@ -26,7 +26,8 @@ class RadiantNova(deps: SpellDependencies) :
     override var warmupSeconds = BASE_WARMUP
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description = "Charge radiant energy, then heal allies in $radius blocks."
+    override val description: String
+        get() = "Charge radiant energy, then heal allies in $radius blocks."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val effectOpt =

@@ -22,9 +22,10 @@ class Remedy(deps: SpellDependencies) :
     override var healAmount = HEAL
     override var healPerLevel = HEAL_PER_LEVEL
     override var duration = DURATION
-    override var description =
-        "You and allies within ${radius} blocks are healed for " +
-            "(${healAmount} + ${healPerLevel}x lvl) over ${duration}s."
+    override val description: String
+        get() =
+            "You and allies within ${radius} blocks are healed for " +
+                "(${healAmount} + ${healPerLevel}x lvl) over ${duration}s."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         var count = 1

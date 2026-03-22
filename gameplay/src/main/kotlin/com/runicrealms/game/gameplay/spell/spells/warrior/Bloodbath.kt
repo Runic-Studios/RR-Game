@@ -29,11 +29,12 @@ class Bloodbath(deps: SpellDependencies) :
     private val eventMap: MutableMap<UUID, Long> = HashMap()
     private var percent = PERCENT
     private var healthCeiling = HEALTH_CEILING
-    override var description =
-        "Hitting an enemy with Cleave heals you for " +
-            "($attributeBaseValue + &f${attributeMultiplier}x&7 ${attribute.uppercase()}) once per swing. " +
-            "You also deal ${(PERCENT * 100).toInt()}% more damage to bleeding enemies under " +
-            "${(HEALTH_CEILING * 100).toInt()}% HP."
+    override val description: String
+        get() =
+            "Hitting an enemy with Cleave heals you for " +
+                "($attributeBaseValue + &f${attributeMultiplier}x&7 ${attribute.uppercase()}) once per swing. " +
+                "You also deal ${(PERCENT * 100).toInt()}% more damage to bleeding enemies under " +
+                "${(HEALTH_CEILING * 100).toInt()}% HP."
 
     init {
         isPassive = true

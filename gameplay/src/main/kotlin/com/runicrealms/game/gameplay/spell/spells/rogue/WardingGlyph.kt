@@ -29,9 +29,11 @@ class WardingGlyph(deps: SpellDependencies) :
     override var duration = GLYPH_DURATION
     override var radius = RADIUS
     private var durationSilence = SILENCE_DURATION
-    override var description =
-        "Place an anti-magic glyph in a $radius block radius for ${duration}s. Allies inside are immune to debuffs. " +
-            "&7&oBranded &7enemies within the glyph are silenced for $SILENCE_DURATION s each second."
+    override val description: String
+        get() =
+            "Place an anti-magic glyph in a $radius block radius for ${duration}s. Allies inside are immune to debuffs. " +
+                "&7&oBranded &7enemies within the glyph are silenced for $SILENCE_DURATION s each second."
+
     private val glyphCasters: MutableMap<UUID, Location> = ConcurrentHashMap()
 
     override fun loadSpellSpecificData(config: FileConfiguration) {

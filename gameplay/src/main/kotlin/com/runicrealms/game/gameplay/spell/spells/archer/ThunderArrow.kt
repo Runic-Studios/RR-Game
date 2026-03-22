@@ -29,9 +29,10 @@ class ThunderArrow(deps: SpellDependencies) :
     override var magicDamage = MAGIC_DAMAGE
     override var magicDamagePerLevel = MAGIC_DAMAGE_PER_LEVEL
     override var radius = RADIUS
-    override var description =
-        "Launch an enchanted arrow that deals (${magicDamage} + ${magicDamagePerLevel}x lvl) " +
-            "magic damage on impact to all enemies within ${radius} blocks."
+    override val description: String
+        get() =
+            "Launch an enchanted arrow that deals (${magicDamage} + ${magicDamagePerLevel}x lvl) " +
+                "magic damage on impact to all enemies within ${radius} blocks."
 
     private val powerShots: MutableSet<UUID> = HashSet()
 

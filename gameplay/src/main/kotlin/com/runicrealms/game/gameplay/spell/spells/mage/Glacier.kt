@@ -24,7 +24,8 @@ class Glacier(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE, deps)
     override var cooldown = 0.0
     override var manaCost = 0
     var maxStacks = MAX_STACKS
-    override var description = "Passive: Increases Ice Barrier max stacks to $MAX_STACKS."
+    override val description: String
+        get() = "Passive: Increases Ice Barrier max stacks to $maxStacks."
 
     init {
         isPassive = true

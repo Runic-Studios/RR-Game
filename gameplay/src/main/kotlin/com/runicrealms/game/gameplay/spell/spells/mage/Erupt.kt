@@ -32,8 +32,8 @@ class Erupt(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Erupt fire at a location, dealing $magicDamage magic damage and igniting enemies."
+    override val description: String
+        get() = "Erupt fire at a location, dealing $magicDamage magic damage and igniting enemies."
 
     private var maxHealthPercent = MAX_HEALTH_PERCENT
     private var knockupMultiplier = KNOCKUP_MULTIPLIER

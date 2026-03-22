@@ -35,12 +35,13 @@ class Adrenaline(deps: SpellDependencies) :
     override var manaCost = MANA_COST
     private var maxStacks = DEFAULT_MAX_STACKS
     private var percent = DEFAULT_PERCENT
-    override var description =
-        "For the next ${duration}s, gain Speed II! " +
-            "Each basic attack against bleeding enemies grants a stack of rage, " +
-            "dealing ${(DEFAULT_PERCENT * 100).toInt()}% more physical damage per stack, " +
-            "up to ${DEFAULT_MAX_STACKS} stacks. " +
-            "Reaching max rage cleanses all debuffs and resets the speed bonus!"
+    override val description: String
+        get() =
+            "For the next ${duration}s, gain Speed II! " +
+                "Each basic attack against bleeding enemies grants a stack of rage, " +
+                "dealing ${(DEFAULT_PERCENT * 100).toInt()}% more physical damage per stack, " +
+                "up to ${DEFAULT_MAX_STACKS} stacks. " +
+                "Reaching max rage cleanses all debuffs and resets the speed bonus!"
 
     private val rageMap: MutableMap<UUID, RagePayload> = HashMap()
 
