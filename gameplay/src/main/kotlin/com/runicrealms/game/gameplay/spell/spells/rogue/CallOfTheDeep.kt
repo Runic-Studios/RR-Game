@@ -31,12 +31,14 @@ class CallOfTheDeep(deps: SpellDependencies) :
     override var duration = STUN_DURATION
     private var dashBuff = DASH_BUFF
     private var dashBuffDuration = DASH_BUFF_DURATION
-    override var description =
-        "After landing &aHarpoon&7 on an enemy, refund half of Harpoon's current cooldown. " +
-            "Basic attacks against that enemy within $DASH_BUFF_DURATION s reduce &aDash&7 cooldown by $DASH_BUFF s. " +
-            "Applying &aScurvy&7 on enemies inside &aWhirlpool&7 summons a creature from the depths " +
-            "after $WARMUP s, dealing ($PHYSICAL_DAMAGE + &f${PHYSICAL_DAMAGE_PER_LEVEL}x&7 lvl) " +
-            "physical⚔ damage and stunning for $STUN_DURATION s."
+    override val description: String
+        get() =
+            "After landing &aHarpoon&7 on an enemy, refund half of Harpoon's current cooldown. " +
+                "Basic attacks against that enemy within $DASH_BUFF_DURATION s reduce &aDash&7 cooldown by $DASH_BUFF s. " +
+                "Applying &aScurvy&7 on enemies inside &aWhirlpool&7 summons a creature from the depths " +
+                "after $WARMUP s, dealing ($PHYSICAL_DAMAGE + &f${PHYSICAL_DAMAGE_PER_LEVEL}x&7 lvl) " +
+                "physical⚔ damage and stunning for $STUN_DURATION s."
+
     private val harpooned: MutableMap<UUID, Long> = HashMap()
 
     init {

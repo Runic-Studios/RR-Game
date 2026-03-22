@@ -24,8 +24,9 @@ class RapidFire(deps: SpellDependencies) :
     override var manaCost = MANA_COST
     override var duration = DURATION
     var percent = PERCENT
-    override var description =
-        "For ${duration}s, rapid-fire arrows and gain ${(percent * 100).toInt()}% attack speed."
+    override val description: String
+        get() =
+            "For ${duration}s, rapid-fire arrows and gain ${(percent * 100).toInt()}% attack speed."
 
     private val players: MutableMap<UUID, Long> = HashMap()
 

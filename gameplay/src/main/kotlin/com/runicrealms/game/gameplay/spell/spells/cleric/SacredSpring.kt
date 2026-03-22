@@ -31,8 +31,9 @@ class SacredSpring(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Throw a magical vial. Allies are healed and enemies are damaged in a $radius block radius."
+    override val description: String
+        get() =
+            "Throw a magical vial. Allies are healed and enemies are damaged in a $radius block radius."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val item = ItemStack(Material.SPLASH_POTION)

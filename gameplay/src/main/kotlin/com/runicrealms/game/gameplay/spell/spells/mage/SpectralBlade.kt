@@ -28,8 +28,9 @@ class SpectralBlade(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.MAGE,
 
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: While shielded, basic attacks use Arcane Slash's hitbox and deal magic damage."
+    override val description: String
+        get() =
+            "Passive: While shielded, basic attacks use Arcane Slash's hitbox and deal magic damage."
 
     init {
         isPassive = true

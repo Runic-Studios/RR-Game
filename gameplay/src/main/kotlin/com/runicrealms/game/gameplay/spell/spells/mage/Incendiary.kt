@@ -10,8 +10,10 @@ import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DistanceSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpell
-import java.util.UUID
+import com.runicrealms.game.gameplay.spell.spellutil.particles.HorizontalCircleFrame
 import org.bukkit.Particle
+import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -29,17 +31,18 @@ class Incendiary(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var distance = BASE_DISTANCE
     override var duration = BASE_DURATION
+    var count = 5
+    var durationOfDamage = 4.0
+    var period = 2.0
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: After a fire spell, your next staff attack fires a fire wave."
+    override val description: String
+        get() = "Passive: After a fire spell, your next staff attack fires a fire wave."
 
     init {
         isPassive = true
         displayCastMessage = false
     }
-
-    private val usedThisCast: MutableSet<UUID> = mutableSetOf()
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onMagicDamage(event: MagicDamageEvent) {
@@ -68,46 +71,53 @@ class Incendiary(deps: SpellDependencies) :
         val origin = player.location.add(0.0, 1.0, 0.0)
         val dir = origin.direction.normalize()
         val hitThisWave = mutableSetOf<LivingEntity>()
+        var count = 1
 
         deps.plugin.server.scheduler.runTaskTimer(
             deps.plugin,
             { task ->
-                var shouldCancel = false
-                for (i in 1..distance.toInt() step PERIOD_BLOCKS) {
-                    val point = origin.clone().add(dir.clone().multiply(i))
-                    point.world.spawnParticle(
-                        Particle.FLAME,
-                        point,
-                        3,
-                        BEAM_RADIUS,
-                        0.2,
-                        BEAM_RADIUS,
-                        0.05,
-                    )
-                    if (!point.block.type.isAir) {
-                        shouldCancel = true
-                        break
-                    }
-
-                    for (entity in
-                        point.world.getNearbyEntities(point, BEAM_RADIUS, 1.0, BEAM_RADIUS)) {
-                        if (entity !is LivingEntity || entity == player || entity in hitThisWave)
-                            continue
-                        if (!isValidEnemy(player, entity)) continue
-                        hitThisWave.add(entity)
-                        deps.damageHandler.dealMagicDamage(
-                            magicDamage.toInt(),
-                            entity,
-                            player,
-                            this@Incendiary,
-                        )
-                    }
+                if (count > distance.toInt()) {
+                    task.cancel()
+                    return@runTaskTimer
                 }
-                if (shouldCancel) task.cancel()
+
+                val point = origin.clone().add(dir.clone().multiply(count))
+
+                if (!point.block.type.isAir) {
+                    task.cancel()
+                    return@runTaskTimer
+                }
+
+                HorizontalCircleFrame(BEAM_RADIUS, semiCircle = true)
+                    .playParticle(player, Particle.FLAME, point, 0.8)
+                point.world.playSound(point, Sound.ITEM_FIRECHARGE_USE, 0.25f, 2.0f)
+
+                for (entity in
+                    point.world.getNearbyEntities(point, BEAM_RADIUS, BEAM_RADIUS, BEAM_RADIUS)) {
+                    if (entity !is LivingEntity || entity == player || entity in hitThisWave)
+                        continue
+                    if (!isValidEnemy(player, entity)) continue
+                    hitThisWave.add(entity)
+                    deps.damageHandler.dealMagicDamage(
+                        magicDamage.toInt(),
+                        entity,
+                        player,
+                        this@Incendiary,
+                    )
+                }
+
+                count++
             },
             0L,
-            PERIOD_TICKS.toLong(),
+            1L,
         )
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        count = loadInt(config, "count", count)
+        durationOfDamage = loadDouble(config, "duration-of-damage", durationOfDamage)
+        period = loadDouble(config, "period", period)
     }
 
     companion object {
@@ -116,9 +126,6 @@ class Incendiary(deps: SpellDependencies) :
         const val DAMAGE_PER_LEVEL = 0.75
         const val BASE_DISTANCE = 12.0
         const val BASE_DURATION = 8.0
-        const val COOLDOWN = 0.0
-        const val PERIOD_BLOCKS = 1
-        const val PERIOD_TICKS = 1
         const val BEAM_RADIUS = 1.0
     }
 }

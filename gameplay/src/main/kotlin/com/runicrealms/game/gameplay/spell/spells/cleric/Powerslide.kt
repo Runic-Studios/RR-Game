@@ -11,6 +11,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
 import com.runicrealms.game.gameplay.spell.spelltypes.components.PhysicalDamageSpell
 import kotlin.math.cos
 import org.bukkit.Bukkit
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -23,8 +24,8 @@ class Powerslide(deps: SpellDependencies) :
     override var duration = BASE_DEBUFF_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Slide forward $distance blocks, damaging enemies hit and silencing them."
+    override val description: String
+        get() = "Slide forward $distance blocks, damaging enemies hit and silencing them."
 
     var cooldownReduction = BASE_COOLDOWN_REDUCTION
 
@@ -100,6 +101,11 @@ class Powerslide(deps: SpellDependencies) :
             }
         }
         return result
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        cooldownReduction = loadDouble(config, "cooldown-reduction", cooldownReduction)
     }
 
     companion object {

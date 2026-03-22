@@ -34,8 +34,9 @@ class Starlight(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Release a crescent wave that damages and silences enemies. Hitting enemies refreshes nearby ally shield uptime."
+    override val description: String
+        get() =
+            "Release a crescent wave that damages and silences enemies. Hitting enemies refreshes nearby ally shield uptime."
 
     private val damageMap: MutableMap<UUID, MutableSet<UUID>> = mutableMapOf()
 

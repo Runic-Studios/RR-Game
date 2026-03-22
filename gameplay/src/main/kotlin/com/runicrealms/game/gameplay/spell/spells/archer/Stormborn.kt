@@ -40,10 +40,11 @@ class Stormborn(deps: SpellDependencies) :
     override var magicDamagePerLevel = MAGIC_DAMAGE_PER_LEVEL
     override var radius = RADIUS
     var maxTargets = MAX_TARGETS
-    override var description =
-        "After casting an ability, your next 3 basic attacks are storm-infused, " +
-            "ricocheting to up to ${maxTargets} additional targets in ${radius} blocks " +
-            "for bonus magic damage."
+    override val description: String
+        get() =
+            "After casting an ability, your next 3 basic attacks are storm-infused, " +
+                "ricocheting to up to ${maxTargets} additional targets in ${radius} blocks " +
+                "for bonus magic damage."
 
     private val stormPlayers: MutableMap<UUID, Int> = HashMap()
     private val hasAlreadyHit: MutableMap<UUID, Long> = HashMap()

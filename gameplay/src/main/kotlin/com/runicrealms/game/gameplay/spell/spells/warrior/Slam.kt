@@ -34,9 +34,10 @@ class Slam(deps: SpellDependencies) :
     override var physicalDamage = BASE_DAMAGE
     override var physicalDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
-    override var description =
-        "Charge into the air, then crash down and deal " +
-            "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage in a $radius block radius."
+    override val description: String
+        get() =
+            "Charge into the air, then crash down and deal " +
+                "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage in a $radius block radius."
 
     private val slamTasks: MutableMap<UUID, BukkitTask> = HashMap()
 

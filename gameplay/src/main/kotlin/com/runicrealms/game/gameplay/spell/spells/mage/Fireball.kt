@@ -24,8 +24,8 @@ class Fireball(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Launch a fireball that detonates on impact, dealing $magicDamage magic damage."
+    override val description: String
+        get() = "Launch a fireball that detonates on impact, dealing $magicDamage magic damage."
 
     private val playerFireballs: MutableMap<UUID, SmallFireball> = HashMap()
 

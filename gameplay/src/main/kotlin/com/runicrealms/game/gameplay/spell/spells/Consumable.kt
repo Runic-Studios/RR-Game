@@ -18,7 +18,8 @@ class Consumable(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ANY, dep
 
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description = "Internal: consumable cooldown stub."
+    override val description: String
+        get() = "Internal: consumable cooldown stub."
 
     init {
         displayCastMessage = false

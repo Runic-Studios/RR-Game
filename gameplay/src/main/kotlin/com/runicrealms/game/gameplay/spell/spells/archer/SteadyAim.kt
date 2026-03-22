@@ -25,10 +25,11 @@ class SteadyAim(deps: SpellDependencies) :
     override var attributeBaseValue = ATTRIBUTE_BASE_VALUE
     override var attributeMultiplier = ATTRIBUTE_MULTIPLIER
     override var duration = DURATION
-    override var description =
-        "Every ${duration}s you do not basic attack, gain a stack (up to $MAX_STACKS) " +
-            "that adds bonus physical damage to your next basic attack. " +
-            "The final Leaping Shot arrow grants maximum stacks."
+    override val description: String
+        get() =
+            "Every ${duration}s you do not basic attack, gain a stack (up to $MAX_STACKS) " +
+                "that adds bonus physical damage to your next basic attack. " +
+                "The final Leaping Shot arrow grants maximum stacks."
 
     private val stacks: MutableMap<UUID, SpellPayload> = HashMap()
 

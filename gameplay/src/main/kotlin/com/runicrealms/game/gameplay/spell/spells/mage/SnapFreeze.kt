@@ -15,6 +15,7 @@ import java.util.UUID
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 
@@ -30,11 +31,13 @@ class SnapFreeze(deps: SpellDependencies) :
     override var duration = BASE_DURATION
     override var magicDamage = BASE_DAMAGE
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
+    var stunDuration = STUN_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Cast a frost wave up to $BASE_DISTANCE blocks. Enemies take ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
-            "magic damage and are rooted for ${BASE_DURATION}s. Chilled enemies are stunned for ${STUN_DURATION}s instead."
+    override val description: String
+        get() =
+            "Cast a frost wave up to $BASE_DISTANCE blocks. Enemies take ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
+                "magic damage and are rooted for ${BASE_DURATION}s. Chilled enemies are stunned for ${STUN_DURATION}s instead."
 
     /** Prevents hitting the same entity twice in one cast. UUID -> set of already-hit UUIDs. */
     private val damageMap: MutableMap<UUID, MutableSet<UUID>> = HashMap()
@@ -57,7 +60,7 @@ class SnapFreeze(deps: SpellDependencies) :
                 }
             },
             0L,
-            (PERIOD * 20).toLong(),
+            1L,
         )
     }
 
@@ -84,18 +87,18 @@ class SnapFreeze(deps: SpellDependencies) :
                 getSpellEffect(player.uniqueId, entity.uniqueId, SpellEffectType.CHILLED)
             if (chilledOpt.isPresent) {
                 (chilledOpt.get() as ChilledEffect).cancel()
-                addStatusEffect(
-                    entity,
-                    RunicStatusEffect.STUN,
-                    STUN_DURATION,
-                    displayMessage = true,
-                )
+                addStatusEffect(entity, RunicStatusEffect.STUN, stunDuration, displayMessage = true)
             } else {
                 addStatusEffect(entity, RunicStatusEffect.ROOT, duration, displayMessage = true)
             }
 
             damageMap[player.uniqueId]?.add(entity.uniqueId)
         }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        stunDuration = loadDouble(config, "stun-duration", stunDuration)
     }
 
     companion object {

@@ -39,9 +39,10 @@ class SacredWings(deps: SpellDependencies) :
     override var radius = RADIUS
     override var shieldAmount = SHIELD
     override var shieldPerLevel = SHIELD_PER_LEVEL
-    override var description =
-        "Conjure wings of light for ${duration}s, granting speed to nearby allies and shielding yourself. " +
-            "During holy fervor, your basic attacks become radiant sweeps."
+    override val description: String
+        get() =
+            "Conjure wings of light for ${duration}s, granting speed to nearby allies and shielding yourself. " +
+                "During holy fervor, your basic attacks become radiant sweeps."
 
     private var allyShield = ALLY_SHIELD
     private var allyShieldPerLevel = ALLY_SHIELD_PER_LEVEL

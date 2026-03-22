@@ -42,11 +42,12 @@ class SilverBolt(deps: SpellDependencies) :
     override var magicDamagePerLevel = MAGIC_DAMAGE_PER_LEVEL
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
-    override var description =
-        "You fire a silver bolt up to $distance blocks away! The first enemy hit suffers " +
-            "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage and is &7&obranded " +
-            "&7for ${duration}s. &7&oBranded &7enemies take an additional " +
-            "($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage from your basic attacks!"
+    override val description: String
+        get() =
+            "You fire a silver bolt up to $distance blocks away! The first enemy hit suffers " +
+                "($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ damage and is &7&obranded " +
+                "&7for ${duration}s. &7&oBranded &7enemies take an additional " +
+                "($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage from your basic attacks!"
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         player.world.playSound(player.location, Sound.ITEM_CROSSBOW_SHOOT, 0.5f, 0.5f)

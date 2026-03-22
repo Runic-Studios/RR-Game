@@ -29,8 +29,9 @@ class TwilightResurgence(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "When your shield breaks from damage, reduce Cosmic Prism cooldown and release a blind pulse."
+    override val description: String
+        get() =
+            "When your shield breaks from damage, reduce Cosmic Prism cooldown and release a blind pulse."
 
     var blindDuration = BASE_BLIND_DURATION
     var effectCooldown = BASE_EFFECT_COOLDOWN

@@ -43,11 +43,13 @@ class BlessedBlade(deps: SpellDependencies) :
     override var radius = RADIUS
     private var maxCharges = MAX_CHARGES
     private var maxTargets = MAX_TARGETS
-    override var description =
-        "Each spell cast empowers your next ${MAX_CHARGES} basic attacks for ${duration}s. " +
-            "Empowered attacks deal ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage, " +
-            "then heal you and up to ${MAX_TARGETS.toInt()} allies within $radius blocks " +
-            "for ($healAmount + &f${healPerLevel}x&7 lvl)."
+    override val description: String
+        get() =
+            "Each spell cast empowers your next ${MAX_CHARGES} basic attacks for ${duration}s. " +
+                "Empowered attacks deal ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage, " +
+                "then heal you and up to ${MAX_TARGETS.toInt()} allies within $radius blocks " +
+                "for ($healAmount + &f${healPerLevel}x&7 lvl)."
+
     private val chargeMap: MutableMap<UUID, Int> = HashMap()
 
     init {

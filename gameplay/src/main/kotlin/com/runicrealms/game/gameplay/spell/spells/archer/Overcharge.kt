@@ -12,6 +12,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.Spell
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellDependencies
 import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -27,10 +28,11 @@ class Overcharge(deps: SpellDependencies) :
     var maxStacks = MAX_STACKS
     var stackDuration = STACK_DURATION
     var stacksPerIncrement = STACKS_PER_INCREMENT
-    override var description =
-        "Thunder Arrow/Jolt marks enemies with static for ${markedDuration}s. " +
-            "Ranged basic attacks against marked enemies consume the mark, restore ${manaToRestore} mana, " +
-            "and grant Charged stacks. Charged increases attack speed by ${(percent * 100).toInt()}% per stack."
+    override val description: String
+        get() =
+            "Thunder Arrow/Jolt marks enemies with static for ${markedDuration}s. " +
+                "Ranged basic attacks against marked enemies consume the mark, restore ${manaToRestore} mana, " +
+                "and grant Charged stacks. Charged increases attack speed by ${(percent * 100).toInt()}% per stack."
 
     init {
         isPassive = true
@@ -123,6 +125,15 @@ class Overcharge(deps: SpellDependencies) :
                 event.cooldownTicks - ticksToReduce,
                 BasicAttackEvent.MINIMUM_COOLDOWN_TICKS.toDouble(),
             )
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        manaToRestore = loadDouble(config, "mana-restore", manaToRestore)
+        percent = loadDouble(config, "percent", percent)
+        markedDuration = loadDouble(config, "marked-duration", markedDuration)
+        maxStacks = loadDouble(config, "max-stacks", maxStacks)
+        stackDuration = loadDouble(config, "stack-duration", stackDuration)
     }
 
     companion object {

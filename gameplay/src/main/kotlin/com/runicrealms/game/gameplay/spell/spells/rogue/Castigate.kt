@@ -33,10 +33,11 @@ class Castigate(deps: SpellDependencies) :
     private var healingReductionDuration = HEALING_REDUCTION_DURATION
     private var numberOfTicks = NUMBER_OF_TICKS
     private var percent = HEAL_REDUCTION_PERCENT
-    override var description =
-        "After casting a spell, your next basic attack within $DURATION_TO_HIT s burns the target for " +
-            "($MAGIC_DAMAGE + &f${MAGIC_DAMAGE_PER_LEVEL}x&7 lvl) magicʔ damage per second for $NUMBER_OF_TICKS s. " +
-            "For $HEALING_REDUCTION_DURATION s, the target receives ${(HEAL_REDUCTION_PERCENT * 100).toInt()}% less healing."
+    override val description: String
+        get() =
+            "After casting a spell, your next basic attack within $DURATION_TO_HIT s burns the target for " +
+                "($MAGIC_DAMAGE + &f${MAGIC_DAMAGE_PER_LEVEL}x&7 lvl) magicʔ damage per second for $NUMBER_OF_TICKS s. " +
+                "For $HEALING_REDUCTION_DURATION s, the target receives ${(HEAL_REDUCTION_PERCENT * 100).toInt()}% less healing."
 
     // Internal map-based state (SPELL_MIGRATION.md): caster -> buff timeout task
     private val buffedMap: ConcurrentHashMap<UUID, BukkitTask> = ConcurrentHashMap()

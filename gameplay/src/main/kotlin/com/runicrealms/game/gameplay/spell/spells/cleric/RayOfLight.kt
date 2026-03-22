@@ -16,6 +16,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
@@ -33,7 +34,8 @@ class RayOfLight(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description = "Call down a ray of light on a target up to $distance blocks away."
+    override val description: String
+        get() = "Call down a ray of light on a target up to $distance blocks away."
 
     var knockback = BASE_KNOCKBACK
 
@@ -138,6 +140,14 @@ class RayOfLight(deps: SpellDependencies) :
             Runnable { task.cancel() },
             MAX_DURATION * 20L,
         )
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        // Config uses non-standard key names for distance and duration.
+        distance = loadDouble(config, "max-distance", distance)
+        duration = loadDouble(config, "silence-duration", duration)
+        knockback = loadDouble(config, "knockback-vector", knockback)
     }
 
     companion object {

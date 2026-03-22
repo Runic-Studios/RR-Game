@@ -29,8 +29,8 @@ import org.bukkit.event.player.PlayerQuitEvent
 class SoulReaper(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.WARRIOR, deps) {
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Landing Devour or Umbral Grasp grants souls that reduce incoming damage."
+    override val description: String
+        get() = "Landing Devour or Umbral Grasp grants souls that reduce incoming damage."
 
     var duration = BASE_DURATION
     var maxStacks = BASE_MAX_STACKS

@@ -36,9 +36,10 @@ class Smite(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
     override var duration = DURATION
-    override var description =
-        "Fire a beam of light that deals magic damage to the first target and nearby enemies. " +
-            "The primary target is slowed for ${duration}s."
+    override val description: String
+        get() =
+            "Fire a beam of light that deals magic damage to the first target and nearby enemies. " +
+                "The primary target is slowed for ${duration}s."
 
     private var knockback = KNOCKBACK
 

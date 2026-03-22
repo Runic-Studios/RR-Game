@@ -26,8 +26,9 @@ class Rejuvenate(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Launch a healing beam. Allies hit receive bonus healing from your spells for $duration seconds."
+    override val description: String
+        get() =
+            "Launch a healing beam. Allies hit receive bonus healing from your spells for $duration seconds."
 
     private val hasBeenHit: MutableMap<UUID, MutableSet<UUID>> = mutableMapOf()
     private val affectedPlayers: MutableMap<UUID, MutableSet<UUID>> = mutableMapOf()

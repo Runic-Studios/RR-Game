@@ -42,10 +42,11 @@ class Consecrate(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
     private var slowDuration = SLOW_DURATION
-    override var description =
-        "Your Slam leaves consecrated ground in a $radius block radius for ${duration}s. " +
-            "Enemies take ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage and are slowed " +
-            "for ${SLOW_DURATION}s each tick. Allies are healed for ($healAmount + &f${healPerLevel}x&7 lvl)."
+    override val description: String
+        get() =
+            "Your Slam leaves consecrated ground in a $radius block radius for ${duration}s. " +
+                "Enemies take ($magicDamage + &f${magicDamagePerLevel}x&7 lvl) magicʔ damage and are slowed " +
+                "for ${SLOW_DURATION}s each tick. Allies are healed for ($healAmount + &f${healPerLevel}x&7 lvl)."
 
     init {
         isPassive = true

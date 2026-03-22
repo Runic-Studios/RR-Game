@@ -21,9 +21,10 @@ import org.bukkit.event.player.PlayerQuitEvent
 class Rupture(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.WARRIOR, deps) {
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "After applying &cbleed&7, your next basic attack critically strikes. " +
-            "If the target is bleeding, refresh their bleed."
+    override val description: String
+        get() =
+            "After applying &cbleed&7, your next basic attack critically strikes. " +
+                "If the target is bleeding, refresh their bleed."
 
     private val nextCriticalSet: MutableSet<UUID> = HashSet()
 

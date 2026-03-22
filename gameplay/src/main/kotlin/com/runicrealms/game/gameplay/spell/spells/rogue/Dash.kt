@@ -36,10 +36,11 @@ class Dash(deps: SpellDependencies) :
     private var launchMultiplier = LAUNCH_MULTIPLIER
     private var percent = DAMAGE_REDUCTION
     private var verticalPower = VERTICAL_POWER
-    override var description =
-        "You dash forward, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ " +
-            "damage to enemies you pass through. While dashing, you receive ${(DAMAGE_REDUCTION * 100).toInt()}% " +
-            "reduced damage from monsters."
+    override val description: String
+        get() =
+            "You dash forward, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) physical⚔ " +
+                "damage to enemies you pass through. While dashing, you receive ${(DAMAGE_REDUCTION * 100).toInt()}% " +
+                "reduced damage from monsters."
 
     init {
         displayCastMessage = true

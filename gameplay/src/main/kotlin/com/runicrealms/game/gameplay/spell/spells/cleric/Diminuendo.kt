@@ -18,6 +18,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerQuitEvent
@@ -29,8 +30,9 @@ class Diminuendo(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Place a jukebox for $duration seconds. Enemies inside $radius blocks attack slower and mobs deal reduced damage."
+    override val description: String
+        get() =
+            "Place a jukebox for $duration seconds. Enemies inside $radius blocks attack slower and mobs deal reduced damage."
 
     var attackSpeedReduction = BASE_ATTACK_SPEED_REDUCTION
     var mobDamageReduction = BASE_MOB_DAMAGE_REDUCTION
@@ -126,6 +128,12 @@ class Diminuendo(deps: SpellDependencies) :
 
     private fun isAffected(entityId: UUID): Boolean {
         return affectedEnemiesMap.values.any { it.contains(entityId) }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        attackSpeedReduction = loadDouble(config, "attack-speed-reduction", attackSpeedReduction)
+        mobDamageReduction = loadDouble(config, "mob-damage-reduction", mobDamageReduction)
     }
 
     companion object {

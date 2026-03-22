@@ -23,7 +23,8 @@ class Purify(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description = "Launch a healing beam that heals allies and removes silence."
+    override val description: String
+        get() = "Launch a healing beam that heals allies and removes silence."
 
     private val hasBeenHit: MutableMap<UUID, MutableSet<UUID>> = mutableMapOf()
 

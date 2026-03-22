@@ -29,11 +29,12 @@ class FromTheShadows(deps: SpellDependencies) :
     override var cooldown = 0.0
     override var manaCost = 0
     override var duration = DURATION
-    override var description =
-        "While you are &8shrouded&7, your first spell cast is empowered." +
-            "\n\n&aDash &7- Cleanse slows and gain Speed III for ${duration}s." +
-            "\n\n&aTwin Fangs &7- Both fangs critically strike." +
-            "\n\n&aCocoon &7- Landing this spell teleports you behind the target."
+    override val description: String
+        get() =
+            "While you are &8shrouded&7, your first spell cast is empowered." +
+                "\n\n&aDash &7- Cleanse slows and gain Speed III for ${duration}s." +
+                "\n\n&aTwin Fangs &7- Both fangs critically strike." +
+                "\n\n&aCocoon &7- Landing this spell teleports you behind the target."
 
     private val buffedTwinFangsHits: MutableMap<UUID, Int> = HashMap()
     private val pendingCocoonTeleport: MutableSet<UUID> = HashSet()

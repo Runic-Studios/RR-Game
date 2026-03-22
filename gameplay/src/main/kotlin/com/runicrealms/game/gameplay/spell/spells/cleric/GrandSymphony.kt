@@ -18,6 +18,7 @@ import org.bukkit.Color
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -36,8 +37,8 @@ class GrandSymphony(deps: SpellDependencies) :
     override var duration = BASE_DURATION
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Pulse magic every second for $duration seconds, damaging and debuffing enemies."
+    override val description: String
+        get() = "Pulse magic every second for $duration seconds, damaging and debuffing enemies."
 
     var debuffDuration = BASE_DEBUFF_DURATION
     var debuffRatio = BASE_DEBUFF_RATIO
@@ -155,6 +156,12 @@ class GrandSymphony(deps: SpellDependencies) :
     private fun buildRanges(): List<Double> {
         val max = (radius * 2).toInt()
         return (1..max).map { it / 2.0 }
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        debuffDuration = loadDouble(config, "debuff-duration", debuffDuration)
+        debuffRatio = loadDouble(config, "debuff-ratio", debuffRatio)
     }
 
     companion object {

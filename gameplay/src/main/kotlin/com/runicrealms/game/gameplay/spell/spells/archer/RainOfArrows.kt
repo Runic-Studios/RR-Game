@@ -29,10 +29,11 @@ class RainOfArrows(deps: SpellDependencies) :
     override var duration = DURATION
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
-    override var description =
-        "Rain arrows over a ${radius}-block area for ${duration}s. " +
-            "Arrows strike every ${INTERVAL}s for (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage. " +
-            "Moving ends the channel early."
+    override val description: String
+        get() =
+            "Rain arrows over a ${radius}-block area for ${duration}s. " +
+                "Arrows strike every ${INTERVAL}s for (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage. " +
+                "Moving ends the channel early."
 
     private val casting: MutableMap<UUID, Location> = HashMap()
 

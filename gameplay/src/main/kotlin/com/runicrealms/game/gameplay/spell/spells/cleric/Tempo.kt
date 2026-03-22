@@ -10,6 +10,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.SpellItemType
 import com.runicrealms.game.gameplay.spell.spelltypes.components.DurationSpell
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -22,8 +23,9 @@ class Tempo(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.CLERIC, deps)
 
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Whenever you cast a spell, your next basic attack restores $BASE_RESTORE mana to yourself and allies within $BASE_RADIUS blocks."
+    override val description: String
+        get() =
+            "Whenever you cast a spell, your next basic attack restores $BASE_RESTORE mana to yourself and allies within $BASE_RADIUS blocks."
 
     private val enhancedAttacks: MutableSet<UUID> = mutableSetOf()
 
@@ -81,6 +83,14 @@ class Tempo(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.CLERIC, deps)
     private fun restoreMana(player: Player, amount: Int) {
         val mana = spellManager.getMana(player.uniqueId)
         spellManager.setMana(player.uniqueId, mana + amount)
+    }
+
+    // Tempo's fields are not component-based, so we load them all manually.
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        restore = loadInt(config, "restore", restore)
+        radius = loadDouble(config, "radius", radius)
+        duration = loadDouble(config, "duration", duration)
     }
 
     companion object {

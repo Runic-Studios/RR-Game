@@ -29,10 +29,11 @@ class Flay(deps: SpellDependencies) :
     override var physicalDamage = PHYSICAL_DAMAGE
     override var physicalDamagePerLevel = PHYSICAL_DAMAGE_PER_LEVEL
     private var silenceDuration = SILENCE_DURATION
-    override var description =
-        "You lash out with a phantom blade, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
-            "physical⚔ damage to enemies within $distance blocks and slowing them for ${duration}s. " +
-            "If an affected enemy is &7&obranded&7, they are silenced for $SILENCE_DURATION s."
+    override val description: String
+        get() =
+            "You lash out with a phantom blade, dealing ($physicalDamage + &f${physicalDamagePerLevel}x&7 lvl) " +
+                "physical⚔ damage to enemies within $distance blocks and slowing them for ${duration}s. " +
+                "If an affected enemy is &7&obranded&7, they are silenced for $SILENCE_DURATION s."
 
     override fun loadSpellSpecificData(config: FileConfiguration) {
         super.loadSpellSpecificData(config)

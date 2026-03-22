@@ -38,9 +38,10 @@ class Damnation(deps: SpellDependencies) :
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
     override var warmupSeconds = WARMUP
-    override var description =
-        "Prime yourself with unholy magic for ${warmupSeconds}s, then emit an aura for ${duration}s " +
-            "that damages and drags nearby enemies."
+    override val description: String
+        get() =
+            "Prime yourself with unholy magic for ${warmupSeconds}s, then emit an aura for ${duration}s " +
+                "that damages and drags nearby enemies."
 
     private var multiplier = PULL_MULTIPLIER
     private var damagePerSouls = DAMAGE_PER_SOUL

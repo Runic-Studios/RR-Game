@@ -24,8 +24,9 @@ class Surge(deps: SpellDependencies) : Spell(SPELL_NAME, ClassType.ARCHER, deps)
     override var manaCost = MANA_COST
     override var duration = DURATION
     var speedMultiplier = SPEED_MULTIPLIER
-    override var description =
-        "Launch yourself forward. Landing a Stormborn arrow reduces this spell cooldown by ${duration}s."
+    override val description: String
+        get() =
+            "Launch yourself forward. Landing a Stormborn arrow reduces this spell cooldown by ${duration}s."
 
     private val surgeTasks: MutableMap<UUID, BukkitTask> = HashMap()
 

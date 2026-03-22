@@ -28,8 +28,9 @@ class DragonsBreath(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Breathe a cone of fire for ${duration}s, dealing $magicDamage magic damage per second."
+    override val description: String
+        get() =
+            "Breathe a cone of fire for ${duration}s, dealing $magicDamage magic damage per second."
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         addStatusEffect(player, RunicStatusEffect.SLOW_I, duration, false)

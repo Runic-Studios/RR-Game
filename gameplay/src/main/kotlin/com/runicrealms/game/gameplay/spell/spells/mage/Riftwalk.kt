@@ -25,9 +25,10 @@ class Riftwalk(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = 0.0
     override var manaCost = 0
-    override var description =
-        "Passive: After Blink, deal ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
-            "magic damage within $BASE_RADIUS blocks. If any enemy is hit, reduce Blink cooldown by ${COOLDOWN_REDUCTION}s."
+    override val description: String
+        get() =
+            "Passive: After Blink, deal ($BASE_DAMAGE + ${DAMAGE_PER_LEVEL}x lvl) " +
+                "magic damage within $BASE_RADIUS blocks. If any enemy is hit, reduce Blink cooldown by ${COOLDOWN_REDUCTION}s."
 
     init {
         isPassive = true

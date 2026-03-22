@@ -12,6 +12,7 @@ import com.runicrealms.game.gameplay.spell.spelltypes.components.MagicDamageSpel
 import com.runicrealms.game.gameplay.spell.spelltypes.components.RadiusSpell
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -31,8 +32,8 @@ class Erupt(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Erupt fire at a location, dealing $magicDamage magic damage and igniting enemies."
+    override val description: String
+        get() = "Erupt fire at a location, dealing $magicDamage magic damage and igniting enemies."
 
     private var maxHealthPercent = MAX_HEALTH_PERCENT
     private var knockupMultiplier = KNOCKUP_MULTIPLIER
@@ -43,8 +44,8 @@ class Erupt(deps: SpellDependencies) :
                 ?: player.location.add(player.location.direction.normalize().multiply(MAX_DIST))
         val center = target.clone().add(0.0, 0.5, 0.0)
 
-        center.world.spawnParticle(Particle.FLAME, center, 40, radius, 0.5, radius, 0.1)
-        center.world.spawnParticle(Particle.LAVA, center, 10, radius, 0.5, radius)
+        // Tight LAVA burst at ground level (eruption from below)
+        center.world.spawnParticle(Particle.LAVA, center, 25, 0.3, 0.3, 0.3, 0.0)
         center.world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 0.8f)
 
         for (entity in center.world.getNearbyEntities(center, radius, radius, radius)) {
@@ -53,9 +54,11 @@ class Erupt(deps: SpellDependencies) :
 
             deps.damageHandler.dealMagicDamage(magicDamage.toInt(), entity, player, this)
 
-            // Knockup
-            val knockup = Vector(0.0, knockupMultiplier, 0.0)
-            entity.velocity = knockup
+            // FLAME at each enemy's eye level (like old code)
+            entity.world.spawnParticle(Particle.FLAME, entity.eyeLocation, 15, 0.5, 0.5, 0.5, 0.0)
+
+            // Knockup (from Erupt.yml: knockup-multiplier: 1.0)
+            entity.velocity = Vector(0.0, knockupMultiplier, 0.0)
 
             // Apply ignite
             IgniteEffect(
@@ -79,12 +82,30 @@ class Erupt(deps: SpellDependencies) :
             it.cancel()
         }
 
+        victim.world.spawnParticle(
+            Particle.SOUL_FIRE_FLAME,
+            victim.eyeLocation,
+            15,
+            0.35,
+            0.35,
+            0.35,
+            0.0,
+        )
+
         val bonusDamage =
             minOf(
                 percentMaxHealth(victim, maxHealthPercent / 100.0).toDouble(),
                 MOB_DAMAGE_CAP.toDouble(),
             )
         deps.damageHandler.dealMagicDamage(bonusDamage.toInt(), victim, event.caster, this)
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        knockupMultiplier = loadDouble(config, "knockup-multiplier", knockupMultiplier)
+        // Config stores as a decimal fraction (e.g. 0.05 = 5%); code stores as a percent.
+        val rawMaxHealth = loadDouble(config, "max-health-damage", maxHealthPercent / 100.0)
+        maxHealthPercent = rawMaxHealth * 100.0
     }
 
     companion object {
@@ -96,9 +117,11 @@ class Erupt(deps: SpellDependencies) :
         const val COOLDOWN = 8.0
         const val MANA_COST = 25
         const val MAX_DIST = 10.0
-        const val MAX_HEALTH_PERCENT = 15.0
+        // From Erupt.yml: max-health-damage: 0.05 (5%), stored here as percent
+        const val MAX_HEALTH_PERCENT = 5.0
         const val MOB_DAMAGE_CAP = 500
-        const val KNOCKUP_MULTIPLIER = 0.6
+        // From Erupt.yml: knockup-multiplier: 1.0
+        const val KNOCKUP_MULTIPLIER = 1.0
         const val RAY_SIZE = 1.5
     }
 }

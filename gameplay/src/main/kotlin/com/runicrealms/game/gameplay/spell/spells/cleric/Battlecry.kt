@@ -17,6 +17,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -38,10 +39,12 @@ class Battlecry(deps: SpellDependencies) :
     override var radius = BASE_RADIUS
     override var cooldown = COOLDOWN
     override var manaCost = MANA_COST
-    override var description =
-        "Shout in a $radius block radius, damaging enemies and empowering allies with Song of War."
+    override val description: String
+        get() =
+            "Shout in a $radius block radius, damaging enemies and empowering allies with Song of War."
 
     var knockback = BASE_KNOCKBACK
+    var attackRadius = 4.0
 
     override fun executeSpell(player: Player, type: SpellItemType) {
         val buffDuration = effectiveDuration(player)
@@ -122,6 +125,11 @@ class Battlecry(deps: SpellDependencies) :
 
     private fun percentAttribute(player: Player): Double {
         return (attributeBaseValue / 100.0).coerceAtLeast(0.0)
+    }
+
+    override fun loadSpellSpecificData(config: FileConfiguration) {
+        super.loadSpellSpecificData(config)
+        attackRadius = loadDouble(config, "attack-radius", attackRadius)
     }
 
     companion object {

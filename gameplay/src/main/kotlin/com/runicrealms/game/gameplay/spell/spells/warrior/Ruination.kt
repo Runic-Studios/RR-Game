@@ -39,9 +39,10 @@ class Ruination(deps: SpellDependencies) :
     override var magicDamage = BASE_DAMAGE
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
     override var radius = RADIUS
-    override var description =
-        "After meeting soul requirements, your next spell releases spirits in a frontal cone, " +
-            "dealing magic damage and reducing healing received."
+    override val description: String
+        get() =
+            "After meeting soul requirements, your next spell releases spirits in a frontal cone, " +
+                "dealing magic damage and reducing healing received."
 
     private val cooldownPlayers: MutableSet<UUID> = HashSet()
     private val weakenedHealers: MutableSet<UUID> = HashSet()

@@ -36,10 +36,11 @@ class LeapingShot(deps: SpellDependencies) :
     override var duration = DURATION
     var launchMultiplier = LAUNCH_MULTIPLIER
     var verticalPower = VERTICAL_POWER
-    override var description =
-        "Fire 4 arrows in quick succession while leaping backwards. " +
-            "Each arrow deals (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage. " +
-            "Gain fall damage immunity for ${duration}s."
+    override val description: String
+        get() =
+            "Fire 4 arrows in quick succession while leaping backwards. " +
+                "Each arrow deals (${physicalDamage} + ${physicalDamagePerLevel}x lvl) physical damage. " +
+                "Gain fall damage immunity for ${duration}s."
 
     private val hasBeenHit: MutableMap<UUID, UUID> = HashMap()
 

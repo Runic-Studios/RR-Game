@@ -37,9 +37,10 @@ class UmbralGrasp(deps: SpellDependencies) :
     override var duration = DURATION
     override var magicDamage = BASE_DAMAGE
     override var magicDamagePerLevel = DAMAGE_PER_LEVEL
-    override var description =
-        "Conjure and launch a spectral skull. On enemy hit, deal magic damage, launch backwards, " +
-            "teleport to the victim, then deal damage again and slow."
+    override val description: String
+        get() =
+            "Conjure and launch a spectral skull. On enemy hit, deal magic damage, launch backwards, " +
+                "teleport to the victim, then deal damage again and slow."
 
     private val witherSkullMap: MutableMap<UUID, WitherSkull> = HashMap()
     private var launchMultiplier = LAUNCH_MULTIPLIER
