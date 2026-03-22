@@ -10,6 +10,9 @@ import com.runicrealms.game.gameplay.spell.SpellManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SkillTreeManager
 import com.runicrealms.game.gameplay.spell.skilltrees.SpellData
 import com.runicrealms.game.gameplay.spell.skilltrees.perks.PerkSpell
+import com.runicrealms.game.items.config.item.GameItemTemplateRegistry
+import com.runicrealms.game.items.generator.ItemStackConverter
+import com.runicrealms.game.items.util.ItemInventoryUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import nl.odalitadevelopments.menus.OdalitaMenus
@@ -25,6 +28,9 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("gameplay")
 
 /**
  * Spell slot assignment editor. Shows 4 spell slot buttons and a spell-setup summary item.
@@ -44,6 +50,8 @@ constructor(
     private val userDataRegistry: UserDataRegistry,
     private val skillTreeManager: SkillTreeManager,
     private val spellManager: SpellManager,
+    private val templateRegistry: GameItemTemplateRegistry,
+    private val itemStackConverter: ItemStackConverter,
     private val runeMenuFactory: RuneMenu.Factory,
     private val spellMenuFactory: SpellMenu.Factory,
     private val spellEditorMenuFactory: Factory,
@@ -111,8 +119,40 @@ constructor(
             0,
             5,
             ClickableItem.of(buildResetButton(playerLevel)) {
+                val cost = calculateResetCost(playerLevel)
+                val coinTemplate = templateRegistry.getItemTemplate(COIN_TEMPLATE_ID)
+                if (coinTemplate == null) {
+                    logger.error(
+                        "Coin template '$COIN_TEMPLATE_ID' not found; cannot process skill tree reset cost"
+                    )
+                    return@of
+                }
+                val coinRefItem =
+                    templateRegistry.generateGameItem(coinTemplate).generateItemStack(1)
+                if (
+                    cost > 0 &&
+                        !ItemInventoryUtil.hasItem(itemStackConverter, player, coinRefItem, cost)
+                ) {
+                    player.playSound(player.location, Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f)
+                    player.sendMessage(
+                        Component.text(
+                            "You need $cost gold coins to reset your skill trees.",
+                            NamedTextColor.RED,
+                        )
+                    )
+                    return@of
+                }
+                if (cost > 0) {
+                    ItemInventoryUtil.takeItem(itemStackConverter, player, coinRefItem, cost)
+                }
+                // resetSpells uses withSyncCharacterData (runBlocking) and must stay on main thread
                 resetSpells(player, spellData)
-                odalitaMenus.openMenu(this, player)
+                // resetSkillTrees is suspending; reopen menu only after it completes so the
+                // menu reflects the zeroed skill tree state
+                plugin.launch {
+                    skillTreeManager.resetSkillTrees(player.uniqueId)
+                    odalitaMenus.openMenu(this@SpellEditorMenu, player)
+                }
             },
         )
 
@@ -375,5 +415,7 @@ constructor(
 
         /** Sentinel for "no slot selected". Slot indices are 0..3. */
         const val NO_SLOT = -1
+
+        private const val COIN_TEMPLATE_ID = "coin"
     }
 }
