@@ -70,6 +70,14 @@ constructor(
         baseStatMap[uuid]?.merge(stat, amount, Int::plus)
     }
 
+    /**
+     * Clears all skill-tree base stat bonuses for [uuid]. Called when the player resets their skill
+     * trees so that previously purchased [PerkBaseStat] bonuses no longer apply.
+     */
+    fun clearBaseStatBonuses(uuid: UUID) {
+        baseStatMap[uuid]?.clear()
+    }
+
     @EventHandler
     fun onCharacterLoad(event: GameCharacterLoadEvent) {
         val character = event.character
